@@ -84,7 +84,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 
 static uint8_t hid_service_buffer[250];
 //static uint8_t device_id_sdp_service_buffer[100];
-static const char hid_device_name[] = "HID PiGun";
+static const char hid_device_name[] = "HID PiGun-1";
 static btstack_packet_callback_registration_t hci_event_callback_registration;
 static uint16_t hid_cid;
 static uint8_t hid_boot_device = 0;
@@ -164,7 +164,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			status = hid_subevent_connection_opened_get_status(packet);
 			if (status != ERROR_CODE_SUCCESS) {
 				// outgoing connection failed
-				printf("Connection failed, status 0x%x\n", status);
+				printf("PIGUN-HID: connection failed, status 0x%x\n", status);
 				app_state = APP_NOT_CONNECTED;
 				hid_cid = 0;
 
@@ -214,11 +214,11 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			// turn off the green LED to save power
 			pigun_GPIO_output_set(PIN_OUT_AOK, 0);
 
-			printf("HID connected to %s, pigunning now...\n", bd_addr_to_str(host_addr));
+			printf("PIGUN-HID: connected to %s, pigunning now...\n", bd_addr_to_str(host_addr));
 			hid_device_request_can_send_now_event(hid_cid); // request a sendnow
 			break;
 		case HID_SUBEVENT_CONNECTION_CLOSED:
-			printf("HID Disconnected\n");
+			printf("PIGUN-HID: disconnected\n");
 			app_state = APP_NOT_CONNECTED;
 			hid_cid = 0;
 
@@ -298,7 +298,7 @@ int btstack_main(int argc, const char * argv[]){
 	
 	hid_create_sdp_record(hid_service_buffer, 0x10001, &hid_params);
 
-	printf("HID service record size: %u\n", de_get_len(hid_service_buffer));
+	printf("PIGUN-HID: HID service record size: %u\n", de_get_len(hid_service_buffer));
 	sdp_register_service(hid_service_buffer);
 
 	// See https://www.bluetooth.com/specifications/assigned-numbers/company-identifiers if you don't have a USB Vendor ID and need a Bluetooth Vendor ID
@@ -332,10 +332,10 @@ int btstack_main(int argc, const char * argv[]){
 	}
 	fread(&nServers, sizeof(int), 1, fin);
 	
-	printf("HID previous hosts: %i\n", nServers);
+	printf("PIGUN-HID: previous hosts: %i\n", nServers);
 	for (int i = 0; i < nServers; i++) {
 		fread(servers[i], sizeof(bd_addr_t), 1, fin);
-		printf("previous host[%i]: %s\n", i, bd_addr_to_str(servers[i]));
+		printf("\thost[%i]: %s\n", i, bd_addr_to_str(servers[i]));
 	}
 	fclose(fin);
 	
@@ -367,7 +367,7 @@ static void heartbeat_handler(btstack_timer_source_t* ts) {
 	if (app_state == APP_NOT_CONNECTED && nServers != 0) {
 
 		// try connecting to a server
-		printf("trying to connect to %s...\n", bd_addr_to_str(servers[snum]));
+		printf("PIGUN-HID: trying to connect to %s...\n", bd_addr_to_str(servers[snum]));
 		hid_device_connect(servers[snum], &hid_cid);
 
 		snum++; if (snum == nServers)snum = 0;
