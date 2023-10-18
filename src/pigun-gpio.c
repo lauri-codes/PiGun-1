@@ -1,0 +1,245 @@
+/*
+* This file contains function that handle the GPIO pins 
+*/
+
+#include <bcm2835.h>
+#include <stdint.h>
+#include <stdio.h>
+
+#include "pigun.h"
+#include "pigun-gpio.h"
+
+
+
+int pigun_GPIO_inited;
+int button_delay = 3;		// delay between consecutive button presses
+
+// List of gpio code that will be used as the 8 buttons
+int pigun_button_pin[9] = {
+	PIN_TRG,PIN_RLD,PIN_MAG,					// handle buttons
+	PIN_BT0,PIN_BTU,PIN_BTD,PIN_BTL,PIN_BTR,	// d-pad buttons
+	PIN_CAL										// calibration is last
+};
+
+int pigun_solenoid_timer = 0;
+
+uint16_t pigun_button_oldstate = 0;
+uint16_t pigun_button_state = 0;					// stores value at the bit position corresponding to button id, 1 if the button was just pressed
+uint16_t pigun_button_newpress = 0;					// stores value at the bit position corresponding to button id, 1 if the button was just pressed
+
+int pigun_button_holder[9] = { 0,0,0,0,0,0,0,0,0 }; // frame counters for each button
+
+
+// Initialises all GPIO
+int pigun_GPIO_init() {
+
+	pigun_GPIO_inited = 0;
+
+	// set the green LED for connection
+	// GPIO system
+	if (!bcm2835_init()) {
+		printf("PIGUN ERROR: failed to init BCM2835!\n");
+		return 1;
+	}
+
+	// setup LEDs - start as off
+	bcm2835_gpio_fsel(PIN_OUT_AOK, BCM2835_GPIO_FSEL_OUTP); bcm2835_gpio_write(PIN_OUT_AOK, LOW);
+	bcm2835_gpio_fsel(PIN_OUT_ERR, BCM2835_GPIO_FSEL_OUTP); bcm2835_gpio_write(PIN_OUT_ERR, LOW);
+	bcm2835_gpio_fsel(PIN_OUT_CAL, BCM2835_GPIO_FSEL_OUTP); bcm2835_gpio_write(PIN_OUT_CAL, LOW);
+
+	// setup the pins for input buttons
+	for (int i = 0; i < 9; i++) {
+		bcm2835_gpio_fsel(pigun_button_pin[i], BCM2835_GPIO_FSEL_INPT);		// set as input
+		bcm2835_gpio_set_pud(pigun_button_pin[i], BCM2835_GPIO_PUD_UP);		// give it a pullup resistor
+		bcm2835_gpio_fen(pigun_button_pin[i]);								// detect falling edge (should happen when button is pressed=grounded)
+	}
+	
+	// setup solenoid - start ON because it is connected to the 555 trigger
+	bcm2835_gpio_fsel(PIN_OUT_SOL, BCM2835_GPIO_FSEL_OUTP); bcm2835_gpio_write(PIN_OUT_SOL, HIGH);
+
+	pigun_button_oldstate = 0;
+	pigun_button_state = 0;
+	pigun_button_newpress = 0;
+
+	pigun_solenoid_timer = 0;
+
+	printf("PIGUN: GPIO system initialised.\n");
+	pigun_GPIO_inited = 1;
+	return 0;
+}
+
+
+// this should be called
+int pigun_GPIO_stop() {
+
+	if (pigun_GPIO_inited == 0) return 0;
+
+	// set solenoid trigger to HIGH because it is attached to the 555
+	bcm2835_gpio_write(PIN_OUT_SOL, HIGH);
+
+	// switch off all LEDS
+	bcm2835_gpio_write(PIN_OUT_AOK, LOW);
+	bcm2835_gpio_write(PIN_OUT_ERR, LOW);
+	bcm2835_gpio_write(PIN_OUT_CAL, LOW);
+
+	// deallocate all resources
+	bcm2835_close();
+	pigun_GPIO_inited = 0;
+
+	return 0;
+}
+
+
+void pigun_GPIO_output_set(int LEDPIN, int state) {
+	bcm2835_gpio_write(LEDPIN, state);
+}
+
+
+
+static inline void button_pressed(int buttonID) {
+
+	// it will have to be another 5 frames before the button can be pressed again
+	pigun_button_holder[buttonID] = button_delay;
+
+	// set the button in the HID report
+	global_pigun_report.buttons |= (uint8_t)(1 << buttonID);
+
+	// mark a good press event internally?
+	pigun_button_newpress |= (uint8_t)(1 << buttonID);
+}
+
+
+
+void pigun_buttons_process() {
+
+	/* BUTTON SYSTEM
+	* 
+	* button pins are kept HIGH by the pizero and grounded (LOW) when the user presses the physical switch
+	* the bcm2835 lib detects falling edge events (FEE)
+	* the FEE only registers as a button press if the button is in the released state
+	* after the press is registered, the button is locked in pressed state for X frames to avoid jitter
+	* once the x frames are passed, we check if the pin state is still LOW
+	* when it is not low, the button becomes released
+	* 
+	*/
+
+	// mark all buttons as not being in "new press" state
+	pigun_button_newpress = 0;
+
+	// check all the buttons
+	for (int i = 0; i < 9; i++) {
+
+		// if button was just pressed now AND we are allowed to register
+		if (bcm2835_gpio_eds(pigun_button_pin[i])) {
+
+			// clear GPIO event flag
+			// this is done every time the event was detected, regardless of whether the
+			// event really was a valid press, otherwise the BCM2835 wont detect it again!
+			bcm2835_gpio_set_eds(pigun_button_pin[i]);
+
+			// register the press event if the button was released & ready to be pressed again
+			if (pigun_button_holder[i] == 0) {
+
+				pigun_button_holder[i] = button_delay;				// it will have to be another 5 frames before the button can be pressed again
+				//global_pigun_report.buttons |= (uint8_t)(1 << i);	// set the button in the HID report (this is a hack... CAL=9 goes to 0 and it should not change the uint8)
+				pigun_button_newpress |= (uint16_t)(1 << i);		// mark a good press event internally?
+				pigun_button_state |= (uint16_t)(1 << i);
+
+				// ignore the rest of the code since it is dealing with button releases
+				continue;
+			}
+		}
+
+		// code here => no press event was registered for this button
+		// either was was not pressed at all, or it was already pressed before this frame
+
+		// if it was already pressed, check that it is still the case
+		// (pigun_button_state is a copy of the button state from the HID report)
+		if ((pigun_button_oldstate >> i) & 1) {
+
+			// if the hold timer expired...
+			if (pigun_button_holder[i] == 0) {
+
+				// ... and the GPIO level is HIGH
+				if (bcm2835_gpio_lev(pigun_button_pin[i]) == HIGH) {
+
+					// then release the button in HID report
+					//global_pigun_report.buttons &= ~(uint8_t)(1 << i);
+					pigun_button_state &= ~(uint16_t)(1 << i);
+				}
+			}
+			else {
+				// code here => the hold timer needs to tick down
+				pigun_button_holder[i]--;
+				// even if the button was released in the meantime, it will not be released
+				// in the HID report until the timer runs to 0.
+			}
+		}
+		// if it wasnt pressed at all, then do nothing
+	}
+
+	global_pigun_report.buttons = pigun_button_state;	// send the state to the HID report (only LSB)
+	pigun_button_oldstate = pigun_button_state;			// save current state as the old one for next frame
+
+	// *** deal with some specific buttons *** *****************************
+
+	if ((pigun_button_newpress >> 8) & 1) { // if CAL button was just pressed
+		printf("PIGUN: CALibrating...\n");
+		bcm2835_gpio_write(PIN_OUT_CAL, HIGH); // turn on the yellow LED
+
+		pigun_state = 1; // next trigger pull marks top-left calibration point
+		button_delay = 5; // prevent jitter when calibrating
+
+		// save the frame
+		FILE* fbin = fopen("CALframe.bin", "wb");
+		fwrite(pigun_framedata, sizeof(unsigned char), PIGUN_NPX, fbin);
+		fclose(fbin);
+	}
+	else if (pigun_button_newpress & 1) { // if TRIGGER was just pressed
+
+		if (pigun_state == 1) { // set the top-left calibration point
+			
+			pigun_cal_topleft = pigun_aim_norm;
+			pigun_state = 2;
+			printf("PIGUN: calibrating top-left {%f, %f}\n", pigun_cal_topleft.x, pigun_cal_topleft.y);
+		}
+		else if (pigun_state == 2) { // set the low-right calibration point
+			
+			pigun_cal_lowright = pigun_aim_norm;
+			pigun_state = 0;
+			button_delay = 3;
+			bcm2835_gpio_write(PIN_OUT_CAL, LOW); // turn off the LED
+			printf("PIGUN: calibrating bottom-right {%f, %f}\n", pigun_cal_lowright.x, pigun_cal_lowright.y);
+
+			// save the calibration data
+			FILE* fbin = fopen("cdata.bin", "wb");
+			fwrite(&pigun_cal_topleft, sizeof(PigunAimPoint), 1, fbin);
+			fwrite(&pigun_cal_lowright, sizeof(PigunAimPoint), 1, fbin);
+			fclose(fbin);
+		}
+		else if (pigun_state == 0) {
+			printf("PIGUN: shoot");
+
+			// fire the solenoid on its pin
+			// send a LOW pulse to the 555 trigger (PIN_OUT_SOL)
+			if (pigun_solenoid_timer == 0) {
+				printf(" [recoil on]");
+				
+				pigun_solenoid_timer = 5; // # of frames the SOL trigger stays on
+				// [in practice the 555 pulse is so short that it keeps triggering for this long anyway!]
+
+				bcm2835_gpio_write(PIN_OUT_SOL, SOL_FIRE);
+			}
+			printf("\n");
+		}
+	}
+
+	// after the desired time, SOL 555 trigger goes off
+	if (pigun_solenoid_timer == 0) bcm2835_gpio_write(PIN_OUT_SOL, SOL_HOLD);
+	else if (pigun_solenoid_timer > 0) pigun_solenoid_timer--;
+
+	// *********************************************************************
+
+
+}
+
