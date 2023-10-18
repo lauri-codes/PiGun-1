@@ -1,7 +1,13 @@
 # Makefile for Raspberry Pi
 
+# use (cross)compiler for Raspi
+CC = arm-linux-gnueabihf-gcc
+
 # location of the btstack main folder
 BTSTACK_ROOT ?= ../../btstack
+
+#--- DO NOT EDIT BEYOND THIS POINT --------#
+#--- unless you know what you are doing ---#
 
 CORE += \
 	btstack_chipset_bcm.c \
@@ -21,10 +27,6 @@ CORE += \
 	raspi_get_model.c \
 	rijndael.c
 
-# these files used to be compiled with core... but no more
-	#main.c \
-	#main_pigun_core.c \
-	#pigun-hid.c \
 
 
 VPATH += ${BTSTACK_ROOT}/src
@@ -107,16 +109,10 @@ SDP_CLIENT += \
 	sdp_client.o		        \
 	sdp_client_rfcomm.o		    \
 
-
-
 # .o for .c
 CORE_OBJ    = $(CORE:.c=.o)
 COMMON_OBJ  = $(COMMON:.c=.o)
 CLASSIC_OBJ  = $(CLASSIC:.c=.o)
-
-
-# use (cross)compiler for Raspi
-CC = arm-linux-gnueabihf-gcc
 
 CFLAGS  += -g -Wall -Werror -O3 -Wno-restrict \
 	-Wno-maybe-uninitialized -Wno-cpp -Wno-comment -Wno-format \
@@ -127,8 +123,6 @@ CFLAGS  += -g -Wall -Werror -O3 -Wno-restrict \
 	-I${BTSTACK_ROOT}/3rd-party/tinydir \
     -I${BTSTACK_ROOT}/3rd-party/rijndael
 
-
-
 # add 'real time' lib for clock_gettime
 LDFLAGS += -lrt -lpthread
 
@@ -137,11 +131,12 @@ VPATH += ${BTSTACK_ROOT}/platform/posix
 VPATH += ${BTSTACK_ROOT}/platform/embedded
 VPATH += ${BTSTACK_ROOT}/chipset/bcm
 
-
-MMAL_INC = -I/opt/vc/include/ -I/home/pi/pigun/eigen-eigen-323c052e1731/
+# LIBMMAL STUFF
+MMAL_INC = -I/opt/vc/include/ #-I/home/pi/pigun/eigen-eigen-323c052e1731/
 MMAL_LIB = -L/opt/vc/lib/ -L$(SDKSTAGE)/opt/vc/src/hello_pi/libs/ilclient -L$(SDKSTAGE)/opt/vc/src/hello_pi/libs/vgfont -L/usr/X11R6/lib
 MMAL_LNK = -lX11 -lwiringPi -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -lmmal -lmmal_core -lmmal_util -lm -ldl 
 
+# THESE WILL BE REMOVED IN THIS VERSION
 # pigun flags
 # PIGUN_PREVIEW enables the preview window
 # PIGUN_MOUSE enables moving the mouse on the pi
@@ -237,55 +232,26 @@ bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient
 
 # compile the main functions of pigun
 pigun:
-	# this is the GPIO control system
-	${CC} -c ${CFLAGS} ${MMAL_INC} pigun-gpio.c
-	# this is the actual program main
-	${CC} -c ${CFLAGS} ${MMAL_INC} main.c
-	# this is the camera acquisition cycle
+
+# compile the detector module and the aiming calculator
+	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun-detector.c 
+	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun-aimer.c 
+
+# compile the GPIO control system
+	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun-gpio.c
+
+# compile the camera acquisition cycle
 	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun.c
-	# compile helper functions - I could not do this with C... 
-	g++ -c -std=c++11 -O3 -w -std=c++11 ${PIGUNFLAGS} ${MMAL_INC} pigun-helpers.c
 
-# compile the dummy peak detection and aiming calculator
-pigun-dummy:
-	rm -f pigun_detector.o pigun_aimer.o
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} -o pigun_kernel.o pigun-dummy.c
+# ... and the actual program entry point
+	${CC} -c ${CFLAGS} ${MMAL_INC} main.c
 
+# compile helper functions - I could not do this with C... 
+#	g++ -c -std=c++11 -O3 -w -std=c++11 ${PIGUNFLAGS} ${MMAL_INC} pigun-helpers.c
 
-# these targets compile the peak detectors and the aim calculators separately
-pigun-detector-lauri:
-	rm -f pigun_kernel.o
-	g++ -c -std=c++11 -O3 -w ${PIGUNFLAGS} ${MMAL_INC} -o pigun_detector.o pigun-detector-lauri.cpp 
-
-pigun-aimer-lauri:
-	rm -f pigun_kernel.o
-	g++ -c -std=c++11 -O3 -w ${PIGUNFLAGS} ${MMAL_INC} -o pigun_aimer.o pigun-aimer-lauri.cpp 
-
-pigun-detector-flp:
-	rm -f pigun_kernel.o
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} -o pigun_detector.o pigun-detector-flp.c 
-
-
-pigun-detector-4led:
-	rm -f pigun_kernel.o
-	g++ -c -std=c++11 -O3 -DPIGUN_FOUR_LEDS -w ${PIGUNFLAGS} ${MMAL_INC} -o pigun_detector.o pigun-detector-lauri.cpp 
-
-pigun-detector-2led:
-	rm -f pigun_kernel.o
-	g++ -c -std=c++11 -O3 -w ${PIGUNFLAGS} ${MMAL_INC} -o pigun_detector.o pigun-detector-lauri.cpp 
-
-pigun-aimer-4led:
-	rm -f pigun_kernel.o
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} -o pigun_aimer.o pigun-aimer-4led.c 
-
-
-# links all object files into pigun.exe
-link:
+# link everything into the executable pigun.exe
 	${CC} -O3 ${MMAL_LIB} *.o -o pigun.exe ${MMAL_LNK} -lbcm2835 -lstdc++
 
-
-gpiotest:
-	${CC} ${CFLAGS} gpiotest.c -o gpiotest.exe -lbcm2835
 
 
 clean:
