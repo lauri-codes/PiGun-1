@@ -219,11 +219,9 @@ bluetooth-others:
 	${CC} -c ${CFLAGS} ${BTSTACK_ROOT}/src/classic/hid_device.c
 	${CC} -c ${CFLAGS} ${BTSTACK_ROOT}/src/btstack_hid_parser.c
 
-bluetooth-pigun-hid:
-	${CC} -c ${CFLAGS} pigun-hid.c
 
 # this one compiles the all the BTStack only parts
-bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient bluetooth-others bluetooth-pigun-hid
+bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient bluetooth-others
 
 #bluetooth: ${CORE_OBJ} ${COMMON_OBJ} ${CLASSIC_OBJ} ${SDP_CLIENT} btstack_ring_buffer.o hid_device.o btstack_hid_parser.o main_pigun_hid.o
 #	${CC} -c $^ ${CFLAGS}
@@ -232,6 +230,9 @@ bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient
 
 # compile the main functions of pigun
 pigun:
+
+# compile the HID module
+	${CC} -c ${CFLAGS} pigun-hid.c
 
 # compile the detector module and the aiming calculator
 	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun-detector.c 
