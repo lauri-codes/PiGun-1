@@ -172,11 +172,7 @@ int pigun_detect(unsigned char* data) {
 
     // These parameters have to be tuned to optimize the search
     // How many blobs to search
-#ifdef PIGUN_FOUR_LEDS
     const unsigned int nBlobs = 4;
-#else
-    const unsigned int nBlobs = 2;
-#endif
     const unsigned int dx = 4;            // How many pixels are skipped in x direction
     const unsigned int dy = 4;            // How many pixels are skipped in y direction
     const unsigned int minBlobSize = 20;  // Have many pixels does a blob have to have to be considered valid
@@ -239,8 +235,6 @@ int pigun_detect(unsigned char* data) {
     // Peak closest to top-right corner = C
     // Peak closest to bottom-right corner = D
 
-#ifdef PIGUN_FOUR_LEDS
-    
     /* 
         4 LED MODE:
 	
@@ -284,48 +278,16 @@ int pigun_detect(unsigned char* data) {
 		pigun_peaks[3] = tmp;
 	}
 
-#else
-    /*
-    * 2 LED MODE:
-    * 
-    * assuming the LED bar was at the bottom of the screen,
-    * we should now have peak 0 and 1 detected, in whatever order.
-    * 
-    * we have to manually adjust them so that we get:
-    * 
-    * 0---1
-    * |   |
-    * 2---3
-    * 
-    * the aimer will use these in the correct order
-    * to compute the inverse projection!
-    * 
-    */
-
-    // reorder 0,1 and place them in slot 2,3
-    if (pigun_peaks[0].col > pigun_peaks[1].col) { // wrong ordering
-        pigun_peaks[2] = pigun_peaks[1];
-        pigun_peaks[3] = pigun_peaks[0];
-    }
-    else { // correct ordering
-        pigun_peaks[2] = pigun_peaks[0];
-        pigun_peaks[3] = pigun_peaks[1];
-    }
-
-    // create the 2 extra peaks
-    emulateFourPeaks();
-#endif
-
     //printf("detector done [%i]\n",blobID);
     return 0;
 }
 
 
-/**
-    * Setup the buffer to show in the preview window. source is the original
-    * frame buffer from the camera output is the buffer to send to
-    * preview/input port
-    */
+/*
+* Setup the buffer to show in the preview window. source is the original
+* frame buffer from the camera output is the buffer to send to
+* preview/input port
+*/
 void pigun_preview(MMAL_BUFFER_HEADER_T* output, MMAL_BUFFER_HEADER_T* source) {
 
     // The following line will copy the Y channel as seen by the camera

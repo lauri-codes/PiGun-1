@@ -67,21 +67,6 @@ PigunAimPoint pigun_cal_lowright;
 int pigun_state = 0;
 
 
-#ifdef PIGUN_MOUSE
-Display* displayMain;
-Screen* screen;
-int screenWidth;
-int screenHeight;
-
-void mouseMove(float x, float y) {
-
-	Window root = DefaultRootWindow(displayMain);
-	int screenX = round(x * screenWidth);
-	int screenY = round((1-y) * screenHeight);
-	XWarpPointer(displayMain, None, root, 0, 0, 0, 0, screenX, screenY);
-	XFlush(displayMain);
-}
-#endif
 
 // GLOBAL MMAL STUFF
 MMAL_PORT_T* pigun_video_port;
@@ -410,7 +395,8 @@ int pigun_mmal_init(void) {
 		// *****************************************************************
 
 	printf("PIGUN: setting up parameters\n");
-		// Disable exposure mode
+	
+	// Disable exposure mode
 	pigun_camera_exposuremode(camera, 0);
 
 	// Set gains

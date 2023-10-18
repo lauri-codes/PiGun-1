@@ -241,6 +241,9 @@ pigun:
 # compile the GPIO control system
 	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun-gpio.c
 
+# compile helper functions - I could not do this with C... 
+	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun-helpers.c
+
 # compile the camera acquisition cycle
 	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun.c
 
