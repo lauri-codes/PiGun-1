@@ -224,8 +224,6 @@ bluetooth-others:
 bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient bluetooth-others
 
 #bluetooth: ${CORE_OBJ} ${COMMON_OBJ} ${CLASSIC_OBJ} ${SDP_CLIENT} btstack_ring_buffer.o hid_device.o btstack_hid_parser.o main_pigun_hid.o
-#	${CC} -c $^ ${CFLAGS}
-
 
 
 # compile the main functions of pigun
