@@ -1,6 +1,8 @@
 #include "pigun.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 	int pigun_camera_exposuremode(MMAL_COMPONENT_T* camera, int on) {
 
@@ -96,4 +98,6 @@ extern "C" {
 		return 0;
 	}
 
+#ifdef __cplusplus
 }
+#endif
