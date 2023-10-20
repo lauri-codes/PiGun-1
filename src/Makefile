@@ -234,6 +234,8 @@ PIGUN_OBJ := $(patsubst %.c,%.o,$(SRCFILES))
 	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
+	echo ${PIGUN_SRC}
+	echo ${PIGUN_OBJ}
 	${CC} -O3 ${MMAL_LIB} *.o -o pigun.exe ${MMAL_LNK} -lbcm2835 -lstdc++
 
 
