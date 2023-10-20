@@ -12,8 +12,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define VERSION_STRING "v1.3.15"
-
 #include "bcm_host.h"
 #include "interface/vcos/vcos.h"
 
