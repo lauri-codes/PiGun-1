@@ -1,1 +1,3 @@
-
+[submodule "btstack"]
+	path = btstack
+	url = git@github.com:fullmetalfelix/btstack.git
