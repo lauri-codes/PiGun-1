@@ -226,13 +226,19 @@ bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient
 #bluetooth: ${CORE_OBJ} ${COMMON_OBJ} ${CLASSIC_OBJ} ${SDP_CLIENT} btstack_ring_buffer.o hid_device.o btstack_hid_parser.o main_pigun_hid.o
 
 
-PIGUN_OBJECTS  := pigun-hid.o pigun-detector.o pigun-aimer.o pigun-gpio.o pigun-helpers.o pigun.o main.o
-    
-pigun: $(PIGUN_OBJECTS)
+DEPS = $(wildcard *.h)
+PIGUN_SRC := pigun-hid.c pigun-detector.c pigun-aimer.c pigun-gpio.c pigun-helpers.c pigun.c main.c
+PIGUN_OBJ := $(patsubst %.c,%.o,$(SRCFILES))
+
+%.o: %.c $(DEPS)
+	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} -c -o $@ $< $(CFLAGS)
+
+
+
+pigun: $(PIGUN_OBJ)
 	${CC} -O3 ${MMAL_LIB} *.o -o pigun.exe ${MMAL_LNK} -lbcm2835 -lstdc++
 
-%.o: %.c
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} -c $(input) -o $(output)
+
 
 
 # compile the main functions of pigun
