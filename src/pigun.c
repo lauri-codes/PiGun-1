@@ -71,10 +71,6 @@ int pigun_state = 0;
 // GLOBAL MMAL STUFF
 MMAL_PORT_T* pigun_video_port;
 MMAL_POOL_T* pigun_video_port_pool;
-#ifdef PIGUN_PREVIEW
-MMAL_POOL_T* preview_input_port_pool = NULL;
-MMAL_PORT_T* preview_input_port = NULL;
-#endif
 
 pthread_mutex_t pigun_mutex;
 
@@ -152,32 +148,6 @@ static void video_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffe
 	
 	*/
 
-	// *********************************************************************
-
-
-
-	// setup a frame buffer to show in the preview window ******************
-#ifdef PIGUN_PREVIEW
-	// fetches a free buffer from the pool of the preview.input port
-	MMAL_BUFFER_HEADER_T* preview_new_buffer = mmal_queue_get(preview_input_port_pool->queue);
-
-	if (preview_new_buffer) {
-
-		preview_new_buffer->length = buffer->length;
-		pigun_preview(preview_new_buffer, buffer);
-
-
-		// I guess this is where the magic happens...
-		// the newbuffer is sent to the preview.input port
-
-		if (mmal_port_send_buffer(preview_input_port, preview_new_buffer) != MMAL_SUCCESS) {
-			printf("PIGUN ERROR: Unable to send buffer to preview input port\n");
-		}
-	}
-	else {
-		printf("PIGUN ERROR: mmal_queue_get (%d)\n", preview_new_buffer);
-	}
-#endif
 	// *********************************************************************
 
 	// we are done with this buffer, we can release it!
@@ -303,97 +273,6 @@ int pigun_mmal_init(void) {
 	// not sure if this is needed - seems to work without as well
 	status = mmal_component_enable(camera);
 
-	// *** SETUP THE PREVIEW SYSTEM ************************************
-#ifdef PIGUN_PREVIEW
-	// create a renderer component to show the video on screen
-	status = mmal_component_create(MMAL_COMPONENT_DEFAULT_VIDEO_RENDERER, &preview);
-	if (status != MMAL_SUCCESS) {
-		printf("PIGUN ERROR: unable to create preview (%u)\n", status);
-		return -1;
-	}
-
-	// setup the preview input port
-	preview_input_port = preview->input[0];
-	MMAL_RECT_T previewWindow;
-	previewWindow.x = 0;
-	previewWindow.y = 0;
-	previewWindow.width = PIGUN_RES_X;
-	previewWindow.height = PIGUN_RES_Y;
-	{
-		MMAL_DISPLAYREGION_T param;
-		param.hdr.id = MMAL_PARAMETER_DISPLAYREGION;
-		param.hdr.size = sizeof(MMAL_DISPLAYREGION_T);
-		param.set = MMAL_DISPLAY_SET_LAYER;
-		param.layer = 0;
-		param.set |= (MMAL_DISPLAY_SET_DEST_RECT | MMAL_DISPLAY_SET_FULLSCREEN);
-		param.fullscreen = 0;
-		param.dest_rect = previewWindow;
-		status = mmal_port_parameter_set(preview_input_port, &param.hdr);
-		if (status != MMAL_SUCCESS && status != MMAL_ENOSYS) {
-			printf("PIGUN ERROR: unable to set preview port parameters (%u)\n", status);
-			return -1;
-		}
-	}
-
-	// setup the format of preview.input port -> same as camera.video output!
-	mmal_format_copy(preview_input_port->format, camera_video_port->format);
-
-	format = preview_input_port->format;
-
-	format->encoding = MMAL_ENCODING_I420;
-	format->encoding_variant = MMAL_ENCODING_I420;
-
-	format->es->video.width = PIGUN_RES_X;
-	format->es->video.height = PIGUN_RES_Y;
-	format->es->video.crop.x = 0;
-	format->es->video.crop.y = 0;
-	format->es->video.crop.width = PIGUN_RES_X;
-	format->es->video.crop.height = PIGUN_RES_Y;
-	format->es->video.frame_rate.num = PIGUN_FPS;
-	format->es->video.frame_rate.den = 1;
-
-	preview_input_port->buffer_size = camera_video_port->buffer_size_recommended;
-	preview_input_port->buffer_num = 8; // with a larger number of buffer
-
-	printf("PIGUN: preview buffer_size = %d\n", preview_input_port->buffer_size);
-	printf("PIGUN: preview buffer_num = %d\n", preview_input_port->buffer_num);
-
-	status = mmal_port_format_commit(preview_input_port);
-	if (status != MMAL_SUCCESS) {
-		printf("PIGUN ERROR: unable to commit preview input port format (%u)\n", status);
-		return -1;
-	}
-
-	// create a buffer pool for the preview.input port
-	preview_input_port_pool = (MMAL_POOL_T*)mmal_port_pool_create(preview_input_port, preview_input_port->buffer_num, preview_input_port->buffer_size);
-
-	preview_input_port->userdata = (struct MMAL_PORT_USERDATA_T*)preview_input_port_pool;
-	// the input port is enabled, using the dull callback (it just releases the buffer)
-	status = mmal_port_enable(preview_input_port, preview_buffer_callback);
-	if (status != MMAL_SUCCESS) {
-		printf("Error: unable to enable preview input port (%u)\n", status);
-		return -1;
-	}
-
-	// camera.video is not connected directly to preview.input!!!!
-	// the callback on camera.video is physically copying the output buffer into the buffer of the input port
-
-	/*
-	status = mmal_connection_create(&camera_preview_connection, camera_preview_port, preview_input_port, MMAL_CONNECTION_FLAG_TUNNELLING | MMAL_CONNECTION_FLAG_ALLOCATION_ON_INPUT);
-	if (status != MMAL_SUCCESS) {
-		printf("PIGUN ERROR: unable to create preview connection (%u)\n", status);
-		return -1;
-	}
-	status = mmal_connection_enable(camera_preview_connection);
-	if (status != MMAL_SUCCESS) {
-		printf("PIGUN ERROR: unable to enable preview connection (%u)\n", status);
-		return -1;
-	}
-	*/
-
-#endif
-		// *****************************************************************
-
 	printf("PIGUN: setting up parameters\n");
 	
 	// Disable exposure mode
@@ -450,21 +329,6 @@ int pigun_mmal_init(void) {
 //void * test_main(int argc, char** argv) {
 void* pigun_cycle(void* nullargs) {
 
-#ifdef PIGUN_MOUSE
-	// Open mouse connection
-	displayMain = XOpenDisplay(NULL);
-	if (displayMain == NULL)
-	{
-		fprintf(stderr, "PIGUN ERROR: Could not open main display\n");
-		exit(EXIT_FAILURE);
-	}
-	else {
-		screen = DefaultScreenOfDisplay(displayMain);
-		screenWidth = screen->width;
-		screenHeight = screen->height;
-	}
-#endif
-
 	// normal state
 	pigun_state = 0;
 
@@ -518,11 +382,6 @@ void* pigun_cycle(void* nullargs) {
 		if (cameraON) break;
 	}
 	
-
-#ifdef PIGUN_MOUSE
-	XCloseDisplay(displayMain);
-#endif
-
 	free(pigun_peaks);
 
 	pthread_exit((void*)0);

@@ -95,49 +95,16 @@ extern PigunAimPoint pigun_cal_lowright;
 
 
 // these function define how detection and aiming works
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 int pigun_detect(unsigned char* data);
 void pigun_calculate_aim();
-void pigun_preview(MMAL_BUFFER_HEADER_T* output, MMAL_BUFFER_HEADER_T* source); // only used if PIGUN_PREVIEW is defined
-
-#ifdef __cplusplus
-}
-#endif
-
-
-#ifdef PIGUN_MOUSE
-extern Display* displayMain;
-extern Screen* screen;
-extern int screenWidth;
-extern int screenHeight;
-
-	#ifdef __cplusplus
-	extern "C" {
-	#endif
-		void mouseMove(float x, float y);
-	#ifdef __cplusplus
-	}
-	#endif
-#endif
-
 
 
 // HELPER FUNCTIONS
-#ifdef __cplusplus
-extern "C" {
-#endif
-	int pigun_camera_gains(MMAL_COMPONENT_T *camera, int analog_gain, int digital_gain);
-	int pigun_camera_awb(MMAL_COMPONENT_T *camera, int on);
-	int pigun_camera_awb_gains(MMAL_COMPONENT_T *camera, float r_gain, float b_gain);
-	int pigun_camera_blur(MMAL_COMPONENT_T *camera, int on);
-	int pigun_camera_exposuremode(MMAL_COMPONENT_T *camera, int on);
-#ifdef __cplusplus
-}
-#endif
-
+int pigun_camera_gains(MMAL_COMPONENT_T *camera, int analog_gain, int digital_gain);
+int pigun_camera_awb(MMAL_COMPONENT_T *camera, int on);
+int pigun_camera_awb_gains(MMAL_COMPONENT_T *camera, float r_gain, float b_gain);
+int pigun_camera_blur(MMAL_COMPONENT_T *camera, int on);
+int pigun_camera_exposuremode(MMAL_COMPONENT_T *camera, int on);
 
 
 #endif
