@@ -223,9 +223,6 @@ bluetooth-others:
 # this one compiles the all the BTStack only parts
 bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient bluetooth-others
 
-#bluetooth: ${CORE_OBJ} ${COMMON_OBJ} ${CLASSIC_OBJ} ${SDP_CLIENT} btstack_ring_buffer.o hid_device.o btstack_hid_parser.o main_pigun_hid.o
-
-
 DEPS = $(wildcard *.h)
 PIGUN_SRC := pigun-hid.c pigun-detector.c pigun-aimer.c pigun-gpio.c pigun-helpers.c pigun.c main.c
 PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
@@ -234,40 +231,9 @@ PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
 	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
-	echo ${PIGUN_SRC}
-	echo ${PIGUN_OBJ}
 	${CC} -O3 ${MMAL_LIB} *.o -o pigun.exe ${MMAL_LNK} -lbcm2835 -lstdc++
 
 
-
-
-# compile the main functions of pigun
-pigun-OLD:
-
-# compile the HID module
-	${CC} -c ${CFLAGS} pigun-hid.c
-
-# compile the detector module and the aiming calculator
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun-detector.c 
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun-aimer.c 
-
-# compile the GPIO control system
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun-gpio.c
-
-# compile helper functions - I could not do this with C... 
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun-helpers.c
-
-# compile the camera acquisition cycle
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} ${MMAL_INC} pigun.c
-
-# ... and the actual program entry point
-	${CC} -c ${CFLAGS} ${MMAL_INC} main.c
-
-# compile helper functions - I could not do this with C... 
-#	g++ -c -std=c++11 -O3 -w -std=c++11 ${PIGUNFLAGS} ${MMAL_INC} pigun-helpers.c
-
-# link everything into the executable pigun.exe
-	${CC} -O3 ${MMAL_LIB} *.o -o pigun.exe ${MMAL_LNK} -lbcm2835 -lstdc++
 
 
 
