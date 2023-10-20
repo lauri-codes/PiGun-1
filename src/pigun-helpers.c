@@ -38,10 +38,10 @@ extern "C" {
 		MMAL_PARAMETER_AWBMODE_T param;
 
 		if (on == 1) {
-			param = { {MMAL_PARAMETER_AWB_MODE, sizeof(param)}, MMAL_PARAM_AWBMODE_AUTO };
+			param = (MMAL_PARAMETER_AWBMODE_T){ {MMAL_PARAMETER_AWB_MODE, sizeof(param)}, MMAL_PARAM_AWBMODE_AUTO };
 		}
 		else {
-			param = { {MMAL_PARAMETER_AWB_MODE, sizeof(param)}, MMAL_PARAM_AWBMODE_OFF };
+			param = (MMAL_PARAMETER_AWBMODE_T){ {MMAL_PARAMETER_AWB_MODE, sizeof(param)}, MMAL_PARAM_AWBMODE_OFF };
 		}
 
 		mmal_port_parameter_set(camera->control, &param.hdr);
