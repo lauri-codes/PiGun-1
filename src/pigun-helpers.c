@@ -90,9 +90,9 @@ extern "C" {
 		MMAL_PARAMETER_IMAGEFX_T imgFX;
 
 		if (on == 1)
-			imgFX = { {MMAL_PARAMETER_IMAGE_EFFECT,sizeof(imgFX)}, MMAL_PARAM_IMAGEFX_BLUR };
+			imgFX = (MMAL_PARAMETER_IMAGEFX_T){ {MMAL_PARAMETER_IMAGE_EFFECT,sizeof(imgFX)}, MMAL_PARAM_IMAGEFX_BLUR };
 		else
-			imgFX = { {MMAL_PARAMETER_IMAGE_EFFECT,sizeof(imgFX)}, MMAL_PARAM_IMAGEFX_NONE };
+			imgFX = (MMAL_PARAMETER_IMAGEFX_T){ {MMAL_PARAMETER_IMAGE_EFFECT,sizeof(imgFX)}, MMAL_PARAM_IMAGEFX_NONE };
 
 		mmal_port_parameter_set(camera->control, &imgFX.hdr);
 		return 0;
