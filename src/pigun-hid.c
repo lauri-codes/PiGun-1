@@ -218,7 +218,7 @@ void get_report(uint16_t hid_cid, hid_report_type_t report_type, int report_size
 	printf("\tReport Size: %i\n", report_size);
 	printf("\tReport Data: ");
 	for (int i=0; i<report_size; i++) {
-		printf("%#02X ",report[i])
+		printf("%#02X ",report[i]);
 	}
 	printf("\n");
 
