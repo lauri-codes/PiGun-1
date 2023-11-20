@@ -2,5 +2,6 @@
     "files.associations": {
         "pigun-hid.h": "c",
         "btstack_chipset_bcm_download_firmware.h": "c"
-    }
+    },
+    "cmake.configureOnOpen": false
 }

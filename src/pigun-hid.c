@@ -53,6 +53,7 @@
 
 // from USB HID Specification 1.1, Appendix B.1
 // this is custom made joystick with 8 buttons, and two 16-bit axis
+/*
 const uint8_t hid_descriptor_joystick_mode[] = {
 	0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 	0x09, 0x04,        // Usage (Joystick)
@@ -77,6 +78,80 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x81, 0x02,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
 	0xC0,              // End Collection --- 44 bytes
 };
+*/
+const uint8_t hid_descriptor_joystick_mode[] = {
+	0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
+	0x09, 0x04,        // Usage (Joystick)
+	0xA1, 0x01,        // Collection (Application)
+	0x85, 0x01,        //   Report_ID (1)
+	0x09, 0x01,        //   Usage (Pointer)
+	0xA1, 0x00,        //   Collection (Physical)
+	0x09, 0x30,        //     Usage (X)
+	0x09, 0x31,        //     Usage (Y)
+	0x16, 0x01, 0x80,  //     Logical Minimum 0x8001 (-32767)  
+	0x26, 0xFF, 0x7F,  //     Logical Maximum 0x7FFF (32767)
+	0x95, 0x02,        //     Report Count (2)
+	0x75, 0x10,        //     Report Size (16)
+	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0xC0,              //   End Collection (Physical)
+	0x05, 0x09,        //   Usage Page (Button)
+	0x19, 0x01,        //   Usage Minimum (0x01)
+	0x29, 0x08,        //   Usage Maximum (0x08)
+	0x15, 0x00,        //   Logical Minimum (0)
+	0x25, 0x01,        //   Logical Maximum (1)
+	0x75, 0x01,        //   Report Size (1)
+	0x95, 0x08,        //   Report Count (8)
+	0x81, 0x02,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	// 45 bytes so far!
+	// now begins the new physical interface device for feedback
+
+	0x05, 0x0F,        //   Usage Page (Physical Interface Device Page)
+	0x09, 0x21,        //   Usage Set Effect Report (Logical Collection)
+	0x85, 0x03,        //   Report_ID (3)
+	0xA1, 0x02         //   (MAIN)   COLLECTION         0x02 Logical (Usage=0x000F0021: Page=Physical Interface Device Page, Usage=Set Effect Report, Type=Logical Collection)
+	0x09, 0x97,        //     (LOCAL)  USAGE 0x000F0097 DC Enable Actuators (Selector)  
+	0x15, 0x00,        //     (GLOBAL) LOGICAL_MINIMUM    0x00 (0) <-- Redundant: LOGICAL_MINIMUM is already 0 <-- Info: Consider replacing 15 00 with 14
+	0x25, 0x01,        //     (GLOBAL) LOGICAL_MAXIMUM    0x01 (1)  
+	0x75, 0x04,        //     (GLOBAL) REPORT_SIZE        0x04 (4) Number of bits per field  
+	0x95, 0x01,        //     (GLOBAL) REPORT_COUNT       0x01 (1) Number of fields <-- Redundant: REPORT_COUNT is already 1 
+	0x91, 0x02,        //     (MAIN)   OUTPUT             0x00000002 (1 field x 4 bits) 0=Data 1=Variable 0=Absolute 0=NoWrap 0=Linear 0=PrefState 0=NoNull 0=NonVolatile 0=Bitmap 
+	0x15, 0x00,        //     (GLOBAL) LOGICAL_MINIMUM    0x00 (0) <-- Redundant: LOGICAL_MINIMUM is already 0 <-- Info: Consider replacing 15 00 with 14
+	0x25, 0x00,        //     (GLOBAL) LOGICAL_MAXIMUM    0x00 (0)  <-- Info: Consider replacing 25 00 with 24
+	0x75, 0x04,        //     (GLOBAL) REPORT_SIZE        0x04 (4) Number of bits per field <-- Redundant: REPORT_SIZE is already 4 
+	0x95, 0x01,        //     (GLOBAL) REPORT_COUNT       0x01 (1) Number of fields <-- Redundant: REPORT_COUNT is already 1 
+	0x91, 0x03,        //     (MAIN)   OUTPUT             0x00000003 (1 field x 4 bits) 1=Constant 1=Variable 0=Absolute 0=NoWrap 0=Linear 0=PrefState 0=NoNull 0=NonVolatile 0=Bitmap 
+	0x09, 0x70,        //     (LOCAL)  USAGE              0x000F0070 Magnitude (Dynamic Value)  
+	0x15, 0x00,        //     (GLOBAL) LOGICAL_MINIMUM    0x00 (0) <-- Redundant: LOGICAL_MINIMUM is already 0 <-- Info: Consider replacing 15 00 with 14
+	0x25, 0x64,        //     (GLOBAL) LOGICAL_MAXIMUM    0x64 (100)  
+	0x75, 0x08,        //     (GLOBAL) REPORT_SIZE        0x08 (8) Number of bits per field  
+	0x95, 0x04,        //     (GLOBAL) REPORT_COUNT       0x04 (4) Number of fields  
+	0x91, 0x02,        //     (MAIN)   OUTPUT             0x00000002 (4 fields x 8 bits) 0=Data 1=Variable 0=Absolute 0=NoWrap 0=Linear 0=PrefState 0=NoNull 0=NonVolatile 0=Bitmap 
+	0x09, 0x50,        //     (LOCAL)  USAGE              0x000F0050 Duration (Dynamic Value)  
+	0x66, 0x01, 0x10,  //     (GLOBAL) UNIT               0x1001 Time in seconds [1 s units] (1=System=SI Linear, 1=Time=Seconds)  
+	0x55, 0x0E,        //     (GLOBAL) UNIT_EXPONENT      0x0E (Unit Value x 10⁻²)  
+	0x15, 0x00,        //     (GLOBAL) LOGICAL_MINIMUM    0x00 (0) <-- Redundant: LOGICAL_MINIMUM is already 0 <-- Info: Consider replacing 15 00 with 14
+	0x26, 0xFF, 0x00,  //     (GLOBAL) LOGICAL_MAXIMUM    0x00FF (255)  
+	0x75, 0x08,        //     (GLOBAL) REPORT_SIZE        0x08 (8) Number of bits per field <-- Redundant: REPORT_SIZE is already 8 
+	0x95, 0x01,        //     (GLOBAL) REPORT_COUNT       0x01 (1) Number of fields  
+	0x91, 0x02,        //     (MAIN)   OUTPUT             0x00000002 (1 field x 8 bits) 0=Data 1=Variable 0=Absolute 0=NoWrap 0=Linear 0=PrefState 0=NoNull 0=NonVolatile 0=Bitmap 
+	0x09, 0xA7,        //     (LOCAL)  USAGE              0x000F00A7 Start Delay (Dynamic Value)  
+	0x15, 0x00,        //     (GLOBAL) LOGICAL_MINIMUM    0x00 (0) <-- Redundant: LOGICAL_MINIMUM is already 0 <-- Info: Consider replacing 15 00 with 14
+	0x26, 0xFF, 0x00,  //     (GLOBAL) LOGICAL_MAXIMUM    0x00FF (255) <-- Redundant: LOGICAL_MAXIMUM is already 255 
+	0x75, 0x08,        //     (GLOBAL) REPORT_SIZE        0x08 (8) Number of bits per field <-- Redundant: REPORT_SIZE is already 8 
+	0x95, 0x01,        //     (GLOBAL) REPORT_COUNT       0x01 (1) Number of fields <-- Redundant: REPORT_COUNT is already 1 
+	0x91, 0x02,        //     (MAIN)   OUTPUT             0x00000002 (1 field x 8 bits) 0=Data 1=Variable 0=Absolute 0=NoWrap 0=Linear 0=PrefState 0=NoNull 0=NonVolatile 0=Bitmap 
+	0x65, 0x00,        //     (GLOBAL) UNIT               0x00 No unit (0=None)  <-- Info: Consider replacing 65 00 with 64
+	0x55, 0x00,        //     (GLOBAL) UNIT_EXPONENT      0x00 (Unit Value x 10⁰)  <-- Info: Consider replacing 55 00 with 54
+	0x09, 0x7C,        //     (LOCAL)  USAGE              0x000F007C Loop Count (Dynamic Value)  
+	0x15, 0x00,        //     (GLOBAL) LOGICAL_MINIMUM    0x00 (0) <-- Redundant: LOGICAL_MINIMUM is already 0 <-- Info: Consider replacing 15 00 with 14
+	0x26, 0xFF, 0x00,  //     (GLOBAL) LOGICAL_MAXIMUM    0x00FF (255) <-- Redundant: LOGICAL_MAXIMUM is already 255 
+	0x75, 0x08,        //     (GLOBAL) REPORT_SIZE        0x08 (8) Number of bits per field <-- Redundant: REPORT_SIZE is already 8 
+	0x95, 0x01,        //     (GLOBAL) REPORT_COUNT       0x01 (1) Number of fields <-- Redundant: REPORT_COUNT is already 1 
+	0x91, 0x02,        //     (MAIN)   OUTPUT             0x00000002 (1 field x 8 bits) 0=Data 1=Variable 0=Absolute 0=NoWrap 0=Linear 0=PrefState 0=NoNull 0=NonVolatile 0=Bitmap 
+	0xC0,              //   (MAIN)   END_COLLECTION     Logical 
+
+	0xC0,              // End Collection (Application)
+}; // 137 bytes total
 
 
 
@@ -132,6 +207,21 @@ static void send_report() {
 
 	//printf("sending x=%i (%i %i) y=%i (%i %i) \n", global_pigun_report.x, hid_report[1], hid_report[2], global_pigun_report.y, hid_report[3], hid_report[4]);
 	hid_device_send_interrupt_message(hid_cid, &hid_report[0], 6); // 6 = sizeof(hid_report)
+}
+
+// called when host sends an output report
+void get_report(uint16_t hid_cid, hid_report_type_t report_type, int report_size, uint8_t *report){
+
+	printf("Host HID output report:\n");
+	printf("\tHID CID: %i\n", hid_cid);
+	printf("\tReport Type: %i\n", report_type);
+	printf("\tReport Size: %i\n", report_size);
+	printf("\tReport Data: ");
+	for (int i=0; i<report_size; i++) {
+		printf("%#02X ",report[i])
+	}
+	printf("\n");
+
 }
 
 
@@ -309,14 +399,18 @@ int btstack_main(int argc, const char * argv[]){
 
 	// HID Device
 	hid_device_init(hid_boot_device, sizeof(hid_descriptor_joystick_mode), hid_descriptor_joystick_mode);
-	   
+	
 	// register for HCI events
 	hci_event_callback_registration.callback = &packet_handler;
 	hci_add_event_handler(&hci_event_callback_registration);
 
 	// register for HID events
 	hid_device_register_packet_handler(&packet_handler);
-	
+
+	// sign up for host output reports
+	hid_device_register_set_report_callback(&get_report);
+
+
 	// turn on!
 	hci_power_control(HCI_POWER_ON);
 
