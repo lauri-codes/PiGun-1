@@ -108,7 +108,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x05, 0x0F,        //   Usage Page (Physical Interface Device Page)
 	0x09, 0x21,        //   Usage Set Effect Report (Logical Collection)
 	0x85, 0x03,        //   Report_ID (3)
-	0xA1, 0x02         //   (MAIN)   COLLECTION         0x02 Logical (Usage=0x000F0021: Page=Physical Interface Device Page, Usage=Set Effect Report, Type=Logical Collection)
+	0xA1, 0x02,        //   (MAIN)   COLLECTION         0x02 Logical (Usage=0x000F0021: Page=Physical Interface Device Page, Usage=Set Effect Report, Type=Logical Collection)
 	0x09, 0x97,        //     (LOCAL)  USAGE 0x000F0097 DC Enable Actuators (Selector)  
 	0x15, 0x00,        //     (GLOBAL) LOGICAL_MINIMUM    0x00 (0) <-- Redundant: LOGICAL_MINIMUM is already 0 <-- Info: Consider replacing 15 00 with 14
 	0x25, 0x01,        //     (GLOBAL) LOGICAL_MAXIMUM    0x01 (1)  
