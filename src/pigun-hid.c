@@ -150,7 +150,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x91, 0x02,        //     (MAIN)   OUTPUT             0x00000002 (1 field x 8 bits) 0=Data 1=Variable 0=Absolute 0=NoWrap 0=Linear 0=PrefState 0=NoNull 0=NonVolatile 0=Bitmap 
 	0xC0,              //   (MAIN)   END_COLLECTION     Logical 
 
-	0xC0,              // End Collection (Application)
+	0xC0               // End Collection (Application)
 }; // 137 bytes total
 
 
