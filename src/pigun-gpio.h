@@ -10,7 +10,7 @@
 // Button definitions - GPIO pins
 #define PIN_TRG RPI_V2_GPIO_P1_15	// trigger 
 #define PIN_RLD RPI_V2_GPIO_P1_13	// reload  (this is the little clip button like in real beretta M9)
-#define PIN_MAG RPI_V2_GPIO_P1_11	// handmag (this should be connected under the handle)
+#define PIN_MAG RPI_V2_GPIO_P1_11	// handmag (this should be connected under the handle)  --  seems to be soldered ok!
 
 #define PIN_BTU RPI_V2_GPIO_P1_18	// d-pad buttons
 #define PIN_BTD RPI_V2_GPIO_P1_24
