@@ -901,7 +901,7 @@ int btstack_main(int argc, const char * argv[]){
 	hid_create_sdp_record(hid_service_buffer, 0x10001, &hid_params);
 
 	printf("PIGUN-HID: HID service record size: %u\n", de_get_len(hid_service_buffer));
-	sdp_register_service(hid_service_buffer);
+	//sdp_register_service(hid_service_buffer);
 
 	// See https://www.bluetooth.com/specifications/assigned-numbers/company-identifiers if you don't have a USB Vendor ID and need a Bluetooth Vendor ID
 	// device info: BlueKitchen GmbH, product 1, version 1
