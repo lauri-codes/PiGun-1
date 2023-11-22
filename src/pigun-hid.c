@@ -669,7 +669,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 
 // STATE
 
-static uint8_t hid_service_buffer[250];
+static uint8_t hid_service_buffer[2500];
 //static uint8_t device_id_sdp_service_buffer[100];
 static const char hid_device_name[] = "HID PiGun-1";
 static btstack_packet_callback_registration_t hci_event_callback_registration;
