@@ -943,7 +943,7 @@ int btstack_main(int argc, const char * argv[]){
 	// register for HID events
 	hid_device_register_packet_handler(&packet_handler);
 
-	// sign up for host output reports
+	// sign up for host output reports?
 	hid_device_register_set_report_callback(&get_report);
 
 
