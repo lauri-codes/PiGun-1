@@ -106,15 +106,13 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	// now begins the new physical interface device for feedback
 
 	0x85, 0x01,        //   Report_ID (1)
-	0x95, 0x05,                    //   REPORT_COUNT (5)
-	0x75, 0x01,                    //   REPORT_SIZE (1)
-	0x05, 0x08,                    //   USAGE_PAGE (LEDs)
-	0x19, 0x01,                    //   USAGE_MINIMUM (Num Lock)
-	0x29, 0x05,                    //   USAGE_MAXIMUM (Kana)
-	0x91, 0x02,                    //   OUTPUT (Data,Var,Abs)
-	0x95, 0x01,                    //   REPORT_COUNT (1)
-	0x75, 0x03,                    //   REPORT_SIZE (3)
-	0x91, 0x03,                    //   OUTPUT (Cnst,Var,Abs)
+	0x06, 0x00, 0xFF,      //            USAGE_PAGE (Vendor Defined Page 1) 
+	0x09, 0x01,            //            USAGE (Vendor Usage 1) 
+	0x15, 0x00,            //            LOGICAL_MINIMUM (0) 
+	0x26, 0xff, 0x00       //            LOGICAL_MAXIMUM (255) 
+	0x75, 0x08,            //            REPORT_SIZE (8) 
+	0x95, 0x40,            //            REPORT_COUNT (1) 
+	0x91, 0x02,            //            OUTPUT (Data,Var,Abs)
 
 /*
   0x06, 0x00, 0xFF,            // (GLOBAL) USAGE_PAGE         0xFF00 Vendor-defined 
