@@ -105,6 +105,15 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	// 45 bytes so far!
 	// now begins the new physical interface device for feedback
 
+	0x05, 0x01,              // USAGE_PAGE (Generic Desktop)
+	0x09, 0x00,              // USAGE (Undefined)
+  	0x85, 0x02,              // (GLOBAL) REPORT_ID          0x02 (2) 
+	0x15, 0x00,              // LOGICAL_MINIMUM (0)
+	0x26, 0xff, 0x00,        // LOGICAL_MAXIMUM (255)
+	0x75, 0x08,              // REPORT_SIZE (8)
+	0x95, 0x01,              // REPORT_COUNT (1)
+	0xb2, 0x03, 0x01,        // FEATURE (Cnst,Var,Abs,Buf)
+
 /*
   0x06, 0x00, 0xFF,            // (GLOBAL) USAGE_PAGE         0xFF00 Vendor-defined 
   0xA1, 0x01,                  // (MAIN)   COLLECTION         0x01 Application (Usage=0x0: Page=, Usage=, Type=) <-- Warning: USAGE type should be CA (Application)
