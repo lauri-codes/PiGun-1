@@ -105,21 +105,27 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	// 45 bytes so far!
 	// now begins the new physical interface device for feedback
 
-0x05, 0x0F,        // Usage Page (PID Page)
-0x09, 0x21, //USAGE (Set Effect Report) 
-0xA1, 0x02,        // Collection (Logical)
-	0x85, 0x02,        //   Report ID (2)
-	0x09, 0x22,        //  	USAGE (Effect Block Index) 09 22
-	0x15, 0x00,        //   Logical Minimum (0)
-	0x25, 0x7F,        //   Logical Maximum (127)
-	0x75, 0x07,        //   Report Size (7)
-	0x95, 0x01,        //   Report Count (1)
-	0x91, 0x02,		   //	OUTPUT (Data,Var,Abs) 91 02
-	0x09, 0x24,		   //	USAGE (ROM Flag) 09 24
-	0x25, 0x01,        //   Logical Maximum (1)
-	0x75, 0x01,        //   Report Size (7)
-	0x91, 0x02,		   //	OUTPUT (Data,Var,Abs) 91 02
-0xC0,              //   End Collection
+	0x05, 0x0F,        // Usage Page (PID Page)
+	0x09,0x73,	// USAGE (Set Constant Force Report)
+	0xA1,0x02,	// COLLECTION (Logical)
+		0x85,0x05,	// REPORT_ID (05)
+		0x09,0x22,	// USAGE (Effect Block Index)
+		0x15,0x01,	// LOGICAL_MINIMUM (01)
+		0x25,0x28,	// LOGICAL_MAXIMUM (28)
+		0x35,0x01,	// PHYSICAL_MINIMUM (01)
+		0x45,0x28,	// PHYSICAL_MAXIMUM (28)
+		0x75,0x08,	// REPORT_SIZE (08)
+		0x95,0x01,	// REPORT_COUNT (01)
+		0x91,0x02,	// OUTPUT (Data,Var,Abs)
+		0x09,0x70,	// USAGE (Magnitude)
+		0x16,0x01,0xFF,	// LOGICAL_MINIMUM (-255)
+		0x26,0xFF,0x00,	// LOGICAL_MAXIMUM (255)
+		0x36,0xF0,0xD8,	// PHYSICAL_MINIMUM (-10000)
+		0x46,0x10,0x27,	// PHYSICAL_MAXIMUM (10000)
+		0x75,0x10,	// REPORT_SIZE (10)
+		0x95,0x01,	// REPORT_COUNT (01)
+		0x91,0x02,	// OUTPUT (Data,Var,Abs)
+	0xC0,	// END COLLECTION ()
 
 /*
 0x05, 0x0F,        // Usage Page (PID Page)
