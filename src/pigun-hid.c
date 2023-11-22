@@ -768,7 +768,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 	UNUSED(packet_size);
 	uint8_t status;
 	
-	//printf("got packet type: %i \n", packet_type);
+	printf("got packet type: %i \n", packet_type);
 
     if (packet_type == L2CAP_DATA_PACKET){
       if(packet[0]==0xA2) { //output report data from host
