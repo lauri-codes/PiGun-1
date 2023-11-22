@@ -104,7 +104,24 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x81, 0x02,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
 	// 45 bytes so far!
 	// now begins the new physical interface device for feedback
-	
+
+0x05, 0x0F,        // Usage Page (PID Page)
+0x09, 0x21, //USAGE (Set Effect Report) 
+0xA1, 0x02,        // Collection (Logical)
+	0x85, 0x02,        //   Report ID (2)
+	0x09, 0x22,        //  	USAGE (Effect Block Index) 09 22
+	0x15, 0x00,        //   Logical Minimum (0)
+	0x25, 0x7F,        //   Logical Maximum (127)
+	0x75, 0x07,        //   Report Size (7)
+	0x95, 0x01,        //   Report Count (1)
+	0x91, 0x02,		   //	OUTPUT (Data,Var,Abs) 91 02
+	0x09, 0x24,		   //	USAGE (ROM Flag) 09 24
+	0x25, 0x01,        //   Logical Maximum (1)
+	0x75, 0x01,        //   Report Size (7)
+	0x91, 0x02,		   //	OUTPUT (Data,Var,Abs) 91 02
+0xC0,              //   End Collection
+
+/*
 0x05, 0x0F,        // Usage Page (PID Page)
 0x09, 0x92,        // Usage (0x92)
 0xA1, 0x02,        // Collection (Logical)
@@ -662,6 +679,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 0x95, 0x01,        //   Report Count (1)
 0xB1, 0x03,        //   Feature (Const,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
 0xC0,              // End Collection
+*/
 	0xC0               // End Collection (Application)
 }; // 137 bytes total
 
