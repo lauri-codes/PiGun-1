@@ -104,7 +104,27 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x81, 0x02,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
 	// 45 bytes so far!
 	// now begins the new physical interface device for feedback
+	
+	0x05, 0x0F,        //   Usage Page (Physical Interface Device Page)
+	0x09, 0x73,        // Usage (0x73)
+	0xA1, 0x02,        // Collection (Logical)
+	0x85, 0x05,        //   Report ID (5)
+	0x09, 0x23,        //   Usage (0x23)
+	0x26, 0xFD, 0x7F,  //   Logical Maximum (32765)
+	0x75, 0x0F,        //   Report Size (15)
+	0x95, 0x01,        //   Report Count (1)
+	0x91, 0x02,        //   Output (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x09, 0x24,        //   Usage (0x24)
+	0x25, 0x01,        //   Logical Maximum (1)
+	0x75, 0x01,        //   Report Size (1)
+	0x91, 0x02,        //   Output (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x09, 0x70,        //   Usage (0x70)
+	0x26, 0xFF, 0x00,  //   Logical Maximum (255)
+	0x75, 0x08,        //   Report Size (8)
+	0x91, 0x02,        //   Output (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0xC0,              // End Collection
 
+/* this one did not really work - not detected as FF capable device
 	0x05, 0x0F,        //   Usage Page (Physical Interface Device Page)
 	0x09, 0x21,        //   Usage Set Effect Report (Logical Collection)
 	0x85, 0x03,        //   Report_ID (3)
@@ -149,7 +169,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x95, 0x01,        //     (GLOBAL) REPORT_COUNT       0x01 (1) Number of fields <-- Redundant: REPORT_COUNT is already 1 
 	0x91, 0x02,        //     (MAIN)   OUTPUT             0x00000002 (1 field x 8 bits) 0=Data 1=Variable 0=Absolute 0=NoWrap 0=Linear 0=PrefState 0=NoNull 0=NonVolatile 0=Bitmap 
 	0xC0,              //   (MAIN)   END_COLLECTION     Logical 
-
+*/
 	0xC0               // End Collection (Application)
 }; // 137 bytes total
 
