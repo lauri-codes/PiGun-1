@@ -105,14 +105,16 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	// 45 bytes so far!
 	// now begins the new physical interface device for feedback
 
-	0x05, 0x01,              // USAGE_PAGE (Generic Desktop)
-	0x09, 0x00,              // USAGE (Undefined)
-  	0x85, 0x02,              // (GLOBAL) REPORT_ID          0x02 (2) 
-	0x15, 0x00,              // LOGICAL_MINIMUM (0)
-	0x26, 0xff, 0x00,        // LOGICAL_MAXIMUM (255)
-	0x75, 0x08,              // REPORT_SIZE (8)
-	0x95, 0x01,              // REPORT_COUNT (1)
-	0xb2, 0x03, 0x01,        // FEATURE (Cnst,Var,Abs,Buf)
+	0x85, 0x01,        //   Report_ID (1)
+	0x95, 0x05,                    //   REPORT_COUNT (5)
+	0x75, 0x01,                    //   REPORT_SIZE (1)
+	0x05, 0x08,                    //   USAGE_PAGE (LEDs)
+	0x19, 0x01,                    //   USAGE_MINIMUM (Num Lock)
+	0x29, 0x05,                    //   USAGE_MAXIMUM (Kana)
+	0x91, 0x02,                    //   OUTPUT (Data,Var,Abs)
+	0x95, 0x01,                    //   REPORT_COUNT (1)
+	0x75, 0x03,                    //   REPORT_SIZE (3)
+	0x91, 0x03,                    //   OUTPUT (Cnst,Var,Abs)
 
 /*
   0x06, 0x00, 0xFF,            // (GLOBAL) USAGE_PAGE         0xFF00 Vendor-defined 
@@ -768,6 +770,14 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 	
 	//printf("got packet type: %i \n", packet_type);
 
+    if (packet_type == L2CAP_DATA_PACKET){
+      if(packet[0]==0xA2) { //output report data from host
+		printf("\tOutput Report Data: ");
+		for (int i=0; i<packet_size; i++) {
+			printf("%#02X ",packet[i]);
+		}
+      }
+    }
 	if (packet_type != HCI_EVENT_PACKET) return;
 
 	switch (hci_event_packet_get_type(packet)) {
