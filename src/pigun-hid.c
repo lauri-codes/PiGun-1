@@ -83,7 +83,6 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 	0x09, 0x04,        // Usage (Joystick)
 	0xA1, 0x01,        // Collection (Application)
-//	0x85, 0x00,        //   Report_ID (0)
 	0x09, 0x01,        //   Usage (Pointer)
 	0xA1, 0x00,        //   Collection (Physical)
 	0x09, 0x30,        //     Usage (X)
@@ -105,7 +104,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	// 45 bytes so far!
 	// now begins the new physical interface device for feedback
 
-/*
+
 	0x85, 0x01,        //   Report_ID (1)
 	0x06, 0x00, 0xFF,      //            USAGE_PAGE (Vendor Defined Page 1) 
 	0x09, 0x01,            //            USAGE (Vendor Usage 1) 
@@ -114,7 +113,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x75, 0x08,            //            REPORT_SIZE (8) 
 	0x95, 0x01,            //            REPORT_COUNT (1) 
 	0x91, 0x02,            //            OUTPUT (Data,Var,Abs)
-*/
+
 /*
   0x06, 0x00, 0xFF,            // (GLOBAL) USAGE_PAGE         0xFF00 Vendor-defined 
   0xA1, 0x01,                  // (MAIN)   COLLECTION         0x01 Application (Usage=0x0: Page=, Usage=, Type=) <-- Warning: USAGE type should be CA (Application)
