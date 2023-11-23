@@ -83,7 +83,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 	0x09, 0x04,        // Usage (Joystick)
 	0xA1, 0x01,        // Collection (Application)
-	0x85, 0x01,        //   Report_ID (1)
+//	0x85, 0x00,        //   Report_ID (0)
 	0x09, 0x01,        //   Usage (Pointer)
 	0xA1, 0x00,        //   Collection (Physical)
 	0x09, 0x30,        //     Usage (X)
@@ -736,7 +736,8 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0xB1, 0x03, // FEATURE ( Cnst,Var,Abs)
   0xC0, // END COLLECTION ()
   */
-0xC0               // End Collection (Application)
+	
+	0xC0               // End Collection (Application)
 }; // 137 bytes total
 
 
