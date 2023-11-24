@@ -109,7 +109,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 
 			0x09, 0x03,		  	// usage ID vendor defined
 			0x15, 0x00,			// Logical Minimum (0)
-			0x26, 0xFF, 0x00   	// Logical Maximum (1)
+			0x26, 0xFF, 0x00,  	// Logical Maximum (1)
 			0x75, 0x08,        	// Report Size (8)
 			0x95, 0x01,        	// Report Count (1)
 			0x91, 0x02,			// output (data,Var,Abs)
