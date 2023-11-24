@@ -53,7 +53,7 @@
 
 // from USB HID Specification 1.1, Appendix B.1
 // this is custom made joystick with 8 buttons, and two 16-bit axis
-/* // this one worked but had no ffb nor output report capabilities
+// this one worked but had no ffb nor output report capabilities
 const uint8_t hid_descriptor_joystick_mode[] = {
 	0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 	0x09, 0x04,        // Usage (Joystick)
@@ -78,11 +78,11 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x81, 0x02,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
 	0xC0,              // End Collection --- 44 bytes
 };
-*/
 
 
 
-const uint8_t hid_descriptor_joystick_mode[] = {
+
+const uint8_t hid_descriptor_joystickASD_mode[] = {
 
 0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 0x09, 0x04,        // Usage (Joystick)
