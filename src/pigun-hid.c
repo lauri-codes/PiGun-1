@@ -695,9 +695,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 		0x95,0x01,	// REPORT_COUNT (01)
 		0xB1,0x03,	// FEATURE ( Cnst,Var,Abs)
 	0xC0,	// END COLLECTION ()
-0xC0,	// END COLLECTION ()
-
-
+0xC0	// END COLLECTION ()
 }
 
 
