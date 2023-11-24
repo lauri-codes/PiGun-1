@@ -99,7 +99,6 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 		0x75, 0x10,        //     Report Size (16) --- 22 bytes
 		0x95, 0x02,        //     Report Count (2)
         0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
-		0x65, 0x00,		//     UNIT (None)
 	0xC0,              // End Collection
 
 	0x05, 0x09,        //   Usage Page (Button)
