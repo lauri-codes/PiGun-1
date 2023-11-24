@@ -94,7 +94,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x09, 0x34,              //                   USAGE (Ry)
 	0x16, 0x01, 0x80,  		//   Logical Minimum 0x8001 (-32767)  
 	0x26, 0xFF, 0x7F,  		//   Logical Maximum 0x7FFF (32767)
-	0x75, 0x16,              //                   REPORT_SIZE (10)
+	0x75, 0x10,              //                   REPORT_SIZE (16)
 	0x95, 0x02,              //                   REPORT_COUNT (2)
 	0x81, 0x02,              //                   INPUT (Data,Var,Abs)
 	0x05, 0x09,              //                   USAGE_PAGE (Button)
