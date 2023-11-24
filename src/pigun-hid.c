@@ -112,7 +112,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0x75, 0x01,        //   Report Size (1)
 	0x95, 0x08,        //   Report Count (8)
 	0x81, 0x02,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
+/*
 	0x55, 0x00, 	// ( UNIT_EXPONENT ( 0))
 	0x65, 0x00, 	// ( UNIT ( None))
 	
@@ -695,6 +695,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 		0x95,0x01,	// REPORT_COUNT (01)
 		0xB1,0x03,	// FEATURE ( Cnst,Var,Abs)
 	0xC0,	// END COLLECTION ()
+	*/
 0xC0	// END COLLECTION ()
 };
 
