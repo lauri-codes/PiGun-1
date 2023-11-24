@@ -806,7 +806,7 @@ static void send_report() {
 	// this is the report to send
 	// I do now know that the first byte is there for?!
 	//uint8_t hid_report[] = { 0xa1, 0, 0, 0, 0, 0 };
-	uint8_t hid_report[] = { 0x01, 0, 0, 0, 0, 0 };
+	uint8_t hid_report[] = { 0xa1, 1,0, 0, 0, 0, 0 };
 
 	hid_report[1] = (global_pigun_report.x) & 0xff;
 	hid_report[2] = (global_pigun_report.x >> 8) & 0xff;
@@ -815,7 +815,7 @@ static void send_report() {
 	hid_report[5] = global_pigun_report.buttons;
 
 	//printf("sending x=%i (%i %i) y=%i (%i %i) \n", global_pigun_report.x, hid_report[1], hid_report[2], global_pigun_report.y, hid_report[3], hid_report[4]);
-	//hid_device_send_interrupt_message(hid_cid, &hid_report[0], 6); // 6 = sizeof(hid_report)
+	hid_device_send_interrupt_message(hid_cid, &hid_report[0], 6); // 6 = sizeof(hid_report)
 }
 
 // called when host sends an output report
