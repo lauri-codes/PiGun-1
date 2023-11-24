@@ -81,8 +81,8 @@ const uint8_t hid_descriptor_joystickWORKNOFFB_mode[] = {
 
 
 
-
-const uint8_t hid_descriptor_joystick_mode[] = {
+// this is not seen a game controller by windows
+const uint8_t hid_descriptor_joystick0_mode[] = {
 
 	0x09, 0x04,              // USAGE (Joystick)
 	0xa1, 0x01,              // COLLECTION (Application)
@@ -122,10 +122,11 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 };
 
 
-const uint8_t hid_descriptor_joystickTEST_mode[] = {
+const uint8_t hid_descriptor_joystick_mode[] = {
 	0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 	0x09, 0x04,        // Usage (Joystick)
 	0xA1, 0x01,        // Collection (Application)
+	0x85, 0x01,		   // Report ID 1
 	0x09, 0x01,        //   Usage (Pointer)
 	0xA1, 0x00,        //   Collection (Physical)
 	0x09, 0x30,        //     Usage (X)
@@ -147,30 +148,8 @@ const uint8_t hid_descriptor_joystickTEST_mode[] = {
 	// 45 bytes so far!
 	// now begins the new physical interface device for feedback
 
-/* -- this gives driver error
-	0x85, 0x01,        //   Report_ID (1)
-	0x06, 0x00, 0xFF,      //            USAGE_PAGE (Vendor Defined Page 1) 
-	0x09, 0x01,            //            USAGE (Vendor Usage 1) 
-	0x15, 0x00,            //            LOGICAL_MINIMUM (0) 
-	0x26, 0xff, 0x00,      //            LOGICAL_MAXIMUM (255) 
-	0x75, 0x08,            //            REPORT_SIZE (8) 
-	0x95, 0x01,            //            REPORT_COUNT (1) 
-	0x91, 0x02,            //            OUTPUT (Data,Var,Abs)
-*/
 
-  0x06, 0x00, 0xFF,            // (GLOBAL) USAGE_PAGE         0xFF00 Vendor-defined 
-  0xA1, 0x01,                  // (MAIN)   COLLECTION         0x01 Application (Usage=0x0: Page=, Usage=, Type=) <-- Warning: USAGE type should be CA (Application)
-  //0x85, 0x02,                  //   (GLOBAL) REPORT_ID          0x02 (2) 
-  0x09, 0x01,                  //   (LOCAL)  USAGE              0xFF000001  
-  0x15, 0x00,                  //   (GLOBAL) LOGICAL_MINIMUM    0x00 (0) <-- Redundant: LOGICAL_MINIMUM is already 0
-  0x26, 0xFF, 0x00,            //   (GLOBAL) LOGICAL_MAXIMUM    0x00FF (255) 
-  0x75, 0x08,                  //   (GLOBAL) REPORT_SIZE        0x08 (8) Number of bits per field 
-  0x95, 0x01,                  //   (GLOBAL) REPORT_COUNT       0x01 (1) Number of fields 
-  0x09, 0x01,                  //   (LOCAL)  USAGE              0xFF000001  
-  0x91, 0x02,                  //   (MAIN)   OUTPUT             0x00000002 (64 fields x 8 bits) 0=Data 1=Variable 0=Absolute 0=NoWrap 0=Linear 0=PrefState 0=NoNull 0=NonVolatile 0=Bitmap 
-  0xC0,                        // (MAIN)   END_COLLECTION     Application
 
-/*
   // PID State Report
   0x05, 0x0F,          // USAGE_PAGE (Physical Interface)
   0x09, 0x92,          // USAGE (PID State Report)
@@ -777,7 +756,7 @@ const uint8_t hid_descriptor_joystickTEST_mode[] = {
 	0x95, 0x01, // REPORT_COUNT (01)
 	0xB1, 0x03, // FEATURE ( Cnst,Var,Abs)
   0xC0, // END COLLECTION ()
-  */
+  
 	
 	0xC0               // End Collection (Application)
 }; // 137 bytes total
