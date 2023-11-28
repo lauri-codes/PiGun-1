@@ -23,15 +23,14 @@ int pigun_button_pin[9] = {
 
 int pigun_solenoid_timer = 0;
 
-//uint16_t pigun_button_oldstate = 0;
 uint16_t pigun_button_state = 0;					// stores value at the bit position corresponding to button id, 1 if the button was just pressed
 uint16_t pigun_button_newpress = 0;					// stores value at the bit position corresponding to button id, 1 if the button was just pressed
 
 int pigun_button_holder[9] = { 0,0,0,0,0,0,0,0,0 }; // frame counters for each button
 
-// x=0: ready to be pressed
-// x=1: button is currently pressed
-// x<0: button has been released as is "recharging"
+// status=0: ready to be pressed
+// status=1: button is currently pressed
+// status<0: button has been released as is "recharging"
 int pigun_button_status[9] = {0,0,0,0,0,0,0,0,0};
 
 
@@ -63,7 +62,6 @@ int pigun_GPIO_init() {
 	// setup solenoid - start ON because it is connected to the 555 trigger
 	bcm2835_gpio_fsel(PIN_OUT_SOL, BCM2835_GPIO_FSEL_OUTP); bcm2835_gpio_write(PIN_OUT_SOL, HIGH);
 
-	//pigun_button_oldstate = 0;
 	pigun_button_state = 0;
 	pigun_button_newpress = 0;
 
@@ -184,7 +182,6 @@ void pigun_buttons_process() {
 	}
 
 	global_pigun_report.buttons = pigun_button_state;	// send the state to the HID report (only LSB)
-	//pigun_button_oldstate = pigun_button_state;		// save current state as the old one for next frame
 
 	// *** deal with some specific buttons *** *****************************
 
