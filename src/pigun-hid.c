@@ -858,7 +858,7 @@ static void send_report() {
 }
 
 // called when host sends an output report
-void get_report(uint16_t hid_cid, hid_report_type_t report_type, int report_size, uint8_t *report){
+void set_report(uint16_t hid_cid, hid_report_type_t report_type, int report_size, uint8_t *report){
 
 	printf("Host HID output report:\n");
 	printf("\tHID CID: %i\n", hid_cid);
@@ -1056,7 +1056,7 @@ int btstack_main(int argc, const char * argv[]){
 	hid_device_register_packet_handler(&packet_handler);
 
 	// sign up for host output reports?
-	hid_device_register_set_report_callback(&get_report);
+	hid_device_register_set_report_callback(&set_report);
 
 
 	// turn on!
