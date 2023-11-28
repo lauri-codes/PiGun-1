@@ -63,7 +63,7 @@ int pigun_GPIO_init() {
 	// setup solenoid - start ON because it is connected to the 555 trigger
 	bcm2835_gpio_fsel(PIN_OUT_SOL, BCM2835_GPIO_FSEL_OUTP); bcm2835_gpio_write(PIN_OUT_SOL, HIGH);
 
-	pigun_button_oldstate = 0;
+	//pigun_button_oldstate = 0;
 	pigun_button_state = 0;
 	pigun_button_newpress = 0;
 
