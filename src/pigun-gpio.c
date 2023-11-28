@@ -238,7 +238,7 @@ void pigun_buttons_process() {
 	if(pigun_button_state == 5 && pigun_state == 0){
 		printf("shutting down\n");
 		pigun_state = -1;
-		system("shutdown -P now");
+		system("sudo shutdown -P now");
 	}
 
 
