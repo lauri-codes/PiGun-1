@@ -147,17 +147,9 @@ void pigun_buttons_process() {
 			// register the press event if the button was released & ready to be pressed again
 			if (pigun_button_status[i] == 0) {
 
-				if (bcm2835_gpio_lev(pigun_button_pin[i]) == HIGH) {
-					printf("button %i is high after event!\n",i);
-				} else {
-					printf("button %i is low after event!!\n",i);
-				}
-
-				//pigun_button_holder[i] = button_delay;				// it will have to be another 5 frames before the button can be pressed again
-				//global_pigun_report.buttons |= (uint8_t)(1 << i);	// set the button in the HID report (this is a hack... CAL=9 goes to 0 and it should not change the uint8)
-				pigun_button_newpress |= (uint16_t)(1 << i);		// mark a good press event internally?
-				pigun_button_state |= (uint16_t)(1 << i);
-				pigun_button_status[i] = 1;
+				pigun_button_newpress |= (uint16_t)(1 << i);	// mark a good press event internally?
+				pigun_button_state |= (uint16_t)(1 << i);		// this is for the HID report
+				pigun_button_status[i] = 1;						// this is for internal use
 
 				// ignore the rest of the code since it is dealing with button releases
 				continue;
@@ -243,8 +235,10 @@ void pigun_buttons_process() {
 	// *********************************************************************
 
 	// autoshutdown everything with some button combo
-	if(pigun_button_state == 5){
+	if(pigun_button_state == 5 && pigun_state == 0){
 		printf("shutting down\n");
+		pigun_state = -1;
+		system("shutdown -P now");
 	}
 
 
