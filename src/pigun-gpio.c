@@ -242,6 +242,11 @@ void pigun_buttons_process() {
 
 	// *********************************************************************
 
+	// autoshutdown everything with some button combo
+	if(pigun_button_state == 5){
+		printf("shutting down\n");
+	}
+
 
 }
 
