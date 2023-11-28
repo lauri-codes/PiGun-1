@@ -23,11 +23,16 @@ int pigun_button_pin[9] = {
 
 int pigun_solenoid_timer = 0;
 
-uint16_t pigun_button_oldstate = 0;
+//uint16_t pigun_button_oldstate = 0;
 uint16_t pigun_button_state = 0;					// stores value at the bit position corresponding to button id, 1 if the button was just pressed
 uint16_t pigun_button_newpress = 0;					// stores value at the bit position corresponding to button id, 1 if the button was just pressed
 
 int pigun_button_holder[9] = { 0,0,0,0,0,0,0,0,0 }; // frame counters for each button
+
+// x=0: ready to be pressed
+// x=1: button is currently pressed
+// x<0: button has been released as is "recharging"
+int pigun_button_status[9] = {0,0,0,0,0,0,0,0,0};
 
 
 // Initialises all GPIO
@@ -51,6 +56,7 @@ int pigun_GPIO_init() {
 	for (int i = 0; i < 9; i++) {
 		bcm2835_gpio_fsel(pigun_button_pin[i], BCM2835_GPIO_FSEL_INPT);		// set as input
 		bcm2835_gpio_set_pud(pigun_button_pin[i], BCM2835_GPIO_PUD_UP);		// give it a pullup resistor
+
 		bcm2835_gpio_fen(pigun_button_pin[i]);								// detect falling edge (should happen when button is pressed=grounded)
 	}
 	
@@ -130,56 +136,55 @@ void pigun_buttons_process() {
 	for (int i = 0; i < 9; i++) {
 
 		// if button was just pressed now AND we are allowed to register
-		if (bcm2835_gpio_eds(pigun_button_pin[i])) {
+		if (bcm2835_gpio_eds(pigun_button_pin[i])) { // this checks the status flag, which is true when a falling edge is detected
 
 			// clear GPIO event flag
 			// this is done every time the event was detected, regardless of whether the
 			// event really was a valid press, otherwise the BCM2835 wont detect it again!
 			bcm2835_gpio_set_eds(pigun_button_pin[i]);
 
-			// register the press event if the button was released & ready to be pressed again
-			if (pigun_button_holder[i] == 0) {
+			// if the button was being reloaded, nothing should happen
+			//if(pigun_button_status[i] < 0) continue;
 
-				pigun_button_holder[i] = button_delay;				// it will have to be another 5 frames before the button can be pressed again
+			// register the press event if the button was released & ready to be pressed again
+			if (pigun_button_status[i] == 0) {
+
+				if (bcm2835_gpio_lev(pigun_button_pin[i]) == HIGH) {
+					printf("button %i is high after event!\n",i);
+				} else {
+					printf("button %i is low after event!!\n",i);
+				}
+
+				//pigun_button_holder[i] = button_delay;				// it will have to be another 5 frames before the button can be pressed again
 				//global_pigun_report.buttons |= (uint8_t)(1 << i);	// set the button in the HID report (this is a hack... CAL=9 goes to 0 and it should not change the uint8)
 				pigun_button_newpress |= (uint16_t)(1 << i);		// mark a good press event internally?
 				pigun_button_state |= (uint16_t)(1 << i);
+				pigun_button_status[i] = 1;
 
 				// ignore the rest of the code since it is dealing with button releases
 				continue;
-			}
+			} 
+			
+			// if the button is not in 0 state, then it is not ready to process this button-press event
 		}
 
-		// code here => no press event was registered for this button
-		// either was was not pressed at all, or it was already pressed before this frame
+		// code here => the press event was NOT registered for this button
 
-		// if it was already pressed, check that it is still the case
-		// (pigun_button_state is a copy of the button state from the HID report)
-		if ((pigun_button_oldstate >> i) & 1) {
-
-			// if the hold timer expired...
-			if (pigun_button_holder[i] == 0) {
-
-				// ... and the GPIO level is HIGH
-				if (bcm2835_gpio_lev(pigun_button_pin[i]) == HIGH) {
-
-					// then release the button in HID report
-					//global_pigun_report.buttons &= ~(uint8_t)(1 << i);
-					pigun_button_state &= ~(uint16_t)(1 << i);
-				}
-			}
-			else {
-				// code here => the hold timer needs to tick down
-				pigun_button_holder[i]--;
-				// even if the button was released in the meantime, it will not be released
-				// in the HID report until the timer runs to 0.
-			}
+		// if button status 1 (pressed) and now it is at HIGH level (not grounded -> released)
+		if (bcm2835_gpio_lev(pigun_button_pin[i]) == HIGH && pigun_button_status[i] == 1) {
+			// set the status to negative # of frames this takes to recharge
+			pigun_button_status[i] = -button_delay;
+			pigun_button_state &= ~(uint16_t)(1 << i);
+			continue;
 		}
-		// if it wasnt pressed at all, then do nothing
+
+		// if the state is negative, increase by one (recharge), regardless of the actual state of the pin
+		if(pigun_button_status[i] < 0) pigun_button_status[i]++;
+
 	}
 
 	global_pigun_report.buttons = pigun_button_state;	// send the state to the HID report (only LSB)
-	pigun_button_oldstate = pigun_button_state;			// save current state as the old one for next frame
+	//pigun_button_oldstate = pigun_button_state;		// save current state as the old one for next frame
 
 	// *** deal with some specific buttons *** *****************************
 

@@ -72,6 +72,7 @@ struct Pigun_settings_t {
 };
 
 
+
 // Describes a peak in the camera image
 typedef struct Peak Peak;
 struct Peak {
