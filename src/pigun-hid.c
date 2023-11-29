@@ -845,7 +845,7 @@ static void send_report() {
 	// this is the report to send
 	// I do now know that the first byte is there for?!
 	//uint8_t hid_report[] = { 0xa1, 0, 0, 0, 0, 0 };
-	uint8_t hid_report[] = { 0xa1, 1,0, 0, 0, 0, 0 };
+	uint8_t hid_report[] = { 0xa1, 3,0, 0, 0, 0, 0 };
 
 	hid_report[2] = (global_pigun_report.x) & 0xff;
 	hid_report[3] = (global_pigun_report.x >> 8) & 0xff;
