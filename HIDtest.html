@@ -1,0 +1,65 @@
+<html>
+    <head>
+
+        <script>
+
+            var device = null
+            var req = null
+
+            function connect(){
+                req = navigator.hid.requestDevice({filters:[]})
+                .then(rsp=>{
+                    console.log("response",rsp)
+                    device = rsp[0]
+                    device.addEventListener("inputreport", hidprint)
+                    device.open().then(rsp=>{console.log("device opened",rsp)})
+                })
+                //device.addEventListener("inputreport", hidprint)
+
+                /*
+                try {
+                    const devices = await navigator.hid.requestDevice({
+                    filters: [
+                        {
+                        vendorId: 0xabcd,
+                        productId: 0x1234,
+                        usagePage: 0x0c,
+                        usage: 0x01,
+                        },
+                    ],
+                    });
+                    device = devices[0];
+                } catch (error) {
+                    console.log("An error occurred.");
+                }
+                */
+
+            }
+
+            function hidprint(event){
+
+                const { data, device, reportId } = event
+                let ax = data.getUint16(0)
+                let ay = data.getUint16(2)
+                let bt = data.getUint8(4)
+                if(bt != 0) console.log([ax,ay,bt])
+            }
+            function hidsend(){
+
+                const enableVibrationData = [1, 0xAA]
+                device.sendReport(0x01, new Uint8Array(enableVibrationData)).then(rsp=>{
+                    console.log("hidsend",rsp)
+                })
+            }
+
+        </script>
+    </head>
+
+
+<body>
+    <button onclick="connect()">connect</button>
+    <button onclick="hidsend()">send report</button>
+</body>
+
+
+</html>
