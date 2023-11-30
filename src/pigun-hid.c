@@ -86,7 +86,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0xA1, 0x01,        // Collection (Application)
 		0x09, 0x01,        //   Usage (Pointer)
 		0xA1, 0x00,        //   Collection (Physical)
-			0x85, 0x03,		   // 	Report ID 3
+			0x85, 0x01,		   // 	Report ID 1
 
 			0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 			0x16, 0x01, 0x80,  //   Logical Minimum 0x8001 (-32767)  
