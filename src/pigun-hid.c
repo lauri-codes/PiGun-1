@@ -869,7 +869,19 @@ void set_report(uint16_t hid_cid, hid_report_type_t report_type, int report_size
 		printf("%#02X ",report[i]);
 	}
 	printf("\n");
+}
 
+void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_id, int report_size, uint8_t * report){
+	printf("Host HID output DATA:\n");
+	printf("\tHID CID: %i\n", hid_cid);
+	printf("\tReport Type: %i\n", report_type);
+	printf("\tReport Size: %i\n", report_size);
+	printf("\tReport ID: %i\n", report_id);
+	printf("\tReport Data: ");
+	for (int i=0; i<report_size; i++) {
+		printf("%x ",report[i]);
+	}
+	printf("\n");
 }
 
 
@@ -972,13 +984,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			// and then we request another can_send_now because we are greedy! need to send moooar!
 			hid_device_request_can_send_now_event(hid_cid);
 			break;
-		case HID_SUBEVENT_SET_REPORT_RESPONSE:
-			printf("set_report response: ");
-			for (int i=0; i<packet_size; i++) {
-			printf("%#02X ",packet[i]);
-			break;
-	}
-	printf("\n");
+
 		default:
 			break;
 		}
@@ -1064,6 +1070,7 @@ int btstack_main(int argc, const char * argv[]){
 
 	// sign up for host output reports?
 	hid_device_register_set_report_callback(&set_report);
+	hid_device_register_report_data_callback(&set_data);
 
 	// turn on!
 	hci_power_control(HCI_POWER_ON);
