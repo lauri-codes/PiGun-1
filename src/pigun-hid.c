@@ -1036,8 +1036,9 @@ int btstack_main(int argc, const char * argv[]){
 	uint8_t hid_normally_connectable = 1;
 
 	hid_sdp_record_t hid_params = {
-		// hid sevice subclass 0x2504 joystick, hid counntry code 33 US
-		0x2504, 33, // should be the joystick code
+		// hid device subclass 0x2504 joystick, hid counntry code 33 US
+		//0x2504, 33, // should be the joystick code
+		0x00, 33, // should be the joystick code
 		hid_virtual_cable, hid_remote_wake, 
 		hid_reconnect_initiate, hid_normally_connectable,
 		hid_boot_device, 
