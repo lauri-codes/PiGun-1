@@ -973,7 +973,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			hid_device_request_can_send_now_event(hid_cid);
 			break;
 		case HID_SUBEVENT_SET_REPORT_RESPONSE:
-			printf("set_report response: ")
+			printf("set_report response: ");
 			for (int i=0; i<packet_size; i++) {
 			printf("%#02X ",packet_size[i]);
 			break;
