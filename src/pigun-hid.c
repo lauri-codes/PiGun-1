@@ -809,7 +809,7 @@ static uint8_t device_id_sdp_service_buffer[100];
 static const char hid_device_name[] = "HID PiGun-1";
 static btstack_packet_callback_registration_t hci_event_callback_registration;
 static uint16_t hid_cid;
-static uint8_t hid_boot_device = 0;
+static uint8_t hid_boot_device = 1;
 
 
 static enum {
@@ -1037,8 +1037,7 @@ int btstack_main(int argc, const char * argv[]){
 
 	hid_sdp_record_t hid_params = {
 		// hid device subclass 0x2504 joystick, hid counntry code 33 US
-		//0x2504, 33, // should be the joystick code
-		0x00, 33, // should be the joystick code
+		0x2504, 33, // should be the joystick code
 		hid_virtual_cable, hid_remote_wake, 
 		hid_reconnect_initiate, hid_normally_connectable,
 		hid_boot_device, 
