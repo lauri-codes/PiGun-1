@@ -975,7 +975,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 		case HID_SUBEVENT_SET_REPORT_RESPONSE:
 			printf("set_report response: ");
 			for (int i=0; i<packet_size; i++) {
-			printf("%#02X ",packet_size[i]);
+			printf("%#02X ",packet[i]);
 			break;
 	}
 	printf("\n");
