@@ -972,6 +972,13 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			// and then we request another can_send_now because we are greedy! need to send moooar!
 			hid_device_request_can_send_now_event(hid_cid);
 			break;
+		case HID_SUBEVENT_SET_REPORT_RESPONSE:
+			printf("set_report response: ")
+			for (int i=0; i<packet_size; i++) {
+			printf("%#02X ",packet_size[i]);
+			break;
+	}
+	printf("\n");
 		default:
 			break;
 		}
@@ -982,35 +989,6 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 		break;
 	}
 }
-
-static void l2cap_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size)
-{
-
-    if (packet_type == L2CAP_DATA_PACKET){
-
-		printf("l2cap data packet [ch%i]: ",channel);
-		for (int i=0; i<size; i++) printf("%02x ",packet[i]);
-		printf("\n");
-		/*
-      if(packet[0]==0xA2) { //output report data from host
-        //Num lock bit0
-        //Caps lock bit1
-        if(packet[2]&0x1) {
-          log_info("Num lock on\n");
-        } else {
-          Send_Str((char *)Sample,12);
-          log_info("Num lock off\n");
-        }
-        if(packet[2]&0x02) {
-          log_info("caps lock on\n");
-        }
-        else  {
-          log_info("caps lock off\n");
-        }
-      }*/
-    }
-}
-
 
 
 
@@ -1086,9 +1064,6 @@ int btstack_main(int argc, const char * argv[]){
 
 	// sign up for host output reports?
 	hid_device_register_set_report_callback(&set_report);
-
-	// sign up for l2cap packets?
-	l2cap_register_service(l2cap_packet_handler, PSM_HID_INTERRUPT, 150, LEVEL_0);
 
 	// turn on!
 	hci_power_control(HCI_POWER_ON);
