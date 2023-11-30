@@ -346,7 +346,7 @@ int main(int argc, const char * argv[]){
     const char * pklg_path = "/tmp/hci_dump.pklg";
     hci_dump_posix_fs_open(pklg_path, HCI_DUMP_PACKETLOGGER);
     const hci_dump_t * hci_dump_impl = hci_dump_posix_fs_get_instance();
-    hci_dump_init(hci_dump_impl);
+    //hci_dump_init(hci_dump_impl);
     printf("Packet Log: %s\n", pklg_path);
 
     // setup run loop
