@@ -988,8 +988,8 @@ static void l2cap_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t 
 
     if (packet_type == L2CAP_DATA_PACKET){
 
-		printf("l2cap data packet: ");
-		for (int i = 0; i < packet_size; i++) printf("%02x ",packet[i]);
+		printf("l2cap data packet [ch%i]: ",channel);
+		for (int i=0; i<size; i++) printf("%02x ",packet[i]);
 		printf("\n");
 		/*
       if(packet[0]==0xA2) { //output report data from host
