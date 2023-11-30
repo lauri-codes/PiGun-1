@@ -880,6 +880,31 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 	
 	//printf("got packet type: %i \n", packet_type);
 
+    if (packet_type == L2CAP_DATA_PACKET){
+		printf("l2cap data packet: ");
+		for (int i = 0; i < packet_size; i++) printf("%02x ",packet[i]);
+		printf("\n");
+	/*
+      if(packet[0]==0xA2) { //output report data from host
+        //Num lock bit0
+        //Caps lock bit1
+        if(packet[2]&0x1) {
+          log_info("Num lock on\n");
+        } else {
+          Send_Str((char *)Sample,12);
+          log_info("Num lock off\n");
+        }
+        if(packet[2]&0x02) {
+          log_info("caps lock on\n");
+        }
+        else  {
+          log_info("caps lock off\n");
+        }
+      }
+	  */
+    }
+
+
 	if (packet_type != HCI_EVENT_PACKET) return;
 
 	switch (hci_event_packet_get_type(packet)) {
