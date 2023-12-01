@@ -177,41 +177,9 @@ void pigun_buttons_process() {
 
 	// *** deal with some specific buttons *** *****************************
 
-	if ((pigun_button_newpress >> 8) & 1) { // if CAL button was just pressed
-		printf("PIGUN: CALibrating...\n");
-		bcm2835_gpio_write(PIN_OUT_CAL, HIGH); // turn on the yellow LED
+	if (pigun.state == STATE_IDLE) {
 
-		pigun_state = 1; // next trigger pull marks top-left calibration point
-		button_delay = 5; // prevent jitter when calibrating
-
-		// save the frame
-		FILE* fbin = fopen("CALframe.bin", "wb");
-		fwrite(pigun_framedata, sizeof(unsigned char), PIGUN_NPX, fbin);
-		fclose(fbin);
-	}
-	else if (pigun_button_newpress & 1) { // if TRIGGER was just pressed
-
-		if (pigun_state == 1) { // set the top-left calibration point
-			
-			pigun_cal_topleft = pigun_aim_norm;
-			pigun_state = 2;
-			printf("PIGUN: calibrating top-left {%f, %f}\n", pigun_cal_topleft.x, pigun_cal_topleft.y);
-		}
-		else if (pigun_state == 2) { // set the low-right calibration point
-			
-			pigun_cal_lowright = pigun_aim_norm;
-			pigun_state = 0;
-			button_delay = 3;
-			bcm2835_gpio_write(PIN_OUT_CAL, LOW); // turn off the LED
-			printf("PIGUN: calibrating bottom-right {%f, %f}\n", pigun_cal_lowright.x, pigun_cal_lowright.y);
-
-			// save the calibration data
-			FILE* fbin = fopen("cdata.bin", "wb");
-			fwrite(&pigun_cal_topleft, sizeof(PigunAimPoint), 1, fbin);
-			fwrite(&pigun_cal_lowright, sizeof(PigunAimPoint), 1, fbin);
-			fclose(fbin);
-		}
-		else if (pigun_state == 0) {
+		if(pigun_button_newpress & MASK_TRG){ // on TRG just shoot
 			printf("PIGUN: shoot");
 
 			// fire the solenoid on its pin
@@ -225,8 +193,72 @@ void pigun_buttons_process() {
 				bcm2835_gpio_write(PIN_OUT_SOL, SOL_FIRE);
 			}
 			printf("\n");
+		}		
+		if (pigun_button_newpress & MASK_CAL) { // on CAL start service mode
+			
+			printf("PIGUN: going in service mode\n");
+			bcm2835_gpio_write(PIN_OUT_CAL, HIGH); // turn on the yellow LED
+
+			// save the frame
+			FILE* fbin = fopen("CALframe.bin", "wb");
+			fwrite(pigun_framedata, sizeof(unsigned char), PIGUN_NPX, fbin);
+			fclose(fbin);
+
+			pigun.state = STATE_SERVICE;
+		}
+
+
+	}
+	else if(pigun.state == STATE_SERVICE){
+
+		if (pigun_button_newpress & MASK_TRG) { // on TRG go to calibration mode
+			printf("PIGUN: service -> calibration\n");
+			pigun.state == STATE_CAL_TL;
+		}
+		if (pigun_button_newpress & MASK_CAL) { // on CAL go back to idle
+			printf("PIGUN: service -> idle\n");
+			pigun.state == STATE_IDLE;
+			bcm2835_gpio_write(PIN_OUT_CAL, LOW);
+		}
+		
+		// TODO: add other functions
+
+
+
+		if(pigun_button_state == (MASK_TRG|MASK_RLD|MASK_MAG)) { // when all handle buttons are down at the same time
+			printf("PIGUN: system shutdown\n");
+			pigun.state = STATE_SHUTDOWN;
+			system("sudo shutdown -P now");
 		}
 	}
+	else if(pigun.state == STATE_CAL_TL){
+		if (pigun_button_newpress & 1) { // on TRG set the top-left and wait for next corner
+			
+			pigun.cal_topleft = pigun.aim_normalised;
+			printf("PIGUN: calibration top-left {%f, %f}\n", pigun.cal_topleft.x, pigun.cal_topleft.y);
+
+			// save the calibration data
+			pigun_calibration_save();
+
+			pigun.state = STATE_CAL_BR;
+		}
+	}
+	else if(pigun.state == STATE_CAL_BR){
+		if (pigun_button_newpress & 1) { // if TRIGGER was just pressed
+			
+			pigun.cal_lowright = pigun.aim_normalised;
+			printf("PIGUN: calibration low-right {%f, %f}\n", pigun.cal_lowright.x, pigun.cal_lowright.y);
+
+			// save the calibration data
+			pigun_calibration_save();
+
+			// back to idle mode
+			pigun.state = STATE_IDLE;
+			bcm2835_gpio_write(PIN_OUT_CAL, LOW);
+		}
+	}
+
+
 
 	// after the desired time, SOL 555 trigger goes off
 	if (pigun_solenoid_timer == 0) bcm2835_gpio_write(PIN_OUT_SOL, SOL_HOLD);

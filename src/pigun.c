@@ -40,6 +40,10 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+
+// main object with all pigun info
+pigun_object_t pigun;
+
 // the HID report
 pigun_report_t global_pigun_report;
 
@@ -51,21 +55,11 @@ Peak* pigun_peaks;
 unsigned char* pigun_framedata;
 
 // normalised aiming point - before calibration applies
-PigunAimPoint pigun_aim_norm;
+pigun_aimpoint_t pigun_aim_norm;
 
 // calibration points in normalised frame of reference
-PigunAimPoint pigun_cal_topleft;
-PigunAimPoint pigun_cal_lowright;
-
-
-/// <summary>
-/// State of the gun:
-/// 0: idle/normal
-/// 1: calibration - expect top-left
-/// 2: calibration - expect bottom-right
-/// </summary>
-int pigun_state = 0;
-
+pigun_aimpoint_t pigun_cal_topleft;
+pigun_aimpoint_t pigun_cal_lowright;
 
 
 // GLOBAL MMAL STUFF
@@ -74,6 +68,15 @@ MMAL_POOL_T* pigun_video_port_pool;
 
 pthread_mutex_t pigun_mutex;
 
+
+/// @brief Save the calibration data for future use.
+void pigun_calibration_save(){
+	
+	FILE* fbin = fopen("cdata.bin", "wb");
+	fwrite(&(pigun.cal_topleft),  sizeof(pigun_aimpoint_t), 1, fbin);
+	fwrite(&(pigun.cal_lowright), sizeof(pigun_aimpoint_t), 1, fbin);
+	fclose(fbin);
+}
 
 
 static void preview_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer) { mmal_buffer_header_release(buffer); }
@@ -329,23 +332,23 @@ int pigun_mmal_init(void) {
 //void * test_main(int argc, char** argv) {
 void* pigun_cycle(void* nullargs) {
 
-	// normal state
-	pigun_state = 0;
-
+	pigun.state = STATE_IDLE;
+	
 	// reset calibration
-	pigun_cal_topleft.x = pigun_cal_topleft.y = 0;
-	pigun_cal_lowright.x = pigun_cal_lowright.y = 1;
+	pigun.cal_topleft.x = pigun.cal_topleft.y = 0;
+	pigun.cal_lowright.x = pigun.cal_lowright.y = 1;
 	
 	// load calibration data if available
 	FILE* fbin = fopen("cdata.bin", "rb");
-	if (fbin == NULL) {
-		printf("no calibration data found\n");
-	}
+	if (fbin == NULL) printf("PIGUN: no calibration data found\n");
 	else {
-		fread(&pigun_cal_topleft, sizeof(PigunAimPoint), 1, fbin);
-		fread(&pigun_cal_lowright, sizeof(PigunAimPoint), 1, fbin);
+		fread(&(pigun.cal_topleft), sizeof(pigun_aimpoint_t), 1, fbin);
+		fread(&(pigun.cal_lowright), sizeof(pigun_aimpoint_t), 1, fbin);
 		fclose(fbin);
 	}
+
+	// allocate peaks
+	pigun.peaks = (Peak*)calloc(10, sizeof(pigun_peak_t));
 
 	// pins should be initialised using the function in the GPIO module
 	// called by the main thread when the program starts
@@ -359,8 +362,7 @@ void* pigun_cycle(void* nullargs) {
 	}
 	printf("PIGUN: MMAL started.\n");
 
-	// allocate peaks
-	pigun_peaks = (Peak*)calloc(10, sizeof(Peak));
+
 	
 	// repeat forever and ever!
 	// there could be a graceful shutdown?
@@ -382,7 +384,7 @@ void* pigun_cycle(void* nullargs) {
 		if (cameraON) break;
 	}
 	
-	free(pigun_peaks);
+	free(pigun.peaks);
 
 	pthread_exit((void*)0);
 }

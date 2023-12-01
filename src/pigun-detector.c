@@ -47,7 +47,7 @@ int blob_detect(int idx, unsigned char* data, const unsigned int blobID, const f
     checked[idx] = 1;
 
 #ifdef PIGUN_DEBUG
-    printf("detecting peak...");
+    printf("PIGUN: detecting peak...");
 #endif
 
     // Do search until stack is emptied or maximum size is reached
@@ -106,54 +106,27 @@ int blob_detect(int idx, unsigned char* data, const unsigned int blobID, const f
     
     //printf("peak found[%i]: %li %li -- %li -- %i --> ", blobID, sumX, sumY, sumVal, blobSize);
 
-    pigun_peaks[blobID].col = ((float)sumX) / sumVal;
-    pigun_peaks[blobID].row = ((float)sumY) / sumVal;
-    pigun_peaks[blobID].maxI = (float)maxI;
-    pigun_peaks[blobID].total = (pigun_peaks[blobID].row * PIGUN_RES_X + pigun_peaks[blobID].col);
+    pigun.peaks[blobID].col = ((float)sumX) / sumVal;
+    pigun.peaks[blobID].row = ((float)sumY) / sumVal;
+    pigun.peaks[blobID].maxI = (float)maxI;
+    pigun.peaks[blobID].total = (pigun.peaks[blobID].row * PIGUN_RES_X + pigun.peaks[blobID].col);
     
 #ifdef PIGUN_DEBUG
-    printf("%f %f\n", pigun_peaks[blobID].col, pigun_peaks[blobID].row);
+    printf("%f %f\n", pigun.peaks[blobID].col, pigun.peaks[blobID].row);
 #endif
     return 1;
 }
 
 int peak_compare(const void* a, const void* b) {
 
-    Peak* A = (Peak*)a;
-    Peak* B = (Peak*)b;
+    pigun_peak_t* A = (pigun_peak_t*)a;
+    pigun_peak_t* B = (pigun_peak_t*)b;
 	// DESCENDING ORDER NOW!
     if (B->total > A->total) return -1;
     else return 1;
 }
 
-/**
- * Whenever only two peaks are present, sorts them correctly and artificially
- * adds the missing ones using an approximation.
- *
- * By creating a vector that points from the left peak to the left peak (=a), and
- * taking the cross product of this vector with the out-of-screen vector (=c), we
- * can create a new artificial axis (=b).
- */
-void emulateFourPeaks() {
-    
-    /*
-    * we have peaks 2,3 at this point:
-    * 0---1
-    * |   |
-    * 2---3 <-- we have these two
-    *
-    * need to create 0,1 from them!
-    */
 
-    float ax = pigun_peaks[3].col - pigun_peaks[2].col;
-    float ay = pigun_peaks[3].row - pigun_peaks[2].row;
-
-    pigun_peaks[0].col = pigun_peaks[2].col + ay;// if (pigun_peaks[0].col < 0) pigun_peaks[0].col = 0;
-    pigun_peaks[0].row = pigun_peaks[2].row - ax;// if (pigun_peaks[0].row < 0) pigun_peaks[0].row = 0;
-
-    pigun_peaks[1].col = pigun_peaks[3].col + ay;// if (pigun_peaks[1].col < 0) pigun_peaks[1].col = 0;
-    pigun_peaks[1].row = pigun_peaks[3].row - ax;// if (pigun_peaks[1].row < 0) pigun_peaks[1].row = 0;
-}
 
 
 /**
@@ -260,22 +233,22 @@ int pigun_detect(unsigned char* data) {
     */
 
 	// this will sort the peaks in descending peak.total order
-	qsort(pigun_peaks, 4, sizeof(Peak), peak_compare);
+	qsort(pigun.peaks, 4, sizeof(pigun.peaks), peak_compare);
 	
 	Peak tmp;
 
 	// now make sure 0 is the top-left of the first two peaks
-	if(pigun_peaks[0].col > pigun_peaks[1].col){
-		tmp = pigun_peaks[0];
-		pigun_peaks[0] = pigun_peaks[1];
-		pigun_peaks[1] = tmp;
+	if(pigun.peaks[0].col > pigun.peaks[1].col){
+		tmp = pigun.peaks[0];
+		pigun.peaks[0] = pigun.peaks[1];
+		pigun.peaks[1] = tmp;
 	}
 
 	// and that 2 is the bottom-left of the last two peaks
-	if(pigun_peaks[2].col > pigun_peaks[3].col){
-		tmp = pigun_peaks[2];
-		pigun_peaks[2] = pigun_peaks[3];
-		pigun_peaks[3] = tmp;
+	if(pigun.peaks[2].col > pigun.peaks[3].col){
+		tmp = pigun.peaks[2];
+		pigun.peaks[2] = pigun.peaks[3];
+		pigun.peaks[3] = tmp;
 	}
 
     //printf("detector done [%i]\n",blobID);

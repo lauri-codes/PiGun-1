@@ -1,7 +1,14 @@
 {
     "files.associations": {
         "pigun-hid.h": "c",
-        "btstack_chipset_bcm_download_firmware.h": "c"
+        "btstack_chipset_bcm_download_firmware.h": "c",
+        "btstack_debug.h": "c",
+        "btstack_hid_parser.h": "c",
+        "bluetooth.h": "c",
+        "bluetooth_psm.h": "c",
+        "bluetooth_sdp.h": "c",
+        "btstack_event.h": "c",
+        "hid_device.h": "c"
     },
     "cmake.configureOnOpen": false
 }

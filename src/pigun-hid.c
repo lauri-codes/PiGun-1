@@ -883,6 +883,9 @@ void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_i
 		printf("%x ",report[i]);
 	}
 	printf("\n");
+
+	// we should trigger the recoil if the gun is in non-self-recoil mode
+
 }
 
 

@@ -21,6 +21,12 @@
 #define PIN_CAL RPI_V2_GPIO_P1_08	// calibration button
 
 
+#define MASK_TRG UINT16_C(0x0001)
+#define MASK_RLD UINT16_C(0x0002)
+#define MASK_MAG UINT16_C(0x0004)
+
+#define MASK_CAL UINT16_C(0x0100)
+
 //extern uint16_t pigun_button_newpress;
 
 

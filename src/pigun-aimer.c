@@ -31,21 +31,21 @@
 void pigun_calculate_aim() {
 	
 	float aim_x, aim_y;
-	float x1 = pigun_peaks[0].col;
-	float x2 = pigun_peaks[2].col;
-	float x3 = pigun_peaks[1].col;
-	float x4 = pigun_peaks[3].col;
-	float y1 = pigun_peaks[0].row;
-	float y2 = pigun_peaks[2].row;
-	float y3 = pigun_peaks[1].row;
-	float y4 = pigun_peaks[3].row;
+	float x1 = pigun.peaks[0].col;
+	float x2 = pigun.peaks[2].col;
+	float x3 = pigun.peaks[1].col;
+	float x4 = pigun.peaks[3].col;
+	float y1 = pigun.peaks[0].row;
+	float y2 = pigun.peaks[2].row;
+	float y3 = pigun.peaks[1].row;
+	float y4 = pigun.peaks[3].row;
 
 #ifdef PIGUN_DEBUG
 	printf("peaks: %f-%f/%f  %f-%f/%f  %f-%f/%f  %f-%f/%f \n",
-	x1,y1,pigun_peaks[0].total,
-	x2,y2,pigun_peaks[2].total,
-	x3,y3,pigun_peaks[1].total,
-	x4,y4,pigun_peaks[3].total);
+	x1,y1,pigun.peaks[0].total,
+	x2,y2,pigun.peaks[2].total,
+	x3,y3,pigun.peaks[1].total,
+	x4,y4,pigun.peaks[3].total);
 #endif
 
 	// build the transformation matrix using the 4 points and apply it to the center of camera image
@@ -61,12 +61,12 @@ void pigun_calculate_aim() {
 	aim_y = (dy * (PIGUN_RES_X / 2) + (x3 - x1) * (PIGUN_RES_Y / 2) + dxy) * d1;
 
 	// save the normalised aim position before messing with it - meaning 0,0 and 1,1 are the TR,LL corner LEDs
-	pigun_aim_norm.x = aim_x;
-	pigun_aim_norm.y = aim_y;
+	pigun.aim_normalised.x = aim_x;
+	pigun.aim_normalised.y = aim_y;
 
 	// apply calibration
-	aim_x = (aim_x - pigun_cal_topleft.x) / (pigun_cal_lowright.x - pigun_cal_topleft.x);
-	aim_y = (aim_y - pigun_cal_topleft.y) / (pigun_cal_lowright.y - pigun_cal_topleft.y);
+	aim_x = (aim_x - pigun.cal_topleft.x) / (pigun.cal_lowright.x - pigun.cal_topleft.x);
+	aim_y = (aim_y - pigun.cal_topleft.y) / (pigun.cal_lowright.y - pigun.cal_topleft.y);
 
 	// clamp between 0 and 1
 	aim_x = (aim_x < 0) ? 0 : aim_x;
@@ -77,9 +77,10 @@ void pigun_calculate_aim() {
 #ifdef PIGUN_DEBUG
 	printf("aimer output: x=%f y=%f \n",aim_x, aim_y);
 #endif
+
 	// write in report
-	global_pigun_report.x = (short)((2 * aim_x - 1) * 32767);
-	global_pigun_report.y = (short)((2 * aim_y - 1) * 32767);
+	pigun.report.x = (int16_t)((2 * aim_x - 1) * 32767);
+	pigun.report.y = (int16_t)((2 * aim_y - 1) * 32767);
 
 	//printf("HID report: x=%i y=%i bt=%d\n", global_pigun_report.x, global_pigun_report.y, global_pigun_report.buttons);
 }

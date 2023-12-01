@@ -347,7 +347,7 @@ int main(int argc, const char * argv[]){
     hci_dump_posix_fs_open(pklg_path, HCI_DUMP_PACKETLOGGER);
     const hci_dump_t * hci_dump_impl = hci_dump_posix_fs_get_instance();
     //hci_dump_init(hci_dump_impl);
-    printf("Packet Log: %s\n", pklg_path);
+    //printf("Packet Log: %s\n", pklg_path);
 
     // setup run loop
     btstack_run_loop_init(btstack_run_loop_posix_get_instance());

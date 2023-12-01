@@ -60,48 +60,86 @@ extern MMAL_PORT_T *port_prv_in1;
 // maximum distance in pixels for peak matching
 #define MAXPEAKDIST 5
 
-
 extern pthread_mutex_t pigun_mutex;
 
-typedef struct Pigun_settings_t Pigun_settings_t;
-struct Pigun_settings_t {
 
-   uint8_t autofire;
-   uint8_t button_rest;
-   
-};
+typedef enum {
+   STATE_IDLE = 0,
+   STATE_SERVICE,
+   STATE_CAL_TL,
+   STATE_CAL_BR,
 
+   STATE_SHUTDOWN
+} pigun_state_t;
 
+typedef enum {
+   SelfActivated=0,
+   HIDdriven,
+   Off,
+}pigun_recoilmode_t;
 
-// Describes a peak in the camera image
-typedef struct Peak Peak;
-struct Peak {
+/// @brief Represents a 2D point with f32 coordinates.
+typedef struct {
+	float x, y;
+}pigun_aimpoint_t;
+
+/// @brief Describes a peak in the camera image.
+typedef struct {
    float row;
    float col;
    float maxI;
    float total;
    float tRow, tCol;
    // 0->struct is unused, 1->peak found
-   unsigned short found;
-};
+   uint16_t found;
+} pigun_peak_t;
+
+typedef struct {
+
+   pigun_state_t state;
+
+   uint8_t autofire;
+   uint8_t button_rest;
+   
+
+   // normalised aiming point - before calibration applies
+   pigun_aimpoint_t aim_normalised;
+
+   // calibration points in normalised frame of reference
+   pigun_aimpoint_t cal_topleft;
+   pigun_aimpoint_t cal_lowright;
+
+   pigun_peak_t *peaks;
+
+   pigun_report_t report;
 
 
-typedef struct PigunAimPoint PigunAimPoint;
-struct PigunAimPoint {
-	float x, y;
-};
+
+
+}pigun_object_t;
+extern pigun_object_t pigun;
+
+
+
+
+
+
 
 extern unsigned char* pigun_framedata;
 extern Peak* pigun_peaks;
 
-extern int pigun_state;
 
+
+/*
 /// <summary>
 /// This is the aiming point in normalised coords (0-1 on both x,y), before calibration is applied
 /// </summary>
-extern PigunAimPoint pigun_aim_norm;
-extern PigunAimPoint pigun_cal_topleft;
-extern PigunAimPoint pigun_cal_lowright;
+extern pigun_aimpoint_t pigun_aim_norm;
+extern pigun_aimpoint_t pigun_cal_topleft;
+extern pigun_aimpoint_t pigun_cal_lowright;
+*/
+
+void pigun_calibration_save(void);
 
 
 // these function define how detection and aiming works
