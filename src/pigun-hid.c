@@ -891,6 +891,8 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 	uint8_t status;
 	
 	//printf("got packet type: %i \n", packet_type);
+	if(app_state == APP_CONNECTED)
+		printf("device boot protocol %i\n", hid_device_in_boot_protocol_mode(hid_cid));
 
 	if (packet_type != HCI_EVENT_PACKET) return;
 
