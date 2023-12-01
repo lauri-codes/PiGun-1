@@ -809,7 +809,7 @@ static uint8_t device_id_sdp_service_buffer[100];
 static const char hid_device_name[] = "HID PiGun-1";
 static btstack_packet_callback_registration_t hci_event_callback_registration;
 static uint16_t hid_cid;
-static uint8_t hid_boot_device = 1;
+static uint8_t hid_boot_device = 0;
 
 
 static enum {
