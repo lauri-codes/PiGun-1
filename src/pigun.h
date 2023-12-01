@@ -121,23 +121,10 @@ extern pigun_object_t pigun;
 
 
 
-
-
-
-
 extern unsigned char* pigun_framedata;
-extern Peak* pigun_peaks;
 
 
 
-/*
-/// <summary>
-/// This is the aiming point in normalised coords (0-1 on both x,y), before calibration is applied
-/// </summary>
-extern pigun_aimpoint_t pigun_aim_norm;
-extern pigun_aimpoint_t pigun_cal_topleft;
-extern pigun_aimpoint_t pigun_cal_lowright;
-*/
 
 void pigun_calibration_save(void);
 

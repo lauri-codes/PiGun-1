@@ -199,7 +199,6 @@ int pigun_detect(unsigned char* data) {
         // if we are short, tell the callback we got an error
         return 1;
     }
-
     
     // Order peaks. The ordering is based on the distance of the peaks to
     // the screen corners:
