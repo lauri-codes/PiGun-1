@@ -871,6 +871,7 @@ void set_report(uint16_t hid_cid, hid_report_type_t report_type, int report_size
 	printf("\n");
 }
 
+// called when host sends an data message
 void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_id, int report_size, uint8_t * report){
 	printf("Host HID output DATA:\n");
 	printf("\tHID CID: %i\n", hid_cid);
