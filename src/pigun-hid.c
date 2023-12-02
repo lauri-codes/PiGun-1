@@ -42,14 +42,11 @@
 #include <inttypes.h>
 #include <unistd.h>
 
-
 #include "btstack.h"
 
-//#include <bcm2835.h>
+#include "pigun.h"
 #include "pigun-gpio.h" // this is mine!
 #include "pigun-hid.h" // this is mine!
-
-
 
 /// @brief HID descriptor for joystick with extra output report (data)
 const uint8_t hid_descriptor_joystick_mode[] = {
@@ -98,7 +95,6 @@ static const char hid_device_name[] = "HID PiGun-1";
 static btstack_packet_callback_registration_t hci_event_callback_registration;
 static uint16_t hid_cid;
 static uint8_t hid_boot_device = 0;
-
 
 static enum {
 	APP_BOOTING,
