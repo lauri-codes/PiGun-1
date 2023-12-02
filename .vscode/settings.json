@@ -8,7 +8,8 @@
         "bluetooth_psm.h": "c",
         "bluetooth_sdp.h": "c",
         "btstack_event.h": "c",
-        "hid_device.h": "c"
+        "hid_device.h": "c",
+        "pigun-mmal.h": "c"
     },
     "cmake.configureOnOpen": false
 }

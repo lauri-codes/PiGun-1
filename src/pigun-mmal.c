@@ -3,6 +3,7 @@ Here are all the PiGun functions related to camera stuff with libmmal.
 */
 
 #include "pigun.h"
+#include "pigun-mmal.h"
 #include "pigun-gpio.h"
 
 #include "bcm_host.h"
