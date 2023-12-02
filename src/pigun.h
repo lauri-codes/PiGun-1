@@ -102,6 +102,10 @@ typedef struct {
    uint8_t button_rest;
    
 
+   // stores the current camera frame
+   unsigned char* framedata;
+   uint8_t detectorError;
+   
    // normalised aiming point - before calibration applies
    pigun_aimpoint_t aim_normalised;
 
@@ -114,15 +118,11 @@ typedef struct {
    pigun_report_t report;
 
 
+   
 
 
 }pigun_object_t;
 extern pigun_object_t pigun;
-
-
-
-extern unsigned char* pigun_framedata;
-
 
 
 
