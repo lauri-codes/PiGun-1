@@ -36,13 +36,13 @@ unsigned int* pxbuffer; // this is used by blob_detect to store the px indexes i
  * return 0 if the blob was too small
  * return 1 if the blob was ok
  */
-int blob_detect(int idx, unsigned char* data, const unsigned int blobID, const float threshold, const unsigned int minBlobSize, const unsigned int maxBlobSize) {
+int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const float threshold, const uint32_t minBlobSize, const uint32_tt maxBlobSize) {
     
-    unsigned int blobSize = 0;
-    unsigned int x, y;
-    unsigned long sumVal = 0;
-    unsigned long sumX = 0, sumY = 0;
-    unsigned int maxI = 0;
+    uint32_t blobSize = 0;
+    uint32_t x, y;
+    uint64_t sumVal = 0;
+    uint64_t sumX = 0, sumY = 0;
+    uint32_t maxI = 0;
 
     // put the first px in the queue
     unsigned int qSize = 1; // length of the queue of idx to check
@@ -66,8 +66,8 @@ int blob_detect(int idx, unsigned char* data, const unsigned int blobID, const f
         x = current % PIGUN_RES_X;
         y = current / PIGUN_RES_X;
         sumVal += data[current];
-        sumX += (unsigned long)(data[current] * x);
-        sumY += (unsigned long)(data[current] * y);
+        sumX += (uint64_t)(data[current] * x);
+        sumY += (uint64_t)(data[current] * y);
         if (data[current] > maxI) maxI = data[current];
         
         blobSize++;
