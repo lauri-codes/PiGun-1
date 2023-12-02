@@ -28,6 +28,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "pigun-hid.h"
 
 #ifndef PIGUN
 #define PIGUN
@@ -105,7 +106,7 @@ typedef struct {
    // stores the current camera frame
    unsigned char* framedata;
    uint8_t detectorError;
-   
+
    // normalised aiming point - before calibration applies
    pigun_aimpoint_t aim_normalised;
 
