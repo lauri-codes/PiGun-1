@@ -11,6 +11,7 @@
 #include "interface/mmal/util/mmal_connection.h"
 
 #include "pigun.h"
+#include "pigun-mmal.h"
 #include "pigun-hid.h"
 #include <math.h>
 
@@ -18,6 +19,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+// How many pixels are skipped by the coarse detector
+#define DETECTOR_DX 4
 
 //vector<bool> CHECKED(PIGUN_RES_X* PIGUN_RES_Y, false);			// Boolean array for storing which pixel locations have been checked in the blob detection
 unsigned char* checked;
@@ -166,12 +169,13 @@ int pigun_detect(unsigned char* data) {
     // Here the order actually matters: we loop in this order to get better cache
     // hit rate
     unsigned int blobID = 0;
-    for (unsigned int j = 0; j < ny; ++j) {
-        for (unsigned int i = 0; i < nx; ++i) {
+    for(uint32_t idx=0; idx<PIGUN_NPX; idx+=DETECTOR_DX){
+    //for (unsigned int j = 0; j < ny; ++j) {
+        //for (unsigned int i = 0; i < nx; ++i) {
 
             // pixel index in the buffer
-            int idx = j * dy * PIGUN_RES_X + i * dx;
-            int value = data[idx];
+            //int idx = j * dy * PIGUN_RES_X + i * dx;
+            uint8_t value = data[idx];
 
             // check if px is bright enough and not seen by the bfs before
             if (value >= threshold && !checked[idx]) {
@@ -234,7 +238,7 @@ int pigun_detect(unsigned char* data) {
 	// this will sort the peaks in descending peak.total order
 	qsort(pigun.peaks, 4, sizeof(pigun.peaks), peak_compare);
 	
-	Peak tmp;
+	pigun_peak_t tmp;
 
 	// now make sure 0 is the top-left of the first two peaks
 	if(pigun.peaks[0].col > pigun.peaks[1].col){
