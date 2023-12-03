@@ -65,7 +65,7 @@ int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const 
         
         // check the last element on the list
         qSize--;
-        uint32_t current = pxbuffer[qSize];
+        uint32_t current = pigun.detector.pxbuffer[qSize];
         
         // do the blob position computation
         
