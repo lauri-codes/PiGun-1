@@ -1,6 +1,3 @@
-
-
-
 #ifndef PIGUN_MMAL
 #define PIGUN_MMAL
 

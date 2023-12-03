@@ -1,14 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
-
-#include "bcm_host.h"
-#include "interface/vcos/vcos.h"
-
-#include "interface/mmal/mmal.h"
-#include "interface/mmal/util/mmal_default_components.h"
-#include "interface/mmal/util/mmal_connection.h"
 
 #include "pigun.h"
 #include "pigun-mmal.h"
@@ -16,11 +8,6 @@
 #include "pigun-hid.h"
 
 #include <math.h>
-
-
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-
 
 
 

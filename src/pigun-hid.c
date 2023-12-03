@@ -104,10 +104,7 @@ static enum {
 } app_state = APP_BOOTING;
 
 
-int nServers = 0;
-bd_addr_t servers[3];
 
-void* pigun_autoconnect(void* nullargs);
 static btstack_timer_source_t heartbeat;
 static void heartbeat_handler(btstack_timer_source_t* ts);
 
@@ -116,12 +113,38 @@ static btstack_timer_source_t connectorBLINK;
 static void connectorBLINK_handler(btstack_timer_source_t* ts);
 
 
+
 int compare_servers(bd_addr_t a, bd_addr_t b) {
 	for (int i = 0; i < 6; i++) {
 		if (a[i] != b[i]) return 0;
 	}
 	return 1;
 }
+
+void pigun_server_load(){
+
+	pigun.nServers = 0;
+	
+	FILE* fin = fopen("servers.bin", "rb");
+	if (fin == NULL) {
+		// if file not found, create a file with no servers
+		fin = fopen("servers.bin", "wb");
+		fwrite(&(pigun.nServers), sizeof(int), 1, fin);
+		fclose(fin);
+		// and open it
+		fin = fopen("servers.bin", "rb");
+	}
+	fread(&(pigun.nServers), sizeof(int), 1, fin);
+	
+	printf("PIGUN-HID: previous hosts: %i\n", pigun.nServers);
+	for (int i = 0; i < pigun.nServers; i++) {
+		fread(pigun.servers[i], sizeof(bd_addr_t), 1, fin);
+		printf("\thost[%i]: %s\n", i, bd_addr_to_str(servers[i]));
+	}
+	fclose(fin);
+}
+
+
 
 // HID Report sending
 static void send_report() {
@@ -223,14 +246,14 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			// save the server address - if not already there
 			// rewrite the past servers list, putting the current one on top
 			// only write 3 of them
-			int isThere = 0;
-			for (int i = 0; i < nServers; i++) {
-				if (compare_servers(host_addr, servers[i])) {
+			uint8_t isThere = 0;
+			for (int i = 0; i < pigun.nServers; i++) {
+				if (compare_servers(host_addr, pigun.servers[i])) {
 					isThere = 1;
 					break;
 				}
 			}
-			int ns = nServers;
+			uint32_t ns = pigun.nServers;
 			if (!isThere) ns++;
 			if (ns > 3) ns = 3;
 			int written = 1;
@@ -238,18 +261,20 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 
 			FILE* fout = fopen("servers.bin", "wb");
 			fwrite(&ns, sizeof(int), 1, fout);
-			fwrite(host_addr, sizeof(bd_addr_t), 1, fout); memcpy(newlist[0], host_addr, sizeof(bd_addr_t));
+			fwrite(host_addr, sizeof(bd_addr_t), 1, fout);
+			memcpy(newlist[0], host_addr, sizeof(bd_addr_t));
 
-			for (int i = 0; i < nServers; i++) {
-				if (!compare_servers(host_addr, servers[i])) {
-					fwrite(servers[i], sizeof(bd_addr_t), 1, fout); memcpy(newlist[written], servers[i], sizeof(bd_addr_t));
+			for (int i = 0; i < pigun.nServers; i++) {
+				if (!compare_servers(host_addr, pigun.servers[i])) {
+					fwrite(pigun.servers[i], sizeof(bd_addr_t), 1, fout);
+					memcpy(newlist[written], pigun.servers[i], sizeof(bd_addr_t));
 					written++;
 					if (written == 3) break;
 				}
 			}
 			fclose(fout);
-			memcpy(servers[0], newlist[0], sizeof(bd_addr_t)*3);
-			nServers = ns;
+			memcpy(pigun.servers[0], newlist[0], sizeof(bd_addr_t)*3);
+			pigun.nServers = ns;
 			
 			// once connected
 			// turn off the green LED to save power
@@ -367,24 +392,8 @@ int btstack_main(int argc, const char * argv[]){
 	hci_power_control(HCI_POWER_ON);
 
 	
-	// read the previous server addresses
-	nServers = 0;
-	FILE* fin = fopen("servers.bin", "rb");
-	if (fin == NULL) {
-		fin = fopen("servers.bin", "wb");
-		fwrite(&nServers, sizeof(int), 1, fin);
-		fclose(fin);
-		fin = fopen("servers.bin", "rb");
-	}
-	fread(&nServers, sizeof(int), 1, fin);
-	
-	printf("PIGUN-HID: previous hosts: %i\n", nServers);
-	for (int i = 0; i < nServers; i++) {
-		fread(servers[i], sizeof(bd_addr_t), 1, fin);
-		printf("\thost[%i]: %s\n", i, bd_addr_to_str(servers[i]));
-	}
-	fclose(fin);
-	
+	// read the previous server addresses from servers.bin
+	pigun_server_load();
 	
 	// start blinking of the green LED
 	connectorBLINK.process = &connectorBLINK_handler;
@@ -393,7 +402,7 @@ int btstack_main(int argc, const char * argv[]){
 
 	// set one-shot timer for autoreconnect
 	heartbeat.process = &heartbeat_handler;
-	if (nServers != 0) {
+	if (pigun.nServers != 0) {
 		btstack_run_loop_set_timer(&heartbeat, 5000);
 		btstack_run_loop_add_timer(&heartbeat);
 	}
@@ -410,13 +419,13 @@ static void heartbeat_handler(btstack_timer_source_t* ts) {
 	// increment counter
 	static int snum = 0;
 
-	if (app_state == APP_NOT_CONNECTED && nServers != 0) {
+	if (app_state == APP_NOT_CONNECTED && pigun.nServers != 0) {
 
 		// try connecting to a server
-		printf("PIGUN-HID: trying to connect to %s...\n", bd_addr_to_str(servers[snum]));
+		printf("PIGUN-HID: trying to connect to %s...\n", bd_addr_to_str(pigun.servers[snum]));
 		hid_device_connect(servers[snum], &hid_cid);
 
-		snum++; if (snum == nServers)snum = 0;
+		snum++; if (snum == pigun.nServers)snum = 0;
 	}
 }
 
