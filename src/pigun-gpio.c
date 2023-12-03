@@ -270,7 +270,7 @@ void pigun_buttons_process() {
 	// autoshutdown everything with some button combo
 	if(pigun_button_state == 5 && pigun.state == STATE_SERVICE){
 		printf("shutting down\n");
-		pigun_state = STATE_SHUTDOWN;
+		pigun.state = STATE_SHUTDOWN;
 		system("sudo shutdown -P now");
 	}
 
