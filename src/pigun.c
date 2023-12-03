@@ -35,25 +35,8 @@
 #include <signal.h>
 
 
-
 // main object with all pigun info
 pigun_object_t pigun;
-
-// the HID report
-pigun_report_t global_pigun_report;
-
-
-// detected peaks - in order
-Peak* pigun_peaks;
-
-// normalised aiming point - before calibration applies
-pigun_aimpoint_t pigun_aim_norm;
-
-// calibration points in normalised frame of reference
-pigun_aimpoint_t pigun_cal_topleft;
-pigun_aimpoint_t pigun_cal_lowright;
-
-
 
 pthread_mutex_t pigun_mutex;
 
@@ -78,8 +61,6 @@ void* pigun_cycle(void* nullargs) {
 
 	pigun.state = STATE_IDLE;
 	pigun_detector_init();
-
-	pigun.detectorError = 0;
 
 	// reset calibration
 	pigun.cal_topleft.x = pigun.cal_topleft.y = 0;
