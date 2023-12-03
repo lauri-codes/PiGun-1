@@ -162,7 +162,7 @@ int pigun_blinker_create(uint8_t nblinks, uint16_t timeout, blinker_callback_t c
 	return bID;
 }
 void pigun_blinker_stop(int bID){
-	pigun_blinkers[i].cancelled = 1;
+	pigun_blinkers[bID].cancelled = 1;
 }
 
 int blinkID_greenLED = -1;
