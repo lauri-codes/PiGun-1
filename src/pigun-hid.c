@@ -139,7 +139,7 @@ void pigun_server_load(){
 	printf("PIGUN-HID: previous hosts: %i\n", pigun.nServers);
 	for (int i = 0; i < pigun.nServers; i++) {
 		fread(pigun.servers[i], sizeof(bd_addr_t), 1, fin);
-		printf("\thost[%i]: %s\n", i, bd_addr_to_str(servers[i]));
+		printf("\thost[%i]: %s\n", i, bd_addr_to_str(pigun.servers[i]));
 	}
 	fclose(fin);
 }
