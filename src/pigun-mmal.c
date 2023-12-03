@@ -19,6 +19,25 @@ MMAL_PORT_T* pigun_video_port;
 MMAL_POOL_T* pigun_video_port_pool;
 
 
+void video_buffer_release(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer) {
+
+	// we are done with this buffer, we can release it!
+	mmal_buffer_header_release(buffer);
+
+	// and send one back to the port (if still open)
+	if (port->is_enabled) {
+
+		MMAL_STATUS_T status = MMAL_SUCCESS;
+		MMAL_BUFFER_HEADER_T* new_buffer;
+		new_buffer = mmal_queue_get(pool->queue);
+
+		if (new_buffer) status = mmal_port_send_buffer(port, new_buffer);
+
+		if (!new_buffer || status != MMAL_SUCCESS)
+			printf("PIGUN ERROR: Unable to return a buffer to the video port\n");
+	}
+}
+
 
 /// @brief Called each time a camera frame is ready for processing.
 /// buffer->data has the pixel values in the chosen encoding (I420).
@@ -29,6 +48,11 @@ static void video_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffe
 	MMAL_POOL_T* pool = (MMAL_POOL_T*)port->userdata;
 
 	pigun.framedata = buffer->data;
+
+	if(pigun.state == STATE_SHUTDOWN){
+		video_buffer_release(port, buffer);
+		return;
+	}
 
     // call the peak detector function *************************************
 	// if there was a detector error, error LED goes on, otherwise off
@@ -59,21 +83,7 @@ static void video_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffe
 	// *********************************************************************
 
 	// we are done with this buffer, we can release it!
-	mmal_buffer_header_release(buffer);
-
-	// and send one back to the port (if still open)
-	if (port->is_enabled) {
-
-		MMAL_STATUS_T status = MMAL_SUCCESS;
-		MMAL_BUFFER_HEADER_T* new_buffer;
-		new_buffer = mmal_queue_get(pool->queue);
-
-		if (new_buffer)
-			status = mmal_port_send_buffer(port, new_buffer);
-
-		if (!new_buffer || status != MMAL_SUCCESS)
-			printf("PIGUN ERROR: Unable to return a buffer to the video port\n");
-	}
+	video_buffer_release(port, buffer);
 }
 
 
