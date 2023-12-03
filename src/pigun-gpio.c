@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "pigun.h"
+#include "pigun-hid.h"
 #include "pigun-gpio.h"
 #include "pigun-mmal.h"
 

@@ -358,7 +358,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			
 			// once connected turn off the green LED to save power
 			pigun_blinker_stop(blinkID_greenLED);
-			pigun_GPIO_output_set(PIN_OUT_AOK, 0);
+			pigun_GPIO_output_set(PIN_OUT_AOK, 0); // make sure it turns off
 
 			printf("PIGUN-HID: connected to %s, pigunning now...\n", bd_addr_to_str(host_addr));
 			hid_device_request_can_send_now_event(hid_cid); // request a sendnow

@@ -50,9 +50,9 @@ typedef enum {
 } pigun_state_t;
 
 typedef enum {
-   SelfActivated=0,
-   HIDdriven,
-   Off,
+   RECOIL_SELF=0,
+   RECOIL_HID,
+   RECOIL_OFF
 }pigun_recoilmode_t;
 
 /// @brief Represents a 2D point with f32 coordinates.
@@ -66,6 +66,8 @@ typedef struct {
 
    pigun_state_t state;
 
+   pigun_recoilmode_t recoilMode;
+   
    uint8_t autofire;
    uint8_t button_rest;
 
