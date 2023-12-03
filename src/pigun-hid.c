@@ -88,6 +88,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 };
 
 pigun_blinker_t *pigun_blinkers;
+static void blinker_connectLED(void); // switches the OK LED
 
 /// @brief Callback for custom blinkers.
 /// @param ts 
@@ -104,10 +105,16 @@ void pigun_blinker_event(btstack_timer_source_t *ts) {
 	}
 
 	if(blk == NULL) return;
+	
+	if(blk->cancelled){
+		blk->active = 0;
+		return;
+	}
 
 	printf("PIGUN-BLINKER[%i]: %i/%i\n", blk, blk->counter, blk->nblinks);
+	
 	// perform the custom action
-	// TODO: ...
+	blk->callback(blk);
 
 	if(blk->nblinks > 0) {
 		blk->counter++;
@@ -127,20 +134,23 @@ void pigun_blinker_event(btstack_timer_source_t *ts) {
 int pigun_blinker_create(uint8_t nblinks, uint16_t timeout, blinker_callback_t callback) {
 
 	pigun_blinker_t *blk = NULL;
+	int bID = -1;
 
 	// find the first inactive blinker
 	for(int i=0; i<10; i++){
 		if(!pigun_blinkers[i].active){
+			bID = i;
 			blk = &(pigun_blinkers[i]);
 			break;
 		}
 	}
 
-	if(blk == NULL) return 1;
+	if(blk == NULL) return bID;
 
 	blk->active = 1;
 	blk->nblinks = nblinks;
 	blk->counter = 0;
+	blk->cancelled = 0;
 	blk->timeout = timeout;
 
 	blk->callback = callback;
@@ -149,11 +159,13 @@ int pigun_blinker_create(uint8_t nblinks, uint16_t timeout, blinker_callback_t c
 	btstack_run_loop_set_timer(&(blk->timer), timeout);
 	btstack_run_loop_add_timer(&(blk->timer));
 
-	return 0;
+	return bID;
+}
+void pigun_blinker_stop(int bID){
+	pigun_blinkers[i].cancelled = 1;
 }
 
-
-
+int blinkID_greenLED = -1;
 
 
 static uint8_t hid_service_buffer[2500];
@@ -304,6 +316,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 				btstack_run_loop_add_timer(&heartbeat);
 				return;
 			}
+
 			app_state = APP_CONNECTED;
 			hid_cid = hid_subevent_connection_opened_get_hid_cid(packet);
 			bd_addr_t host_addr;
@@ -343,8 +356,8 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			memcpy(pigun.servers[0], newlist[0], sizeof(bd_addr_t)*3);
 			pigun.nServers = ns;
 			
-			// once connected
-			// turn off the green LED to save power
+			// once connected turn off the green LED to save power
+			
 			pigun_GPIO_output_set(PIN_OUT_AOK, 0);
 
 			printf("PIGUN-HID: connected to %s, pigunning now...\n", bd_addr_to_str(host_addr));
@@ -465,12 +478,14 @@ int btstack_main(int argc, const char * argv[]){
 	pigun_server_load();
 	
 	// test the new blinker system
-	pigun_blinker_create(0, 800, NULL);
+	//pigun_blinker_create(0, 800, NULL);
 
 	// start blinking of the green LED
-	connectorBLINK.process = &connectorBLINK_handler;
-	btstack_run_loop_set_timer(&connectorBLINK, 800);
-	btstack_run_loop_add_timer(&connectorBLINK);
+	blinkID_greenLED = pigun_blinker_create(0, 800, &blinker_connectLED);
+
+	//connectorBLINK.process = &connectorBLINK_handler;
+	//btstack_run_loop_set_timer(&connectorBLINK, 800);
+	//btstack_run_loop_add_timer(&connectorBLINK);
 
 	// set one-shot timer for autoreconnect
 	heartbeat.process = &heartbeat_handler;
@@ -517,3 +532,16 @@ static void connectorBLINK_handler(btstack_timer_source_t* ts) {
 	}
 }
 
+static void blinker_connectLED() {
+
+	static uint_8 s = 0;
+
+	// change state and restart the blink timer if not connected
+	if (app_state != APP_CONNECTED) {
+
+		// switch state
+		s = (s) ? 0 : 1;
+
+		pigun_GPIO_output_set(PIN_OUT_AOK, s);
+	}
+}

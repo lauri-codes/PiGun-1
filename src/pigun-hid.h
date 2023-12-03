@@ -16,19 +16,21 @@ struct pigun_report_t {
 	uint8_t buttons;
 };
 
-typedef void (*blinker_callback_t)(btstack_timer_source_t *ts);
+typedef struct pigun_blinker_t pigun_blinker_t;
+typedef void (*blinker_callback_t)(void);
 
-typedef struct {
+struct pigun_blinker_t {
 
 	uint8_t 	active;
 	uint8_t 	nblinks;	// 0=infinite blinks
 	uint8_t 	counter;
+	uint8_t		cancelled;	// turn to 1 when pigun_blinker_stop is called
 	uint16_t 	timeout; 	// in ms
 
 	btstack_timer_source_t timer;
 	blinker_callback_t callback;
 
-} pigun_blinker_t;
+};
 
 
 
