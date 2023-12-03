@@ -3,6 +3,7 @@ Here are all the PiGun functions related to camera stuff with libmmal.
 */
 
 #include "pigun.h"
+#include "pigun-detector.h"
 #include "pigun-mmal.h"
 #include "pigun-gpio.h"
 
@@ -32,16 +33,11 @@ static void video_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffe
     // call the peak detector function *************************************
 	// if there was a detector error, error LED goes on, otherwise off
 	// the switch only happens when the detector return value changes
-	if (pigun_detector_run(pigun.framedata)) {
-		if(!pigun.detectorError) {
-			pigun_GPIO_output_set(PIN_OUT_ERR, HIGH);
-			pigun.detectorError = 1;
-		}
-	} else {
-		if(pigun.detectorError){
-			pigun.detectorError = 0;
-			pigun_GPIO_output_set(PIN_OUT_ERR, LOW);
-		}
+	uint8_t ce = pigun.detector.error;
+	pigun_detector_run(pigun.framedata);
+	if(pigun.detector.error != ce) {
+		// if the error flag changed, flip the LED state
+		pigun_GPIO_output_set(PIN_OUT_ERR, pigun.detector.error);
 	}
 
 	// the peaks are supposed to be ordered by the detector function
