@@ -27,6 +27,8 @@
 #include "pigun-gpio.h"
 #include "pigun-hid.h"
 #include "pigun-mmal.h"
+#include "pigun-detector.h"
+
 
 #include <math.h>
 #include <stdint.h>
@@ -75,6 +77,8 @@ static void preview_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buf
 void* pigun_cycle(void* nullargs) {
 
 	pigun.state = STATE_IDLE;
+	pigun_detector_init();
+
 	pigun.detectorError = 0;
 
 	// reset calibration

@@ -12,19 +12,26 @@
 
 #include "pigun.h"
 #include "pigun-mmal.h"
+#include "pigun-detector.h"
 #include "pigun-hid.h"
+
 #include <math.h>
 
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-// How many pixels are skipped by the coarse detector
-#define DETECTOR_DX 4
 
-//vector<bool> CHECKED(PIGUN_RES_X* PIGUN_RES_Y, false);			// Boolean array for storing which pixel locations have been checked in the blob detection
-unsigned char* checked;
-unsigned int* pxbuffer; // this is used by blob_detect to store the px indexes in the queue - the total allocation is PIGUN_RES_X* PIGUN_RES_Y
+
+
+void pigun_detector_init(){
+
+    pigun.detector.checked = calloc(PIGUN_RES_X * PIGUN_RES_Y, sizeof(uint8_t));
+    pigun.detector.pxbuffer = (uint32_t*)malloc(sizeof(uint32_t) * PIGUN_NPX);
+    pigun.detector.error = 0;
+}
+
+
 
 /**
  * Performs a breadth-first search starting from the given starting index and
@@ -36,7 +43,7 @@ unsigned int* pxbuffer; // this is used by blob_detect to store the px indexes i
  * return 0 if the blob was too small
  * return 1 if the blob was ok
  */
-int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const float threshold, const uint32_t minBlobSize, const uint32_tt maxBlobSize) {
+int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const float threshold) {
     
     uint32_t blobSize = 0;
     uint32_t x, y;
@@ -45,20 +52,20 @@ int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const 
     uint32_t maxI = 0;
 
     // put the first px in the queue
-    unsigned int qSize = 1; // length of the queue of idx to check
-    pxbuffer[0] = idx;
-    checked[idx] = 1;
+    uint32_t qSize = 1; // length of the queue of idx to check
+    pigun.detector.pxbuffer[0] = idx;
+    pigun.detector.checked[idx] = 1;
 
 #ifdef PIGUN_DEBUG
     printf("PIGUN: detecting peak...");
 #endif
 
     // Do search until stack is emptied or maximum size is reached
-    while (qSize > 0 && blobSize < maxBlobSize) {
+    while (qSize > 0 && blobSize < DETECTOR_MAXBLOBSIZE) {
         
         // check the last element on the list
         qSize--;
-        int current = pxbuffer[qSize];
+        uint32_t current = pxbuffer[qSize];
         
         // do the blob position computation
         
@@ -73,37 +80,43 @@ int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const 
         blobSize++;
 
         // check neighbours
-        int other;
-        other = current - PIGUN_RES_X;
-        if (other >= 0 && !checked[other] && data[other] >= threshold && y > 0) {
-            pxbuffer[qSize] = other;
-            qSize++;
-            checked[other] = 1;
+        uint32_t other;
+        
+        if(y > 0) { // UP
+            other = current - PIGUN_RES_X;
+            if (!pigun.detector.checked[other] && data[other] >= threshold) {
+                pigun.detector.pxbuffer[qSize] = other;
+                qSize++;
+                pigun.detector.checked[other] = 1;
+            }
         }
-
-        other = current + PIGUN_RES_X;
-        if (other >= 0 && !checked[other] && data[other] >= threshold && y < PIGUN_RES_Y-1) {
-            pxbuffer[qSize] = other;
-            qSize++;
-            checked[other] = 1;
+        if(y < PIGUN_RES_Y-1) { // DOWN
+            other = current + PIGUN_RES_X;
+            if (!pigun.detector.checked[other] && data[other] >= threshold) {
+                pigun.detector.pxbuffer[qSize] = other;
+                qSize++;
+                pigun.detector.checked[other] = 1;
+            }
         }
-
-        other = current - 1;
-        if (other >= 0 && !checked[other] && data[other] >= threshold && x > 0) {
-            pxbuffer[qSize] = other;
-            qSize++;
-            checked[other] = 1;
+        if(x > 0) { // LEFT
+            other = current - 1;
+            if (!pigun.detector.checked[other] && data[other] >= threshold) {
+                pigun.detector.pxbuffer[qSize] = other;
+                qSize++;
+                pigun.detector.checked[other] = 1;
+            }
         }
-
-        other = current + 1;
-        if (other >= 0 && !checked[other] && data[other] >= threshold && x < PIGUN_RES_X-1) {
-            pxbuffer[qSize] = other;
-            qSize++;
-            checked[other] = 1;
+        if(x < PIGUN_RES_X-1) { // RIGHT
+            other = current + 1;
+            if (!pigun.detector.checked[other] && data[other] >= threshold) {
+                pigun.detector.pxbuffer[qSize] = other;
+                qSize++;
+                pigun.detector.checked[other] = 1;
+            }
         }
     }
     // loop ends when there are no more px to check, or the blob is as big as it can be
-    if (blobSize < minBlobSize) return 0;
+    if (blobSize < DETECTOR_MINBLOBSIZE) return 0;
 
     // code here => peak was good, save it
     
@@ -136,7 +149,7 @@ int peak_compare(const void* a, const void* b) {
     * Detects peaks in the camera output and reports them under the global
     * "peaks"-variables.
     */
-int pigun_detect(unsigned char* data) {
+void pigun_detector_run(unsigned char* data) {
 
     /*FILE* fout = fopen("text.bin", "rb");
     fread(data, sizeof(unsigned char), PIGUN_NPX, fout);
@@ -147,60 +160,49 @@ int pigun_detect(unsigned char* data) {
 #endif
 
     // These parameters have to be tuned to optimize the search
-    // How many blobs to search
-    const unsigned int nBlobs = 4;
-    const unsigned int dx = 4;            // How many pixels are skipped in x direction
-    const unsigned int dy = 4;            // How many pixels are skipped in y direction
-    const unsigned int minBlobSize = 20;  // Have many pixels does a blob have to have to be considered valid
-    const unsigned int maxBlobSize =1000; // Maximum numer of pixels for a blob
     const float threshold = 130;          // The minimum threshold for pixel intensity in a blob
 
-    const unsigned int nx = floor((float)(PIGUN_RES_X) / (float)(dx));
-    const unsigned int ny = floor((float)(PIGUN_RES_Y) / (float)(dy));
+    const uint32_t nx = floor((float)(PIGUN_RES_X) / (float)(DETECTOR_DX));
+    const uint32_t ny = floor((float)(PIGUN_RES_Y) / (float)(DETECTOR_DX));
 
     // Reset the boolean array for marking pixels as checked.
-    if (checked == NULL) {
-        checked = calloc(PIGUN_RES_X * PIGUN_RES_Y, sizeof(unsigned char));
-        pxbuffer = malloc(sizeof(unsigned int) * PIGUN_RES_X * PIGUN_RES_Y);
-    }
-    memset(checked, 0, PIGUN_RES_X * PIGUN_RES_Y * sizeof(unsigned char));
+    memset(pigun.detector.checked, 0, PIGUN_RES_X * PIGUN_RES_Y * sizeof(uint8_t));
 
 
-    // Here the order actually matters: we loop in this order to get better cache
-    // hit rate
-    unsigned int blobID = 0;
-    for(uint32_t idx=0; idx<PIGUN_NPX; idx+=DETECTOR_DX){
-    //for (unsigned int j = 0; j < ny; ++j) {
-        //for (unsigned int i = 0; i < nx; ++i) {
+    // Here the order actually matters: we loop in this order to get better cache hit rate
+    uint32_t blobID = 0;
+    for (uint32_t j = 0; j < ny; ++j) {
+        for (uint32_t i = 0; i < nx; ++i) {
 
             // pixel index in the buffer
-            //int idx = j * dy * PIGUN_RES_X + i * dx;
+            uint32_t idx = j * DETECTOR_DX * PIGUN_RES_X + i * DETECTOR_DX;
             uint8_t value = data[idx];
 
             // check if px is bright enough and not seen by the bfs before
-            if (value >= threshold && !checked[idx]) {
+            if (value >= threshold && !pigun.detector.checked[idx]) {
                 
                 // we found a bright pixel! search nearby
-                value = blob_detect(idx, data, blobID, threshold, minBlobSize, maxBlobSize);
+                value = blob_detect(idx, data, blobID, threshold);
                 // peak was saved if good, move on to the next
                 if (value == 1) {
                     blobID++;
                     // stop trying if we found the ones we deserve
-                    if (blobID == nBlobs) break;
+                    if (blobID == DETECTOR_NBLOBS) break;
                 }
             }
         }
-        if (blobID == nBlobs) break;
+        if (blobID == DETECTOR_NBLOBS) break;
     }
 
 #ifdef PIGUN_DEBUG
-    //printf("detector done, nblobs=%i/%i\n", blobID, nBlobs);
+    //printf("detector done, nblobs=%i/%i\n", blobID, DETECTOR_NBLOBS);
 #endif
 
     // at this point we should have all the blobs we wanted
     // or maybe we are short
-    if (blobID != nBlobs) {
+    if (blobID != DETECTOR_NBLOBS) {
         // if we are short, tell the callback we got an error
+        pigun.detector.error = 1;
         return 1;
     }
     
@@ -255,6 +257,6 @@ int pigun_detect(unsigned char* data) {
 	}
 
     //printf("detector done [%i]\n",blobID);
-    return 0;
+    pigun.detector.error = 0;
 }
 

@@ -32,7 +32,7 @@ static void video_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffe
     // call the peak detector function *************************************
 	// if there was a detector error, error LED goes on, otherwise off
 	// the switch only happens when the detector return value changes
-	if (pigun_detect(pigun.framedata)) {
+	if (pigun_detector_run(pigun.framedata)) {
 		if(!pigun.detectorError) {
 			pigun_GPIO_output_set(PIN_OUT_ERR, HIGH);
 			pigun.detectorError = 1;
