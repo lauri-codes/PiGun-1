@@ -111,7 +111,7 @@ void pigun_blinker_event(btstack_timer_source_t *ts) {
 		return;
 	}
 
-	printf("PIGUN-BLINKER[%i]: %i/%i\n", blk, blk->counter, blk->nblinks);
+	//printf("PIGUN-BLINKER[%i]: %i/%i\n", blk, blk->counter, blk->nblinks);
 	
 	// perform the custom action
 	blk->callback();
@@ -161,7 +161,7 @@ int pigun_blinker_create(uint8_t nblinks, uint16_t timeout, blinker_callback_t c
 
 	return bID;
 }
-void pigun_blinker_stop(int bID){
+void pigun_blinker_stop(int bID) {
 	pigun_blinkers[bID].cancelled = 1;
 }
 
@@ -369,8 +369,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			hid_cid = 0;
 
 			// start blinking of the green LED again
-			btstack_run_loop_set_timer(&connectorBLINK, 800);
-			btstack_run_loop_add_timer(&connectorBLINK);
+			blinkID_greenLED = pigun_blinker_create(0, 800, &blinker_connectLED);
 
 			break;
 		case HID_SUBEVENT_CAN_SEND_NOW:
@@ -404,7 +403,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 /* LISTING_START(MainConfiguration): Setup HID Device */
 
 int btstack_main(int argc, const char * argv[]);
-int btstack_main(int argc, const char * argv[]){
+int btstack_main(int argc, const char * argv[]) {
 	(void)argc;
 	(void)argv;
 
@@ -483,9 +482,6 @@ int btstack_main(int argc, const char * argv[]){
 	// start blinking of the green LED
 	blinkID_greenLED = pigun_blinker_create(0, 800, &blinker_connectLED);
 
-	//connectorBLINK.process = &connectorBLINK_handler;
-	//btstack_run_loop_set_timer(&connectorBLINK, 800);
-	//btstack_run_loop_add_timer(&connectorBLINK);
 
 	// set one-shot timer for autoreconnect
 	heartbeat.process = &heartbeat_handler;
@@ -516,21 +512,7 @@ static void heartbeat_handler(btstack_timer_source_t* ts) {
 	}
 }
 
-static void connectorBLINK_handler(btstack_timer_source_t* ts) {
-	UNUSED(ts);
 
-	// change state and restart the blink timer if not connected
-	if (app_state != APP_CONNECTED) {
-
-		// switch state
-		connectorState = (connectorState == 0) ? 1 : 0;
-
-		pigun_GPIO_output_set(PIN_OUT_AOK, connectorState);
-
-		btstack_run_loop_set_timer(&connectorBLINK, 800);
-		btstack_run_loop_add_timer(&connectorBLINK);
-	}
-}
 
 static void blinker_connectLED() {
 

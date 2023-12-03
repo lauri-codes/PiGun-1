@@ -35,6 +35,8 @@ struct pigun_blinker_t {
 
 
 void* pigun_cycle(void*);
+int pigun_blinker_create(uint8_t nblinks, uint16_t timeout, blinker_callback_t callback);
+void pigun_blinker_stop(int bID);
 
 
 #endif
