@@ -534,7 +534,7 @@ static void connectorBLINK_handler(btstack_timer_source_t* ts) {
 
 static void blinker_connectLED() {
 
-	static uint_8 s = 0;
+	static uint8_t s = 0;
 
 	// change state and restart the blink timer if not connected
 	if (app_state != APP_CONNECTED) {
