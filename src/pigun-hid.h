@@ -4,6 +4,9 @@
 #define PIGUN_HID
 
 
+#define PIGUN_REPORT_ID 0x03
+
+
 // data container for the HID joystick report
 typedef struct pigun_report_t pigun_report_t;
 struct pigun_report_t {

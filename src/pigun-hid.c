@@ -55,7 +55,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0xA1, 0x01,        // Collection (Application)
 		0x09, 0x01,        //   Usage (Pointer)
 		0xA1, 0x00,        //   Collection (Physical)
-			0x85, 0x02,		   // 	Report ID 2
+			0x85, PIGUN_REPORT_ID,		   // 	Report ID 3
 
 			0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 			0x16, 0x01, 0x80,  //   Logical Minimum 0x8001 (-32767)  
@@ -129,13 +129,15 @@ static void send_report() {
 	// this is the report to send
 	// I do now know that the first byte is there for?!
 	//uint8_t hid_report[] = { 0xa1, 0, 0, 0, 0, 0 };
-	uint8_t hid_report[] = { 0xa1, 0x02, 0, 0, 0, 0, 0 }; // first byte is a1=device to host request type, second byte is report ID
+	uint8_t hid_report[] = { 0xa1, PIGUN_REPORT_ID, 0, 0, 0, 0, 0 }; // first byte is a1=device to host request type, second byte is report ID
 
+	/*
 	hid_report[2] = (pigun.report.x) & 0xff;
 	hid_report[3] = (pigun.report.x >> 8) & 0xff;
 	hid_report[4] = (pigun.report.y) & 0xff;
 	hid_report[5] = (pigun.report.y >> 8) & 0xff;
 	hid_report[6] = pigun.report.buttons;
+	*/
 
 	//printf("sending x=%i (%i %i) y=%i (%i %i) \n", pigun.report.x, hid_report[1], hid_report[2], pigun.report.y, hid_report[3], hid_report[4]);
 	hid_device_send_interrupt_message(hid_cid, &hid_report[0], 7); // 6 = sizeof(hid_report)
