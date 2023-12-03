@@ -8,7 +8,7 @@
 
 #include "pigun.h"
 #include "pigun-gpio.h"
-#include "pigun-mmal"
+#include "pigun-mmal.h"
 
 
 
