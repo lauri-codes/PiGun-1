@@ -93,7 +93,6 @@ typedef struct {
 
    // stores the current camera frame
    unsigned char     *framedata;
-   uint8_t           detectorError;
    pigun_detector_t  detector;
 
    // normalised aiming point - before calibration applies
