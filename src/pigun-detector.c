@@ -201,23 +201,21 @@ void pigun_detector_run(unsigned char* data) {
     // at this point we should have all the blobs we wanted
     // or maybe we are short
     if (blobID != DETECTOR_NBLOBS) {
-        // if we are short, tell the callback we got an error
+        // if we are short or too many, tell the callback we got an error
         pigun.detector.error = 1;
-        return 1;
+        return;
     }
-    
-    // Order peaks. The ordering is based on the distance of the peaks to
-    // the screen corners:
-    // Peak closest to top-left corner = A
-    // Peak closest to bottom-left corner = B
-    // Peak closest to top-right corner = C
-    // Peak closest to bottom-right corner = D
 
-    /* 
+    /* INFO
         4 LED MODE:
 	
-        assuming we sort the peaks using the peak.total indexer (ascending),
-        the camera sees:
+        Order peaks. The ordering is based on the distance of the peaks to the screen corners:
+            Peak closest to top-left corner = A
+            Peak closest to bottom-left corner = B
+            Peak closest to top-right corner = C
+            Peak closest to bottom-right corner = D
+
+        assuming we sort the peaks using the peak.total indexer (ascending), the camera sees:
 	
         2---3      3---2
         |   |  OR  |   |
@@ -258,5 +256,6 @@ void pigun_detector_run(unsigned char* data) {
 
     //printf("detector done [%i]\n",blobID);
     pigun.detector.error = 0;
+    return;
 }
 
