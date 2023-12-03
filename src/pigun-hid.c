@@ -113,7 +113,7 @@ void pigun_blinker_event(btstack_timer_source_t *ts) {
 		blk->counter++;
 		if(blk->counter == blk->nblinks) {
 			blk->active = 0;
-			return
+			return;
 		}
 	}
 
@@ -148,6 +148,8 @@ int pigun_blinker_create(uint8_t nblinks, uint16_t timeout, blinker_callback_t c
 
 	btstack_run_loop_set_timer(&(blk->timer), timeout);
 	btstack_run_loop_add_timer(&(blk->timer));
+
+	return 0;
 }
 
 
