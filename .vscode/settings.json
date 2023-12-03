@@ -11,7 +11,8 @@
         "hid_device.h": "c",
         "pigun-mmal.h": "c",
         "pigun-detector.h": "c",
-        "pigun-gpio.h": "c"
+        "pigun-gpio.h": "c",
+        "xutility": "c"
     },
     "cmake.configureOnOpen": false
 }

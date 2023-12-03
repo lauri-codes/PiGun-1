@@ -21,6 +21,8 @@ MMAL_POOL_T* pigun_video_port_pool;
 
 void video_buffer_release(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer) {
 
+	MMAL_POOL_T* pool = (MMAL_POOL_T*)port->userdata;
+
 	// we are done with this buffer, we can release it!
 	mmal_buffer_header_release(buffer);
 
@@ -44,8 +46,6 @@ void video_buffer_release(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer) {
 /// @param port MMAL port object.
 /// @param buffer Camera frame buffer object.
 static void video_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer) {
-
-	MMAL_POOL_T* pool = (MMAL_POOL_T*)port->userdata;
 
 	pigun.framedata = buffer->data;
 
