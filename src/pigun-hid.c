@@ -357,7 +357,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			pigun.nServers = ns;
 			
 			// once connected turn off the green LED to save power
-			
+			pigun_blinker_stop(blinkID_greenLED);
 			pigun_GPIO_output_set(PIN_OUT_AOK, 0);
 
 			printf("PIGUN-HID: connected to %s, pigunning now...\n", bd_addr_to_str(host_addr));
