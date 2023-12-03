@@ -16,6 +16,21 @@ struct pigun_report_t {
 	uint8_t buttons;
 };
 
+typedef void (*blinker_callback_t)(btstack_timer_source_t *ts);
+
+typedef struct {
+
+	uint8_t 	active;
+	uint8_t 	nblinks;	// 0=infinite blinks
+	uint8_t 	counter;
+	uint16_t 	timeout; 	// in ms
+
+	btstack_timer_source_t timer;
+	blinker_callback_t callback;
+
+} pigun_blinker_t;
+
+
 
 void* pigun_cycle(void*);
 

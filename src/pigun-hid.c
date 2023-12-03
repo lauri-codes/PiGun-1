@@ -87,6 +87,71 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 	0xC0              // End Collection --- 44 bytes
 };
 
+pigun_blinker_t *pigun_blinkers;
+
+/// @brief Callback for custom blinkers.
+/// @param ts 
+void pigun_blinker_event(btstack_timer_source_t *ts) {
+
+	pigun_blinker_t *blk = NULL;
+
+	// find the global blinker with this timersource
+	for(int i=0; i<10; i++){
+		if(ts == &(pigun_blinkers[i].timer)){
+			blk = &(pigun_blinkers[i]);
+			break;
+		}
+	}
+
+	if(blk == NULL) return;
+
+	printf("PIGUN-BLINKER[%i]: %i/%i\n", blk, blk->counter, blk->nblinks);
+	// perform the custom action
+	// TODO: ...
+
+	if(blk->nblinks > 0) {
+		blk->counter++;
+		if(blk->counter == blk->nblinks) {
+			blk->active = 0;
+			return
+		}
+	}
+
+	// code here => we have to schedule another blink
+	btstack_run_loop_set_timer(&(blk->timer), blk->timeout);
+	btstack_run_loop_add_timer(&(blk->timer));
+	
+
+}
+
+int pigun_blinker_create(uint8_t nblinks, uint16_t timeout, blinker_callback_t callback) {
+
+	pigun_blinker_t *blk = NULL;
+
+	// find the first inactive blinker
+	for(int i=0; i<10; i++){
+		if(!pigun_blinkers[i].active){
+			blk = &(pigun_blinkers[i]);
+			break;
+		}
+	}
+
+	if(blk == NULL) return 1;
+
+	blk->active = 1;
+	blk->nblinks = nblinks;
+	blk->counter = 0;
+	blk->timeout = timeout;
+
+	blk->callback = callback;
+	blk->timer.process = &(pigun_blinker_event);
+
+	btstack_run_loop_set_timer(&(blk->timer), timeout);
+	btstack_run_loop_add_timer(&(blk->timer));
+}
+
+
+
 
 
 static uint8_t hid_service_buffer[2500];
@@ -391,10 +456,15 @@ int btstack_main(int argc, const char * argv[]){
 	// turn on!
 	hci_power_control(HCI_POWER_ON);
 
-	
+	// allocate blinkers
+	pigun_blinkers = (pigun_blinker_t*)calloc(10, sizeof(pigun_blinker_t));
+
 	// read the previous server addresses from servers.bin
 	pigun_server_load();
 	
+	// test the new blinker system
+	pigun_blinker_create(0, 800, NULL);
+
 	// start blinking of the green LED
 	connectorBLINK.process = &connectorBLINK_handler;
 	btstack_run_loop_set_timer(&connectorBLINK, 800);
