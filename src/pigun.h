@@ -67,7 +67,8 @@ typedef struct {
    pigun_state_t state;
 
    pigun_recoilmode_t recoilMode;
-   
+   int8_t recoilCooldownTimer;
+
    uint8_t autofire;
    uint8_t button_rest;
 

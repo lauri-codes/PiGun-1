@@ -60,6 +60,7 @@ static void preview_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buf
 void* pigun_cycle(void* nullargs) {
 
 	pigun.state = STATE_IDLE;
+	pigun.recoilCooldownTimer = 0;
 	pigun_detector_init();
 
 	// reset calibration

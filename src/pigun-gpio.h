@@ -12,11 +12,12 @@
 #define PIN_RLD RPI_V2_GPIO_P1_13	// reload  (this is the little clip button like in real beretta M9)
 #define PIN_MAG RPI_V2_GPIO_P1_11	// handmag (this should be connected under the handle)  --  seems to be soldered ok!
 
+#define PIN_BT0 RPI_V2_GPIO_P1_22	// central button in the d-pad
 #define PIN_BTU RPI_V2_GPIO_P1_18	// d-pad buttons
 #define PIN_BTD RPI_V2_GPIO_P1_24
 #define PIN_BTL RPI_V2_GPIO_P1_16
 #define PIN_BTR RPI_V2_GPIO_P1_32
-#define PIN_BT0 RPI_V2_GPIO_P1_22	// central button in the d-pad
+
 
 #define PIN_CAL RPI_V2_GPIO_P1_08	// calibration button
 
@@ -24,6 +25,9 @@
 #define MASK_TRG UINT16_C(0x0001)
 #define MASK_RLD UINT16_C(0x0002)
 #define MASK_MAG UINT16_C(0x0004)
+
+#define MASK_BT0 UINT16_C(0x0008)
+
 
 #define MASK_CAL UINT16_C(0x0100)
 
@@ -61,6 +65,7 @@ int pigun_GPIO_init();
 int pigun_GPIO_stop();
 
 void pigun_GPIO_output_set(int LEDPIN, int state);
+void pigun_recoil_fire(void);
 void pigun_buttons_process(void);
 
 
