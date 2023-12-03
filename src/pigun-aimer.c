@@ -1,6 +1,6 @@
 #include "pigun.h"
 #include "pigun-hid.h"
-
+#include "pigun-mmal.h"
 
 /*
 * at this point the peaks are:
