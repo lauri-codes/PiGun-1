@@ -8,6 +8,7 @@
 
 #include "pigun.h"
 #include "pigun-gpio.h"
+#include "pigun-mmal"
 
 
 
@@ -99,19 +100,19 @@ void pigun_GPIO_output_set(int LEDPIN, int state) {
 }
 
 
-
+/* DEPRECATED?
 static inline void button_pressed(int buttonID) {
 
 	// it will have to be another 5 frames before the button can be pressed again
 	pigun_button_holder[buttonID] = button_delay;
 
 	// set the button in the HID report
-	global_pigun_report.buttons |= (uint8_t)(1 << buttonID);
+	pigun.report.buttons |= (uint8_t)(1 << buttonID);
 
 	// mark a good press event internally?
 	pigun_button_newpress |= (uint8_t)(1 << buttonID);
 }
-
+*/
 
 
 void pigun_buttons_process() {
@@ -173,7 +174,7 @@ void pigun_buttons_process() {
 
 	}
 
-	global_pigun_report.buttons = pigun_button_state;	// send the state to the HID report (only LSB)
+	pigun.report.buttons = pigun_button_state;	// send the state to the HID report (only LSB)
 
 	// *** deal with some specific buttons *** *****************************
 
@@ -201,7 +202,7 @@ void pigun_buttons_process() {
 
 			// save the frame
 			FILE* fbin = fopen("CALframe.bin", "wb");
-			fwrite(pigun_framedata, sizeof(unsigned char), PIGUN_NPX, fbin);
+			fwrite(pigun.framedata, sizeof(unsigned char), PIGUN_NPX, fbin);
 			fclose(fbin);
 
 			pigun.state = STATE_SERVICE;
@@ -213,11 +214,11 @@ void pigun_buttons_process() {
 
 		if (pigun_button_newpress & MASK_TRG) { // on TRG go to calibration mode
 			printf("PIGUN: service -> calibration\n");
-			pigun.state == STATE_CAL_TL;
+			pigun.state = STATE_CAL_TL;
 		}
 		if (pigun_button_newpress & MASK_CAL) { // on CAL go back to idle
 			printf("PIGUN: service -> idle\n");
-			pigun.state == STATE_IDLE;
+			pigun.state = STATE_IDLE;
 			bcm2835_gpio_write(PIN_OUT_CAL, LOW);
 		}
 		
@@ -267,7 +268,7 @@ void pigun_buttons_process() {
 	// *********************************************************************
 
 	// autoshutdown everything with some button combo
-	if(pigun_button_state == 5 && pigun_state == 1){
+	if(pigun_buttton_state == 5 && pigun.state == STATE_SERVICE){
 		printf("shutting down\n");
 		pigun_state = -1;
 		system("sudo shutdown -P now");
