@@ -88,6 +88,7 @@ const uint8_t hid_descriptor_joystick_mode[] = {
 };
 
 pigun_blinker_t *pigun_blinkers;
+static void blinker_autoconnect(void);
 static void blinker_connectLED(void); // switches the OK LED
 
 /// @brief Callback for custom blinkers.
@@ -184,13 +185,6 @@ static enum {
 
 
 
-static btstack_timer_source_t heartbeat;
-static void heartbeat_handler(btstack_timer_source_t* ts);
-
-static int connectorState = 0;
-static btstack_timer_source_t connectorBLINK;
-static void connectorBLINK_handler(btstack_timer_source_t* ts);
-
 
 
 int compare_servers(bd_addr_t a, bd_addr_t b) {
@@ -248,7 +242,7 @@ static void send_report() {
 // called when host sends an output report
 void set_report(uint16_t hid_cid, hid_report_type_t report_type, int report_size, uint8_t *report){
 
-	printf("Host HID output report:\n");
+	/*printf("Host HID output report:\n");
 	printf("\tHID CID: %i\n", hid_cid);
 	printf("\tReport Type: %i\n", report_type);
 	printf("\tReport Size: %i\n", report_size);
@@ -256,12 +250,16 @@ void set_report(uint16_t hid_cid, hid_report_type_t report_type, int report_size
 	for (int i=0; i<report_size; i++) {
 		printf("%#02X ",report[i]);
 	}
-	printf("\n");
+	printf("\n");*/
+
+	// any report would just trigger the solenoid if possible
+	if(pigun.recoilMode == RECOIL_HID) pigun_recoil_fire();
 }
 
 // called when host sends an data message
 void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_id, int report_size, uint8_t * report){
-	printf("Host HID output DATA:\n");
+	
+	/*printf("Host HID output DATA:\n");
 	printf("\tHID CID: %i\n", hid_cid);
 	printf("\tReport Type: %i\n", report_type);
 	printf("\tReport Size: %i\n", report_size);
@@ -270,9 +268,10 @@ void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_i
 	for (int i=0; i<report_size; i++) {
 		printf("%x ",report[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 
-	// we should trigger the recoil if the gun is in non-self-recoil mode
+	// any report would just trigger the solenoid if possible
+	if(pigun.recoilMode == RECOIL_HID) pigun_recoil_fire();
 
 }
 
@@ -312,8 +311,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 				hid_cid = 0;
 
 				// re-register timer
-				btstack_run_loop_set_timer(&heartbeat, 1000);
-				btstack_run_loop_add_timer(&heartbeat);
+				pigun_blinker_create(1, 1000, &blinker_autoconnect);
 				return;
 			}
 
@@ -484,21 +482,16 @@ int btstack_main(int argc, const char * argv[]) {
 
 
 	// set one-shot timer for autoreconnect
-	heartbeat.process = &heartbeat_handler;
-	if (pigun.nServers != 0) {
-		btstack_run_loop_set_timer(&heartbeat, 5000);
-		btstack_run_loop_add_timer(&heartbeat);
-	}
+	if (pigun.nServers != 0)
+		pigun_blinker_create(1, 5000, &blinker_autoconnect);
 
 	return 0;
 }
 
 
-// This is called when the heartbeat times out.
-// attempt to connect to a known host if app is not connected already
-static void heartbeat_handler(btstack_timer_source_t* ts) {
-	UNUSED(ts);
 
+static void blinker_autoconnect(){
+	
 	// increment counter
 	static int snum = 0;
 
@@ -511,9 +504,6 @@ static void heartbeat_handler(btstack_timer_source_t* ts) {
 		snum++; if (snum == pigun.nServers)snum = 0;
 	}
 }
-
-
-
 static void blinker_connectLED() {
 
 	static uint8_t s = 0;
