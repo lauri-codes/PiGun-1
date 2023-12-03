@@ -114,7 +114,7 @@ void pigun_blinker_event(btstack_timer_source_t *ts) {
 	printf("PIGUN-BLINKER[%i]: %i/%i\n", blk, blk->counter, blk->nblinks);
 	
 	// perform the custom action
-	blk->callback(blk);
+	blk->callback();
 
 	if(blk->nblinks > 0) {
 		blk->counter++;
