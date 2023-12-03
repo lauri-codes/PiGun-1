@@ -474,14 +474,10 @@ int btstack_main(int argc, const char * argv[]) {
 	// read the previous server addresses from servers.bin
 	pigun_server_load();
 	
-	// test the new blinker system
-	//pigun_blinker_create(0, 800, NULL);
-
 	// start blinking of the green LED
 	blinkID_greenLED = pigun_blinker_create(0, 800, &blinker_connectLED);
 
-
-	// set one-shot timer for autoreconnect
+	// set one-shot timer for autoreconnect of there are servers in the list
 	if (pigun.nServers != 0)
 		pigun_blinker_create(1, 5000, &blinker_autoconnect);
 
