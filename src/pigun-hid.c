@@ -423,7 +423,7 @@ static void heartbeat_handler(btstack_timer_source_t* ts) {
 
 		// try connecting to a server
 		printf("PIGUN-HID: trying to connect to %s...\n", bd_addr_to_str(pigun.servers[snum]));
-		hid_device_connect(servers[snum], &hid_cid);
+		hid_device_connect(pigun.servers[snum], &hid_cid);
 
 		snum++; if (snum == pigun.nServers)snum = 0;
 	}
