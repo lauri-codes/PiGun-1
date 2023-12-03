@@ -28,7 +28,18 @@ void pigun_detector_init(){
 
     pigun.detector.checked = calloc(PIGUN_RES_X * PIGUN_RES_Y, sizeof(uint8_t));
     pigun.detector.pxbuffer = (uint32_t*)malloc(sizeof(uint32_t) * PIGUN_NPX);
+    
+    pigun.detector.peaks = (pigun_peak_t*)calloc(10, sizeof(pigun_peak_t));
+    
     pigun.detector.error = 0;
+}
+
+void pigun_detector_free(){
+
+    free(pigun.detector.checked);
+    free(pigun.detector.pxbuffer);
+    free(pigun.detector.peaks);
+
 }
 
 
@@ -122,13 +133,13 @@ int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const 
     
     //printf("peak found[%i]: %li %li -- %li -- %i --> ", blobID, sumX, sumY, sumVal, blobSize);
 
-    pigun.peaks[blobID].col = ((float)sumX) / sumVal;
-    pigun.peaks[blobID].row = ((float)sumY) / sumVal;
-    pigun.peaks[blobID].maxI = (float)maxI;
-    pigun.peaks[blobID].total = (pigun.peaks[blobID].row * PIGUN_RES_X + pigun.peaks[blobID].col);
+    pigun.detector.peaks[blobID].col = ((float)sumX) / sumVal;
+    pigun.detector.peaks[blobID].row = ((float)sumY) / sumVal;
+    pigun.detector.peaks[blobID].maxI = (float)maxI;
+    pigun.detector.peaks[blobID].total = (pigun.detector.peaks[blobID].row * PIGUN_RES_X + pigun.detector.peaks[blobID].col);
     
 #ifdef PIGUN_DEBUG
-    printf("%f %f\n", pigun.peaks[blobID].col, pigun.peaks[blobID].row);
+    printf("%f %f\n", pigun.detector.peaks[blobID].col, pigun.detector.peaks[blobID].row);
 #endif
     return 1;
 }
@@ -236,22 +247,22 @@ void pigun_detector_run(unsigned char* data) {
     */
 
 	// this will sort the peaks in descending peak.total order
-	qsort(pigun.peaks, 4, sizeof(pigun.peaks), peak_compare);
+	qsort(pigun.detector.peaks, 4, sizeof(pigun.detector.peaks), peak_compare);
 	
 	pigun_peak_t tmp;
 
 	// now make sure 0 is the top-left of the first two peaks
-	if(pigun.peaks[0].col > pigun.peaks[1].col){
-		tmp = pigun.peaks[0];
-		pigun.peaks[0] = pigun.peaks[1];
-		pigun.peaks[1] = tmp;
+	if(pigun.detector.peaks[0].col > pigun.detector.peaks[1].col){
+		tmp = pigun.detector.peaks[0];
+		pigun.detector.peaks[0] = pigun.detector.peaks[1];
+		pigun.detector.peaks[1] = tmp;
 	}
 
 	// and that 2 is the bottom-left of the last two peaks
-	if(pigun.peaks[2].col > pigun.peaks[3].col){
-		tmp = pigun.peaks[2];
-		pigun.peaks[2] = pigun.peaks[3];
-		pigun.peaks[3] = tmp;
+	if(pigun.detector.peaks[2].col > pigun.detector.peaks[3].col){
+		tmp = pigun.detector.peaks[2];
+		pigun.detector.peaks[2] = pigun.detector.peaks[3];
+		pigun.detector.peaks[3] = tmp;
 	}
 
     //printf("detector done [%i]\n",blobID);

@@ -68,14 +68,13 @@ typedef struct {
 
    uint8_t autofire;
    uint8_t button_rest;
-   
 
 
    // *** DETECTION SYSTEM ***
    // stores the current camera frame
    unsigned char     *framedata;
    pigun_detector_t  detector;
-   pigun_peak_t      *peaks;
+
 
    // *** AIMING CALCULATOR ***
    // normalised aiming point - before calibration applies

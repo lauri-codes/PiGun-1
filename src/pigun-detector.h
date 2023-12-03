@@ -26,15 +26,18 @@ typedef struct {
 /// @brief Detector operational parameters.
 typedef struct {
 
-    uint8_t     error;      // 1 if there was an error after detecting
-    uint8_t     *checked;   // one element for each px in the image
-    uint32_t    *pxbuffer;  // this is used by blob_detect to store the px indexes in the queue - the total allocation is PIGUN_RES_X* PIGUN_RES_Y
+    uint8_t         error;      // 1 if there was an error after detecting
+    uint8_t         *checked;   // one element for each px in the image
+    uint32_t        *pxbuffer;  // this is used by blob_detect to store the px indexes in the queue - the total allocation is PIGUN_RES_X* PIGUN_RES_Y
+    pigun_peak_t    *peaks;     // peaks detected
 
 }pigun_detector_t;
 
 
 
 void pigun_detector_init();
+void pigun_detector_free();
+
 void pigun_detector_run(unsigned char*);
 
 

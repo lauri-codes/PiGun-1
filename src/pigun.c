@@ -75,8 +75,6 @@ void* pigun_cycle(void* nullargs) {
 		fclose(fbin);
 	}
 
-	// allocate peaks - 10 to be sure there is enough space
-	pigun.peaks = (pigun_peak_t*)calloc(10, sizeof(pigun_peak_t));
 
 	// pins should be initialised using the function in the GPIO module
 	// called by the main thread when the program starts
@@ -110,7 +108,7 @@ void* pigun_cycle(void* nullargs) {
 		if (cameraON) break;
 	}
 	
-	free(pigun.peaks);
+	pigun_detector_free();
 
 	pthread_exit((void*)0);
 }

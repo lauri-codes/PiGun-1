@@ -31,21 +31,21 @@
 void pigun_calculate_aim() {
 	
 	float aim_x, aim_y;
-	float x1 = pigun.peaks[0].col;
-	float x2 = pigun.peaks[2].col;
-	float x3 = pigun.peaks[1].col;
-	float x4 = pigun.peaks[3].col;
-	float y1 = pigun.peaks[0].row;
-	float y2 = pigun.peaks[2].row;
-	float y3 = pigun.peaks[1].row;
-	float y4 = pigun.peaks[3].row;
+	float x1 = pigun.detector.peaks[0].col;
+	float x2 = pigun.detector.peaks[2].col;
+	float x3 = pigun.detector.peaks[1].col;
+	float x4 = pigun.detector.peaks[3].col;
+	float y1 = pigun.detector.peaks[0].row;
+	float y2 = pigun.detector.peaks[2].row;
+	float y3 = pigun.detector.peaks[1].row;
+	float y4 = pigun.detector.peaks[3].row;
 
 #ifdef PIGUN_DEBUG
 	printf("peaks: %f-%f/%f  %f-%f/%f  %f-%f/%f  %f-%f/%f \n",
-	x1,y1,pigun.peaks[0].total,
-	x2,y2,pigun.peaks[2].total,
-	x3,y3,pigun.peaks[1].total,
-	x4,y4,pigun.peaks[3].total);
+	x1,y1,pigun.detector.peaks[0].total,
+	x2,y2,pigun.detector.peaks[2].total,
+	x3,y3,pigun.detector.peaks[1].total,
+	x4,y4,pigun.detector.peaks[3].total);
 #endif
 
 	// build the transformation matrix using the 4 points and apply it to the center of camera image
