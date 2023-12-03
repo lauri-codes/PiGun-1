@@ -25,29 +25,17 @@
 
 #include <semaphore.h>
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
+
+#include "btstack.h"
 
 #include "pigun-hid.h"
 #include "pigun-detector.h"
+
 
 #ifndef PIGUN
 #define PIGUN
 
 
-
-
-
-
-
-
-
-#define PI 3.14159265
-extern MMAL_PORT_T *port_prv_in1;
-
-
-// maximum distance in pixels for peak matching
-#define MAXPEAKDIST 5
 
 extern pthread_mutex_t pigun_mutex;
 
@@ -72,16 +60,7 @@ typedef struct {
 	float x, y;
 }pigun_aimpoint_t;
 
-/// @brief Describes a peak in the camera image.
-typedef struct {
-   float row;
-   float col;
-   float maxI;
-   float total;
-   float tRow, tCol;
-   // 0->struct is unused, 1->peak found
-   uint16_t found;
-} pigun_peak_t;
+
 
 typedef struct {
 
@@ -91,10 +70,14 @@ typedef struct {
    uint8_t button_rest;
    
 
+
+   // *** DETECTION SYSTEM ***
    // stores the current camera frame
    unsigned char     *framedata;
    pigun_detector_t  detector;
+   pigun_peak_t      *peaks;
 
+   // *** AIMING CALCULATOR ***
    // normalised aiming point - before calibration applies
    pigun_aimpoint_t  aim_normalised;
 
@@ -102,7 +85,14 @@ typedef struct {
    pigun_aimpoint_t  cal_topleft;
    pigun_aimpoint_t  cal_lowright;
 
-   pigun_peak_t      *peaks;
+
+   // *** CONNECTIVITY ***
+   uint8_t           nServers;   // number of past servers stored in the file - up to 3
+   bd_addr_t         servers[3]; // server addresses - up to 3
+
+
+
+
 
    pigun_report_t    report;
 
