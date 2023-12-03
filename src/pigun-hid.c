@@ -131,13 +131,13 @@ static void send_report() {
 	//uint8_t hid_report[] = { 0xa1, 0, 0, 0, 0, 0 };
 	uint8_t hid_report[] = { 0xa1, PIGUN_REPORT_ID, 0, 0, 0, 0, 0 }; // first byte is a1=device to host request type, second byte is report ID
 
-	/*
+	
 	hid_report[2] = (pigun.report.x) & 0xff;
 	hid_report[3] = (pigun.report.x >> 8) & 0xff;
 	hid_report[4] = (pigun.report.y) & 0xff;
 	hid_report[5] = (pigun.report.y >> 8) & 0xff;
 	hid_report[6] = pigun.report.buttons;
-	*/
+	
 
 	//printf("sending x=%i (%i %i) y=%i (%i %i) \n", pigun.report.x, hid_report[1], hid_report[2], pigun.report.y, hid_report[3], hid_report[4]);
 	hid_device_send_interrupt_message(hid_cid, &hid_report[0], 7); // 6 = sizeof(hid_report)
