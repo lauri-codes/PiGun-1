@@ -112,7 +112,7 @@ void pigun_recoil_fire(){
 		bcm2835_gpio_write(PIN_OUT_SOL, SOL_FIRE);
 		
 		// schedule cooldown
-		pigun.recoilCooldownTimer = -2; // hard coded to 1 recoil / 2 frames
+		pigun.recoilCooldownTimer = -1; // hard coded to 1 recoil / 2 frames
 	}
 }
 
