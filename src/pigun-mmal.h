@@ -15,14 +15,11 @@
 // Camera output settings: these are ~1/4th of the camera acquisition. The
 // vertical resolution needs to be a multiple of 16, and the horizontal
 // resolution needs to be a multiple of 32!
-//#define PIGUN_RES_X 416 // 410 // 320
-//#define PIGUN_RES_Y 320 // 308 // 180
-#define PIGUN_RES_X 410 // 410 // 320
-#define PIGUN_RES_Y 308 // 308 // 180
+#define PIGUN_RES_X 416
+#define PIGUN_RES_Y 320
 
 // total number of pixels in the buffer - has to be the product of the previous 2
-//#define PIGUN_NPX 133120 // 126280 // 57600 // 230400
-#define PIGUN_NPX 126280
+#define PIGUN_NPX 133120
 
 
 int pigun_mmal_init(void);
