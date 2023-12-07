@@ -235,7 +235,7 @@ void pigun_detector_run(unsigned char* data) {
     */
 
 	// this will sort the peaks in descending peak.total order
-	qsort(pigun.detector.peaks, 4, sizeof(pigun.detector.peaks), peak_compare);
+	qsort(pigun.detector.peaks, 4, sizeof(pigun_peak_t), peak_compare);
 	
 	pigun_peak_t tmp;
 
