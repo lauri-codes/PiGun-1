@@ -125,9 +125,9 @@ int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const 
     pigun.detector.peaks[blobID].maxI = (float)maxI;
     pigun.detector.peaks[blobID].total = (pigun.detector.peaks[blobID].row * PIGUN_RES_X + pigun.detector.peaks[blobID].col);
     
-#ifdef PIGUN_DEBUG
+//#ifdef PIGUN_DEBUG
     printf("%f %f\n", pigun.detector.peaks[blobID].col, pigun.detector.peaks[blobID].row);
-#endif
+//#endif
     return 1;
 }
 
