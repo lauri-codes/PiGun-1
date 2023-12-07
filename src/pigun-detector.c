@@ -120,7 +120,7 @@ int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const 
     
     //printf("peak found[%i]: %li %li -- %li -- %i --> ", blobID, sumX, sumY, sumVal, blobSize);
     
-    pigun.detector.peaks[blobID].blobSize = blobSize;
+    pigun.detector.peaks[blobID].blobsize = blobSize;
     pigun.detector.peaks[blobID].col = ((float)sumX) / sumVal;
     pigun.detector.peaks[blobID].row = ((float)sumY) / sumVal;
     pigun.detector.peaks[blobID].maxI = (float)maxI;
