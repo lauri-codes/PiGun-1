@@ -41,13 +41,13 @@ void pigun_detector_free(){
  * return 0 if the blob was too small
  * return 1 if the blob was ok
  */
-int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const float threshold) {
+int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const uint8_t threshold) {
     
     uint32_t blobSize = 0;
     uint32_t x, y;
     uint64_t sumVal = 0;
     uint64_t sumX = 0, sumY = 0;
-    uint32_t maxI = 0;
+    uint8_t maxI = 0;
 
     // put the first px in the queue
     uint32_t qSize = 1; // length of the queue of idx to check
@@ -159,7 +159,7 @@ void pigun_detector_run(unsigned char* data) {
 #endif
 
     // These parameters have to be tuned to optimize the search
-    const float threshold = 130;          // The minimum threshold for pixel intensity in a blob
+    const uint8_t threshold = 130;          // The minimum threshold for pixel intensity in a blob
 
     const uint32_t nx = floor((float)(PIGUN_RES_X) / (float)(DETECTOR_DX));
     const uint32_t ny = floor((float)(PIGUN_RES_Y) / (float)(DETECTOR_DX));
