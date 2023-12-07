@@ -45,8 +45,8 @@ int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const 
     
     uint32_t blobSize = 0;
     uint32_t x, y;
-    uint64_t sumVal = 0;
-    uint64_t sumX = 0, sumY = 0;
+    uint32_t sumVal = 0;
+    uint32_t sumX = 0, sumY = 0;
     uint8_t maxI = 0;
 
     // put the first px in the queue
@@ -71,8 +71,8 @@ int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const 
         x = current % PIGUN_RES_X;
         y = current / PIGUN_RES_X;
         sumVal += data[current];
-        sumX += (uint64_t)(data[current] * x);
-        sumY += (uint64_t)(data[current] * y);
+        sumX += (uint32_t)(data[current] * x);
+        sumY += (uint32_t)(data[current] * y);
         if (data[current] > maxI) maxI = data[current];
         
         blobSize++;
