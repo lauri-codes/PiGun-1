@@ -14,15 +14,11 @@
 
 /// @brief Describes a peak in the camera image.
 typedef struct {
-   float row;
-   float col;
-   float maxI;
-   float total;
-   float tRow, tCol;
-   uint32_t     blobsize;
-   
-   // 0->struct is unused, 1->peak found
-   uint16_t found;
+   float    row;
+   float    col;
+   float    maxI;
+   float    total;
+   uint32_t blobsize;
 } pigun_peak_t;
 
 /// @brief Detector operational parameters.
