@@ -19,6 +19,8 @@ typedef struct {
    float maxI;
    float total;
    float tRow, tCol;
+   uint32_t     blobsize;
+   
    // 0->struct is unused, 1->peak found
    uint16_t found;
 } pigun_peak_t;

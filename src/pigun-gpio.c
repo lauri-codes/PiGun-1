@@ -210,6 +210,14 @@ void pigun_buttons_process() {
 			fwrite(pigun.framedata, sizeof(unsigned char), PIGUN_NPX, fbin);
 			fclose(fbin);
 
+			// print more debug to screen
+			printf("PIGUN PEAKS:\n");
+			for(int i=0;i<4;i++){
+				printf("\t[%i]: [%f, %f] -- %i\n", i,
+					pigun.detector.peaks[i].col,pigun.detector.peaks[i].row,
+					pigun.detector.peaks[i].blobsize);
+			}
+
 			pigun.state = STATE_SERVICE;
 		}
 
