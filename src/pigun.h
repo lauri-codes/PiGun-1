@@ -46,11 +46,13 @@ typedef enum {
    STATE_CAL_TL,
    STATE_CAL_BR,
 
+   STATE_BLINKING,
    STATE_SHUTDOWN
 } pigun_state_t;
 
 typedef enum {
    RECOIL_SELF=0,
+   RECOIL_AUTO,
    RECOIL_HID,
    RECOIL_OFF
 }pigun_recoilmode_t;
