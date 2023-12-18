@@ -114,7 +114,7 @@ void pigun_recoil_fire(){
 	//if(pigun.recoilCooldownTimer == 0) {
 		// turn on the GPIO that triggers the solenoid
 		bcm2835_gpio_write(PIN_OUT_SOL, SOL_FIRE);
-		
+		printf("firing...\n");
 		// schedule cooldown
 		//pigun.recoilCooldownTimer = -1; // hard coded to 1 recoil / 2 frames
 		pigun.recoilPulseTimer = 0;
