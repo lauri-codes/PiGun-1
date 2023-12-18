@@ -107,13 +107,17 @@ void pigun_GPIO_output_set(int LEDPIN, int state) {
 void pigun_recoil_fire(){
 
 	// it only fires the solenoid if it is ready to go
-	if(pigun.recoilCooldownTimer == 0) {
+	//if(pigun.recoilCooldownTimer == 0) {
 		// turn on the GPIO that triggers the solenoid
 		bcm2835_gpio_write(PIN_OUT_SOL, SOL_FIRE);
 		
 		// schedule cooldown
-		pigun.recoilCooldownTimer = -1; // hard coded to 1 recoil / 2 frames
-	}
+		//pigun.recoilCooldownTimer = -1; // hard coded to 1 recoil / 2 frames
+		pigun.recoilPulseTimer = 0;
+		
+		// this is a test to see if the pulse is long enough
+		//bcm2835_gpio_write(PIN_OUT_SOL, SOL_HOLD);
+	//}
 }
 
 
@@ -133,7 +137,7 @@ void pigun_buttons_process() {
 	// mark all buttons as not being in "new press" state
 	pigun_button_newpress = 0;
 
-	// check all the buttons
+	// check all the buttons to detect new presses and formulate the HID report byte
 	for (int i = 0; i < 9; i++) {
 
 		// if button was just pressed now AND we are allowed to register
@@ -184,22 +188,34 @@ void pigun_buttons_process() {
 		pigun.recoilCooldownTimer++;
 		
 		// if recharge complete, switch the trigger pin
-		if(pigun.recoilCooldownTimer == 0)
-			bcm2835_gpio_write(PIN_OUT_SOL, SOL_HOLD);
+		//if(pigun.recoilCooldownTimer == 0)
+			//bcm2835_gpio_write(PIN_OUT_SOL, SOL_HOLD);
 	}
 
 
 	// *** deal with some specific buttons *** *****************************
 
+
 	if (pigun.state == STATE_IDLE) {
+		
+		
+		// process the trigger
+		switch(pigun.recoilMode){
+			case RECOIL_AUTO:
+				// fire if the button is down and cooldown timer is 0
+				if((pigun_button_state & 1) && pigun.recoilCooldownTimer == 0){
+					pigun_recoil_fire();
+					pigun.recoilCooldownTimer = -3; // hard-coded cooldown
+				}
+				break;
+			case RECOIL_SELF:
+				// fire on newpress events - no need to check cooldown
+				if(pigun_button_newpress & MASK_TRG)
+					pigun_recoil_fire();
+				break;
+		}
 
-		if(pigun_button_newpress & MASK_TRG){ // on TRG just shoot
-			
-			// if possible, fire the solenoid
-			if(pigun.recoilMode == RECOIL_SELF)
-				pigun_recoil_fire();
 
-		}		
 		if (pigun_button_newpress & MASK_CAL) { // on CAL start service mode
 			
 			printf("PIGUN: going in service mode\n");
@@ -286,8 +302,8 @@ void pigun_buttons_process() {
 
 
 	// after the desired time, SOL 555 trigger goes off
-	if (pigun_solenoid_timer == 0) bcm2835_gpio_write(PIN_OUT_SOL, SOL_HOLD);
-	else if (pigun_solenoid_timer > 0) pigun_solenoid_timer--;
+	if (pigun.recoilPulseTimer == 0) bcm2835_gpio_write(PIN_OUT_SOL, SOL_HOLD);
+	else if (pigun.recoilPulseTimer < 0) pigun.recoilPulseTimer++;
 
 	// *********************************************************************
 

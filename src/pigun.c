@@ -61,6 +61,7 @@ void* pigun_cycle(void* nullargs) {
 
 	pigun.state = STATE_IDLE;
 	pigun.recoilCooldownTimer = 0;
+	pigun.recoilPulseTimer = 0;
 	pigun_detector_init();
 
 	// reset calibration

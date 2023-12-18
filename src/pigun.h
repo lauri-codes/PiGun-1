@@ -68,10 +68,17 @@ typedef struct {
 
    pigun_state_t state;
 
-   pigun_recoilmode_t recoilMode;
-   int8_t recoilCooldownTimer;
+   // *** RECOIL SYSTEM ***
 
-   uint8_t autofire;
+   /// @brief Current recoil mode (self, auto, hid, off)
+   pigun_recoilmode_t recoilMode;
+   /// @brief Solenoid cooldown time (for auto mode)
+   int8_t recoilCooldownTimer;
+   /// @brief Timer for the 555 trigger pulse
+   int8_t recoilPulseTimer;
+   // *********************
+
+
    uint8_t button_rest;
 
 
@@ -98,7 +105,7 @@ typedef struct {
 
 
 
-   pigun_report_t    report;
+   pigun_report_t    report; // 
 
 
    
