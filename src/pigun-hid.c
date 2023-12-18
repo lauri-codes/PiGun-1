@@ -281,10 +281,10 @@ void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_i
 	}
 	printf("\n");
 
-	uint8 cmd = report[0]>>4;
-	uint8 par = report[0] & 0x0F;
+	uint8_t cmd = report[0]>>4;
+	uint8_t par = report[0] & 0x0F;
 	if(cmd == 1){ // set recoil mode
-		if(mode >= 0 && mode <= RECOIL_OFF){
+		if(par >= 0 && par <= RECOIL_OFF){
 			pigun.recoilMode = par;
 			printf("PIGUN-HID: recoil mode is now %i\n", par);
 		}
