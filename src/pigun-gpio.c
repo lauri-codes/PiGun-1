@@ -101,8 +101,10 @@ void pigun_GPIO_output_set(int LEDPIN, int state) {
 	bcm2835_gpio_write(LEDPIN, state);
 }
 
-void pigun_service_toggle(int state){
-
+void pigun_service_off(){
+	printf("PIGUN: service -> idle\n");
+	pigun.state = STATE_IDLE;
+	bcm2835_gpio_write(PIN_OUT_CAL, LOW);
 }
 
 
@@ -249,9 +251,7 @@ void pigun_buttons_process() {
 			pigun.state = STATE_CAL_TL;
 		}
 		if (pigun_button_newpress & MASK_CAL) { // on CAL go back to idle
-			printf("PIGUN: service -> idle\n");
-			pigun.state = STATE_IDLE;
-			bcm2835_gpio_write(PIN_OUT_CAL, LOW);
+			pigun_service_off();
 		}
 		if (pigun_button_newpress & MASK_BT0) { // on BT0 switch solenoid mode
 
@@ -289,8 +289,7 @@ void pigun_buttons_process() {
 			pigun.state = STATE_CAL_BR;
 		}
 		else if (pigun_button_newpress & MASK_CAL){
-			printf("PIGUN: service -> idle\n");
-			pigun.state = STATE_IDLE;
+			pigun_service_off();
 		}
 	}
 	else if(pigun.state == STATE_CAL_BR){
@@ -307,8 +306,7 @@ void pigun_buttons_process() {
 			bcm2835_gpio_write(PIN_OUT_CAL, LOW);
 		}
 		else if (pigun_button_newpress & MASK_CAL){
-			printf("PIGUN: service -> idle\n");
-			pigun.state = STATE_IDLE;
+			pigun_service_off();
 		}
 	}
 
