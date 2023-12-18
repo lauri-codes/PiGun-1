@@ -114,7 +114,7 @@ void pigun_recoil_fire(){
 	bcm2835_gpio_write(PIN_OUT_SOL, SOL_FIRE);
 	
 	// duration of the trigger pulse
-	pigun.recoilPulseTimer = -1 // has to be at least 1 frame to produce a pulse!
+	pigun.recoilPulseTimer = -1; // has to be at least 1 frame to produce a pulse!
 
 }
 
