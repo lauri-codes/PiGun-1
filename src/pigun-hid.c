@@ -290,8 +290,12 @@ void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_i
 		}
 		else
 			printf("PIGUN-HID: invalid recoil mode [%i]\n", par);
-	}else if(cmd == 0 && par == 1 && pigun.recoilMode == RECOIL_HID){
-		pigun_recoil_fire();
+	}else if(cmd == 0){
+		if(par == 1 && pigun.recoilMode == RECOIL_HID)
+			pigun_recoil_fire();
+	}
+	else{
+		printf("PIGUN-HID: invalid data %x\n",report[0]);
 	}
 }
 
