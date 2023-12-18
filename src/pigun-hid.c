@@ -256,10 +256,21 @@ void set_report(uint16_t hid_cid, hid_report_type_t report_type, int report_size
 	if(pigun.recoilMode == RECOIL_HID) pigun_recoil_fire();
 }
 
-// called when host sends an data message
-void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_id, int report_size, uint8_t * report){
+
+/// @brief Called when host sends an HID data message.
+/// @param hid_cid the HID device ID
+/// @param report_type HID report type (should be DATA)
+/// @param report_id report ID
+/// @param report_size size in bytes (should be 1)
+/// @param report the report bytes
+///
+/// The report is one byte. The high-half is the command, the low-half the parameter.
+/// 
+/// 0x[0][1]: fire the solenoid once
+/// 0x[1][k]: set solenoid mode: k=0,1,2,3 (pigun_recoilmode_t)
+void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_id, int report_size, uint8_t *report){
 	
-	/*printf("Host HID output DATA:\n");
+	printf("Host HID output DATA:\n");
 	printf("\tHID CID: %i\n", hid_cid);
 	printf("\tReport Type: %i\n", report_type);
 	printf("\tReport Size: %i\n", report_size);
@@ -268,11 +279,20 @@ void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_i
 	for (int i=0; i<report_size; i++) {
 		printf("%x ",report[i]);
 	}
-	printf("\n");*/
+	printf("\n");
 
-	// any report would just trigger the solenoid if possible
-	if(pigun.recoilMode == RECOIL_HID) pigun_recoil_fire();
-
+	uint8 cmd = report[0]>>4;
+	uint8 par = report[0] & 0x0F;
+	if(cmd == 1){ // set recoil mode
+		if(mode >= 0 && mode <= RECOIL_OFF){
+			pigun.recoilMode = par;
+			printf("PIGUN-HID: recoil mode is now %i\n", par);
+		}
+		else
+			printf("PIGUN-HID: invalid recoil mode [%i]\n", par);
+	}else if(cmd == 0 && par == 1 && pigun.recoilMode == RECOIL_HID){
+		pigun_recoil_fire();
+	}
 }
 
 
