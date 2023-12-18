@@ -110,18 +110,12 @@ void pigun_service_off(){
 
 void pigun_recoil_fire(){
 
-	// it only fires the solenoid if it is ready to go
-	//if(pigun.recoilCooldownTimer == 0) {
-		// turn on the GPIO that triggers the solenoid
-		bcm2835_gpio_write(PIN_OUT_SOL, SOL_FIRE);
-		printf("firing...\n");
-		// schedule cooldown
-		//pigun.recoilCooldownTimer = -1; // hard coded to 1 recoil / 2 frames
-		pigun.recoilPulseTimer = -2;
+	// turn on the GPIO that triggers the solenoid
+	bcm2835_gpio_write(PIN_OUT_SOL, SOL_FIRE);
+	
+	// duration of the trigger pulse
+	pigun.recoilPulseTimer = -1 // has to be at least 1 frame to produce a pulse!
 
-		// this is a test to see if the pulse is long enough
-		//bcm2835_gpio_write(PIN_OUT_SOL, SOL_HOLD);
-	//}
 }
 
 
