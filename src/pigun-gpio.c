@@ -117,7 +117,7 @@ void pigun_recoil_fire(){
 		printf("firing...\n");
 		// schedule cooldown
 		//pigun.recoilCooldownTimer = -1; // hard coded to 1 recoil / 2 frames
-		pigun.recoilPulseTimer = 0;
+		pigun.recoilPulseTimer = -2;
 
 		// this is a test to see if the pulse is long enough
 		//bcm2835_gpio_write(PIN_OUT_SOL, SOL_HOLD);
