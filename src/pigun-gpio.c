@@ -205,7 +205,7 @@ void pigun_buttons_process() {
 				// fire if the button is down and cooldown timer is 0
 				if((pigun_button_state & 1) && pigun.recoilCooldownTimer == 0){
 					pigun_recoil_fire();
-					pigun.recoilCooldownTimer = -10; // hard-coded cooldown
+					pigun.recoilCooldownTimer = -100; // hard-coded cooldown
 				}
 				break;
 			case RECOIL_SELF:
