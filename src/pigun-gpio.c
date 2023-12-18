@@ -213,6 +213,8 @@ void pigun_buttons_process() {
 				if(pigun_button_newpress & MASK_TRG)
 					pigun_recoil_fire();
 				break;
+			default:
+				break;
 		}
 
 
