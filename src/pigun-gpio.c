@@ -286,6 +286,10 @@ void pigun_buttons_process() {
 
 			pigun.state = STATE_CAL_BR;
 		}
+		else if (pigun_button_newpress & MASK_CAL){
+			printf("PIGUN: service -> idle\n");
+			pigun.state = STATE_IDLE;
+		}
 	}
 	else if(pigun.state == STATE_CAL_BR){
 		if (pigun_button_newpress & 1) { // if TRIGGER was just pressed
@@ -299,6 +303,10 @@ void pigun_buttons_process() {
 			// back to idle mode
 			pigun.state = STATE_IDLE;
 			bcm2835_gpio_write(PIN_OUT_CAL, LOW);
+		}
+		else if (pigun_button_newpress & MASK_CAL){
+			printf("PIGUN: service -> idle\n");
+			pigun.state = STATE_IDLE;
 		}
 	}
 
