@@ -3,11 +3,9 @@
 This is the software for PiGun (model 1), a DIY infra-red lightgun for modern systems. PiGun runs on a PiZero W with PiCamera V2.1 NoIR, and connects to the host computer via classic bluetooth.
 It appears to the host as an HID joystick (2-axis, 8-buttons).
 
-
 This is a rendering of the current PiGun model 1 CAD model:
 
 <img src="/3DModels/PG-1F/buttons.PNG" height="512"/>
-
 
 
 
