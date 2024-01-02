@@ -6,7 +6,7 @@ It appears to the host as an HID joystick (2-axis, 8-buttons).
 
 This is a rendering of the current PiGun model 1 CAD model:
 
-![PiGun model 1 buttons layout]./3DModels/PG-1F/buttons.PNG?raw=true "PiGun model 1 buttons layout")
+![PiGun model 1 buttons layout] ./3DModels/PG-1F/buttons.PNG?raw=true "PiGun model 1 buttons layout")
 
 
 
