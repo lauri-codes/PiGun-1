@@ -8,7 +8,7 @@ This is a rendering of the current PiGun model 1 CAD model:
 
 ![alt text][buttons]
 
-[buttons]: https://github.com/fullmetalfelix/PiGun-1/3DModels/PG-1F/buttons.png "PiGun model 1 buttons layout"
+[buttons]: https://github.com/fullmetalfelix/PiGun-1/3DModels/PG-1F/buttons.PNG "PiGun model 1 buttons layout"
 
 
 
