@@ -46,9 +46,9 @@ A simpler setup generates the solenoid pulse directly in the PiGun code by switc
 
 Press the service mode button (connected to pin PIN_CAL) to enter the PiGun service mode, and change its settings. Service mode is a state machine following this schema:
 
-| Attempt | #1    | #2    |
-| :---:   | :---: | :---: |
-| Seconds | 301   | 283   |
+| State | TRG | RLD | MAG | BT0 |
+| :---: | :---: | :---: | :---: | :---: |
+| IDLE | shoot | button press | button press | button press |
 
 
 
