@@ -8,6 +8,7 @@ This is a rendering of the current PiGun model 1 CAD model:
 
 ![PiGun model 1 buttons layout](./3DModels/PG-1F/buttons.PNG?raw=true "PiGun model 1 buttons layout")
 
+<img src="relative/path/in/repository/to/image.svg" width="128"/>
 
 
 
