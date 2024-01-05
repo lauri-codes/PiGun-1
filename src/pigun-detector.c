@@ -17,7 +17,8 @@ void pigun_detector_init(){
     pigun.detector.pxbuffer = (uint32_t*)malloc(sizeof(uint32_t) * PIGUN_NPX);
     
     pigun.detector.peaks = (pigun_peak_t*)calloc(10, sizeof(pigun_peak_t));
-    
+    memset(pigun.detector.oldpeaks, 0, sizeof(pigun_peak_t)*4);
+
     pigun.detector.error = 0;
 }
 
@@ -136,11 +137,26 @@ int peak_compare(const void* a, const void* b) {
 
     pigun_peak_t* A = (pigun_peak_t*)a;
     pigun_peak_t* B = (pigun_peak_t*)b;
-	// DESCENDING ORDER NOW!
+	
     if (B->total > A->total) return -1;
     else return 1;
 }
-
+int peak_compare_col(const void* a, const void* b) {
+    // return -1 if a is before b
+    pigun_peak_t* A = (pigun_peak_t*)a;
+    pigun_peak_t* B = (pigun_peak_t*)b;
+	
+    if (A->col < B->col) return -1;
+    else return 1;
+}
+int peak_compare_row(const void* a, const void* b) {
+    // return -1 if a is before b
+    pigun_peak_t* A = (pigun_peak_t*)a;
+    pigun_peak_t* B = (pigun_peak_t*)b;
+	
+    if (A->row < B->row) return -1;
+    else return 1;
+}
 
 
 
@@ -149,10 +165,6 @@ int peak_compare(const void* a, const void* b) {
     * "peaks"-variables.
     */
 void pigun_detector_run(unsigned char* data) {
-
-    /*FILE* fout = fopen("text.bin", "rb");
-    fread(data, sizeof(unsigned char), PIGUN_NPX, fout);
-    fclose(fout);*/
 
 #ifdef PIGUN_DEBUG
     printf("detecting...\n");
@@ -167,22 +179,19 @@ void pigun_detector_run(unsigned char* data) {
     // Reset the boolean array for marking pixels as checked.
     memset(pigun.detector.checked, 0, PIGUN_RES_X * PIGUN_RES_Y * sizeof(uint8_t));
 
+    uint8_t blobID = 0;
 
-    // Here the order actually matters: we loop in this order to get better cache hit rate
-    uint32_t blobID = 0;
-    for (uint32_t j = 0; j < ny; ++j) {
-        for (uint32_t i = 0; i < nx; ++i) {
-
-            // pixel index in the buffer
+    // we should start the search at the centers of the old peaks from last frame
+    for(uint8_t i=0; i<4; i++){
+        pigun_peak_t *peak = &(pigun.detector.oldpeaks[i]);
+        if(pigun.detector.oldpeaks[i].blobsize!=0){
+            uint32_t i = (uint32_t)floor(peak->col);
+            uint32_t j = (uint32_t)floor(peak->row);
             uint32_t idx = j * DETECTOR_DX * PIGUN_RES_X + i * DETECTOR_DX;
             uint8_t value = data[idx];
 
-            // check if px is bright enough and not seen by the bfs before
-            if (value >= threshold && !pigun.detector.checked[idx]) {
-                
-                // we found a bright pixel! search nearby
+            if(value >= threshold && !pigun.detector.checked[idx]){
                 value = blob_detect(idx, data, blobID, threshold);
-                // peak was saved if good, move on to the next
                 if (value == 1) {
                     blobID++;
                     // stop trying if we found the ones we deserve
@@ -190,7 +199,41 @@ void pigun_detector_run(unsigned char* data) {
                 }
             }
         }
-        if (blobID == DETECTOR_NBLOBS) break;
+    }
+    printf("peaks found near previous ones: %i\n", blobID);
+    // at this point we have used the old peaks to find the current ones
+    // the oldpeaks can be reset now
+    memset(pigun.detector.oldpeaks, 0, sizeof(pigun_peak_t)*4);
+
+    // save the peaks for faster search next round
+    memcpy(pigun.detector.oldpeaks, pigun.detector.peaks, sizeof(pigun_peak_t)*blobID);
+
+    // if we still did not find all the peaks, do a sweep
+    if(blobID != DETECTOR_NBLOBS) {
+        
+        // Here the order actually matters: we loop in this order to get better cache hit rate
+        for (uint32_t j = 0; j < ny; ++j) {
+            for (uint32_t i = 0; i < nx; ++i) {
+
+                // pixel index in the buffer
+                uint32_t idx = j * DETECTOR_DX * PIGUN_RES_X + i * DETECTOR_DX;
+                uint8_t value = data[idx];
+
+                // check if px is bright enough and not seen by the bfs before
+                if (value >= threshold && !pigun.detector.checked[idx]) {
+                    
+                    // we found a bright pixel! search nearby
+                    value = blob_detect(idx, data, blobID, threshold);
+                    // peak was saved if good, move on to the next
+                    if (value == 1) {
+                        blobID++;
+                        // stop trying if we found the ones we deserve
+                        if (blobID == DETECTOR_NBLOBS) break;
+                    }
+                }
+            }
+            if (blobID == DETECTOR_NBLOBS) break;
+        }
     }
 
 #ifdef PIGUN_DEBUG
@@ -232,12 +275,19 @@ void pigun_detector_run(unsigned char* data) {
         2---3
 
         the aimer will use these in the correct order to compute the inverse projection!
+
+        WARNING! sorting by .total is a hack that only works when the .row/.col are positive.
+            if we were to use prediction to extrapolate positions of peaks that went out of
+            camera view, the coordinates could be negative.
     */
+
+    /*
+    pigun_peak_t tmp;
 
 	// this will sort the peaks in descending peak.total order
 	qsort(pigun.detector.peaks, 4, sizeof(pigun_peak_t), peak_compare);
-	
-	pigun_peak_t tmp;
+    // it would be more proper to identify the peaks without relying on 
+    // their pseudoindex .total
 
 	// now make sure 0 is the top-left of the first two peaks
 	if(pigun.detector.peaks[0].col > pigun.detector.peaks[1].col){
@@ -252,6 +302,32 @@ void pigun_detector_run(unsigned char* data) {
 		pigun.detector.peaks[2] = pigun.detector.peaks[3];
 		pigun.detector.peaks[3] = tmp;
 	}
+    */
+
+    pigun_peak_t sortedpeaks[4];
+
+    // sort by col (horizontal coordinate)
+    qsort(pigun.detector.peaks, 4, sizeof(pigun_peak_t), peak_compare_col);
+    // the first 2 peaks have to be 0 and 2 (unless u hold the gun like a gansta in which case u deserve to miss)
+    // the one with smallest .row is 0
+    // flip them if it is not so
+    if(pigun.detector.peaks[0].row > pigun.detector.peaks[1].row) {
+        sortedpeaks[0] = pigun.detector.peaks[1];
+        sortedpeaks[2] = pigun.detector.peaks[0];
+	} else {
+        sortedpeaks[0] = pigun.detector.peaks[0];
+        sortedpeaks[2] = pigun.detector.peaks[1];
+    }
+    // the same goes for peaks 2 and 3
+    if(pigun.detector.peaks[2].row > pigun.detector.peaks[3].row) {
+        sortedpeaks[1] = pigun.detector.peaks[3];
+        sortedpeaks[3] = pigun.detector.peaks[2];
+    } else {
+        sortedpeaks[1] = pigun.detector.peaks[2];
+        sortedpeaks[3] = pigun.detector.peaks[3];
+    }
+    memcpy(pigun.detector.peaks, sortedpeaks, sizeof(pigun_peak_t)*4);
+    
 
     //printf("detector done [%i]\n",blobID);
     pigun.detector.error = 0;

@@ -14,11 +14,11 @@
 
 /// @brief Describes a peak in the camera image.
 typedef struct {
-   float    row;
-   float    col;
-   float    maxI;
-   float    total;
-   uint32_t blobsize;
+    float    row;
+    float    col;
+    float    maxI;
+    float    total;
+    uint32_t blobsize;
 } pigun_peak_t;
 
 /// @brief Detector operational parameters.
@@ -28,6 +28,8 @@ typedef struct {
     uint8_t         *checked;   // one element for each px in the image
     uint32_t        *pxbuffer;  // this is used by blob_detect to store the px indexes in the queue - the total allocation is PIGUN_RES_X* PIGUN_RES_Y
     pigun_peak_t    *peaks;     // peaks detected
+
+    pigun_peak_t    oldpeaks[4];// stores the 4 peaks from previous frame
 
 }pigun_detector_t;
 
