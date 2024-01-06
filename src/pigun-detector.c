@@ -188,7 +188,7 @@ void pigun_detector_run(unsigned char* data) {
         if(pigun.detector.oldpeaks[i].blobsize!=0){
             uint32_t i = (uint32_t)floor(peak->col);
             uint32_t j = (uint32_t)floor(peak->row);
-            uint32_t idx = j * DETECTOR_DX * PIGUN_RES_X + i * DETECTOR_DX;
+            uint32_t idx = j * PIGUN_RES_X + i;
             uint8_t value = data[idx];
 
             if(value >= threshold && !pigun.detector.checked[idx]){
