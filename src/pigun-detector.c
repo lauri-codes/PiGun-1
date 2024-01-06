@@ -184,7 +184,7 @@ void pigun_detector_run(unsigned char* data) {
     // we should start the search at the centers of the old peaks from last frame
     for(uint8_t i=0; i<4; i++){
         pigun_peak_t *peak = &(pigun.detector.oldpeaks[i]);
-        printf("oldpeak[%i]: {%i, %i} %i\n", peak->col, peak->row, peak->blobsize);
+        printf("oldpeak[%i]: {%f, %f} %i\n", peak->col, peak->row, peak->blobsize);
         if(pigun.detector.oldpeaks[i].blobsize!=0){
             uint32_t i = (uint32_t)floor(peak->col);
             uint32_t j = (uint32_t)floor(peak->row);
