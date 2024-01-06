@@ -243,7 +243,8 @@ void pigun_detector_run(unsigned char* data) {
     }
 
     // save the peaks for faster search next round
-    memcpy(pigun.detector.oldpeaks, pigun.detector.peaks, sizeof(pigun_peak_t)*blobID);
+    if(blobID > 0)
+        memcpy(pigun.detector.oldpeaks, pigun.detector.peaks, sizeof(pigun_peak_t)*blobID);
 
 
 #ifdef PIGUN_DEBUG
