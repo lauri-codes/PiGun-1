@@ -179,6 +179,9 @@ void pigun_detector_run(unsigned char* data) {
     // Reset the boolean array for marking pixels as checked.
     memset(pigun.detector.checked, 0, PIGUN_RES_X * PIGUN_RES_Y * sizeof(uint8_t));
 
+    // reset the peaks
+    memset(pigun.detector.peaks, 0, sizeof(pigun_peak_t)*4);
+
     uint8_t blobID = 0;
 
     // we should start the search at the centers of the old peaks from last frame
@@ -194,6 +197,8 @@ void pigun_detector_run(unsigned char* data) {
             if(value >= threshold && !pigun.detector.checked[idx]){
                 value = blob_detect(idx, data, blobID, threshold);
                 if (value == 1) {
+                    pigun_peak_t *p = &pigun.detector.peaks[blobID];
+                    printf("REdetected peak: {%f, %f} %i\n",p->col, p->row, p->blobsize);
                     blobID++;
                     // stop trying if we found the ones we deserve
                     if (blobID == DETECTOR_NBLOBS) break;
@@ -206,7 +211,7 @@ void pigun_detector_run(unsigned char* data) {
     // the oldpeaks can be reset now
     memset(pigun.detector.oldpeaks, 0, sizeof(pigun_peak_t)*4);
 
-    blobID = 0; // DEBUG
+    //blobID = 0; // DEBUG
     // if we still did not find all the peaks, do a sweep
     if(blobID != DETECTOR_NBLOBS) {
         
