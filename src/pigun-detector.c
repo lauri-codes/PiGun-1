@@ -187,7 +187,7 @@ void pigun_detector_run(unsigned char* data) {
     // we should start the search at the centers of the old peaks from last frame
     for(uint8_t i=0; i<4; i++){
         pigun_peak_t *peak = &(pigun.detector.oldpeaks[i]);
-        printf("oldpeak[%i]: {%f, %f} %i\n", peak->col, peak->row, peak->blobsize);
+        
         if(pigun.detector.oldpeaks[i].blobsize!=0){
             uint32_t i = (uint32_t)floor(peak->col);
             uint32_t j = (uint32_t)floor(peak->row);
@@ -197,8 +197,6 @@ void pigun_detector_run(unsigned char* data) {
             if(value >= threshold && !pigun.detector.checked[idx]){
                 value = blob_detect(idx, data, blobID, threshold);
                 if (value == 1) {
-                    pigun_peak_t *p = &pigun.detector.peaks[blobID];
-                    printf("REdetected peak: {%f, %f} %i\n",p->col, p->row, p->blobsize);
                     blobID++;
                     // stop trying if we found the ones we deserve
                     if (blobID == DETECTOR_NBLOBS) break;
@@ -206,7 +204,8 @@ void pigun_detector_run(unsigned char* data) {
             }
         }
     }
-    printf("peaks found near previous ones: %i\n", blobID);
+    //printf("peaks found near previous ones: %i\n", blobID);
+
     // at this point we have used the old peaks to find the current ones
     // the oldpeaks can be reset now
     memset(pigun.detector.oldpeaks, 0, sizeof(pigun_peak_t)*4);
@@ -230,8 +229,6 @@ void pigun_detector_run(unsigned char* data) {
                     value = blob_detect(idx, data, blobID, threshold);
                     // peak was saved if good, move on to the next
                     if (value == 1) {
-                        pigun_peak_t *p = &pigun.detector.peaks[blobID];
-                        printf("detected peak: {%f, %f} %i\n",p->col, p->row, p->blobsize);
                         blobID++;
                         // stop trying if we found the ones we deserve
                         if (blobID == DETECTOR_NBLOBS) break;
