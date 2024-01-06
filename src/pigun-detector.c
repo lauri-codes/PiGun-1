@@ -206,6 +206,7 @@ void pigun_detector_run(unsigned char* data) {
     // the oldpeaks can be reset now
     memset(pigun.detector.oldpeaks, 0, sizeof(pigun_peak_t)*4);
 
+    blobID = 0; // DEBUG
     // if we still did not find all the peaks, do a sweep
     if(blobID != DETECTOR_NBLOBS) {
         
@@ -224,6 +225,8 @@ void pigun_detector_run(unsigned char* data) {
                     value = blob_detect(idx, data, blobID, threshold);
                     // peak was saved if good, move on to the next
                     if (value == 1) {
+                        pigun_peak_t *p = &pigun.detector.peaks[blobID];
+                        printf("detected peak: {%f, %f} %i\n",p->col, p->row, p->blobsize);
                         blobID++;
                         // stop trying if we found the ones we deserve
                         if (blobID == DETECTOR_NBLOBS) break;
