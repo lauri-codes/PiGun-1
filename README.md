@@ -91,8 +91,8 @@ PiGun needs to be calibrated to work properly, and it is done directly on the li
 2. press TRG - PiGun is now in calibration mode
 3. shoot the top-left corner of the play area
 4. shoot the bottom-right corner of the play area
-5. press CAL button - PiGun goes back to idle mode (LED_CAL goes off)
 
+After shoothing the bottom-right corner, PiGun goes back to idle mode by itself (LED_CAL goes off), ready to fire!
 When aiming at the corners, it is important to ignore whatever crosshair might appear on screen (e.g. if you are running MAME) and aim with the PiGun sights.
 What happens under the hood is simple. The rectangle formed by the beacons provides a natural, normalised coordinate frame on a plane, where the top-left corner is (0,0) and the bottom-right one is (1,1). Shooting the actual corners sets the origin and scale of this frame of refence, defining the rectangle of the play area on the same plane. The PiGun x/y axis are then constrained to this rectangle.
 
