@@ -206,9 +206,6 @@ void pigun_detector_run(unsigned char* data) {
     // the oldpeaks can be reset now
     memset(pigun.detector.oldpeaks, 0, sizeof(pigun_peak_t)*4);
 
-    // save the peaks for faster search next round
-    memcpy(pigun.detector.oldpeaks, pigun.detector.peaks, sizeof(pigun_peak_t)*blobID);
-
     // if we still did not find all the peaks, do a sweep
     if(blobID != DETECTOR_NBLOBS) {
         
@@ -236,6 +233,10 @@ void pigun_detector_run(unsigned char* data) {
             if (blobID == DETECTOR_NBLOBS) break;
         }
     }
+
+    // save the peaks for faster search next round
+    memcpy(pigun.detector.oldpeaks, pigun.detector.peaks, sizeof(pigun_peak_t)*blobID);
+
 
 #ifdef PIGUN_DEBUG
     //printf("detector done, nblobs=%i/%i\n", blobID, DETECTOR_NBLOBS);
