@@ -289,29 +289,6 @@ void pigun_detector_run(unsigned char* data) {
             camera view, the coordinates could be negative.
     */
 
-    /*
-    pigun_peak_t tmp;
-
-	// this will sort the peaks in descending peak.total order
-	qsort(pigun.detector.peaks, 4, sizeof(pigun_peak_t), peak_compare);
-    // it would be more proper to identify the peaks without relying on 
-    // their pseudoindex .total
-
-	// now make sure 0 is the top-left of the first two peaks
-	if(pigun.detector.peaks[0].col > pigun.detector.peaks[1].col){
-		tmp = pigun.detector.peaks[0];
-		pigun.detector.peaks[0] = pigun.detector.peaks[1];
-		pigun.detector.peaks[1] = tmp;
-	}
-
-	// and that 2 is the bottom-left of the last two peaks
-	if(pigun.detector.peaks[2].col > pigun.detector.peaks[3].col){
-		tmp = pigun.detector.peaks[2];
-		pigun.detector.peaks[2] = pigun.detector.peaks[3];
-		pigun.detector.peaks[3] = tmp;
-	}
-    */
-
     pigun_peak_t sortedpeaks[4];
 
     // sort by col (horizontal coordinate)
