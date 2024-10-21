@@ -8,18 +8,18 @@
 
 
 // Button definitions - GPIO pins
-#define PIN_TRG RPI_V2_GPIO_P1_15	// trigger 
+#define PIN_TRG RPI_V2_GPIO_P1_11	// trigger 
 #define PIN_RLD RPI_V2_GPIO_P1_13	// reload  (this is the little clip button like in real beretta M9)
-#define PIN_MAG RPI_V2_GPIO_P1_11	// handmag (this should be connected under the handle)  --  seems to be soldered ok!
+#define PIN_MAG RPI_V2_GPIO_P1_15	// handmag (this should be connected under the handle)  --  seems to be soldered ok!
 
-#define PIN_BT0 RPI_V2_GPIO_P1_22	// central button in the d-pad
-#define PIN_BTU RPI_V2_GPIO_P1_18	// d-pad buttons
-#define PIN_BTD RPI_V2_GPIO_P1_24
-#define PIN_BTL RPI_V2_GPIO_P1_16
-#define PIN_BTR RPI_V2_GPIO_P1_32
+#define PIN_BT0 RPI_V2_GPIO_P1_18	// central button in the d-pad
+#define PIN_BTU RPI_V2_GPIO_P1_24	// d-pad buttons
+#define PIN_BTD RPI_V2_GPIO_P1_32
+#define PIN_BTL RPI_V2_GPIO_P1_22
+#define PIN_BTR RPI_V2_GPIO_P1_16
 
 
-#define PIN_CAL RPI_V2_GPIO_P1_08	// calibration button
+#define PIN_CAL RPI_V2_GPIO_P1_10	// calibration button
 
 
 #define MASK_TRG UINT16_C(0x0001)
@@ -51,7 +51,7 @@
 #define PIN_OUT_AOK RPI_V2_GPIO_P1_40
 
 // GPIO that triggers the solenoid
-#define PIN_OUT_SOL RPI_V2_GPIO_P1_07
+#define PIN_OUT_SOL RPI_V2_GPIO_P1_08
 
 // these are the pin states for fire and not-fire
 #define SOL_FIRE 0 // set to 0 if the SOL pin drives the 555 trigger, set to 1 if the SOL pin drives the optocoupler directly
