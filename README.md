@@ -19,6 +19,7 @@ There is no design for the power supply board, but it is easy to make.
 
 ```bash
 git clone https://github.com/fullmetalfelix/PiGun-1.git # use git@github.com:fullmetalfelix/PiGun-1 for SSH access
+cd PiGun-1
 git submodule update --init --recursive
 ```
 
