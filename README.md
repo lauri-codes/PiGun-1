@@ -15,6 +15,12 @@ The repo inludes stl models for all hardware parts. These were designed to be ma
 There is also the PCB design in a zip file, ready for submission to manufacturers (JLPCB, Aisler, ...).
 There is no design for the power supply board, but it is easy to make.
 
+## Clone the repository and submodules
+
+```bash
+git clone https://github.com/fullmetalfelix/PiGun-1.git # use git@github.com:fullmetalfelix/PiGun-1 for SSH access
+git submodule update --init --recursive
+```
 
 ## Compiling the Code
 
