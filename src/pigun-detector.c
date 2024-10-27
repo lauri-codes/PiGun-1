@@ -1,262 +1,216 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-
-#include "pigun.h"
-#include "pigun-mmal.h"
-#include "pigun-detector.h"
-#include "pigun-hid.h"
-
+#include <stdint.h>
 #include <math.h>
+#include "pigun-detector.h"
+#include "pigun-mmal.h"
+#include "pigun.h"
 
+#define THRESHOLD       130     // Intensity threshold for bright spots
+#define SPARSE_STEP     4       // Step size for sparse sampling (every nth pixel)
+#define MAX_PEAKS       4       // Maximum number of peaks
+#define MAX_PEAK_SIZE   1000    // Maximum number of pixels in a peak
+#define MIN_PEAK_SIZE   20      // Minimum number of pixels in a peak
+#define MAX_SEARCH_DISTANCE 100 // Maximum search distance around old peaks in pixels
 
-
-void pigun_detector_init(){
-
+// For initializing detector state
+void pigun_detector_init() {
     pigun.detector.checked = calloc(PIGUN_RES_X * PIGUN_RES_Y, sizeof(uint8_t));
-    pigun.detector.pxbuffer = (uint32_t*)malloc(sizeof(uint32_t) * PIGUN_NPX);
-    
-    pigun.detector.peaks = (pigun_peak_t*)calloc(10, sizeof(pigun_peak_t));
-    memset(pigun.detector.oldpeaks, 0, sizeof(pigun_peak_t)*4);
-
     pigun.detector.error = 0;
+    memset(pigun.detector.peaks, 0, sizeof(pigun_peak_t)*4);
+
+    // Set initial peak locations. Note that the ordering needs to be set
+    // correctly.
+    pigun.detector.peaks[0].x = (int)(0.25 * PIGUN_RES_X);
+    pigun.detector.peaks[0].y = (int)(0.25 * PIGUN_RES_Y)
+    pigun.detector.peaks[1].x = (int)(0.75 * PIGUN_RES_X);
+    pigun.detector.peaks[1].y = (int)(0.25 * PIGUN_RES_Y)
+    pigun.detector.peaks[2].x = (int)(0.25 * PIGUN_RES_X);
+    pigun.detector.peaks[2].y = (int)(0.75 * PIGUN_RES_Y)
+    pigun.detector.peaks[3].x = (int)(0.75 * PIGUN_RES_X);
+    pigun.detector.peaks[3].y = (int)(0.75 * PIGUN_RES_Y)
 }
 
-void pigun_detector_free(){
-
-    free(pigun.detector.checked);
-    free(pigun.detector.pxbuffer);
-    free(pigun.detector.peaks);
-
+int peak_compare_x(const void* a, const void* b) {
+    // return -1 if a is before b
+    pigun_peak_t* A = (pigun_peak_t*)a;
+    pigun_peak_t* B = (pigun_peak_t*)b;
+	
+    if (A->x < B->x) return -1;
+    else return 1;
 }
 
+// Return an estimate for the peak location
+pixel get_peak_estimate(int x, int y, float dx, float dy) {
+    int x_est = (int)(x + dx);
+    int y_est = (int)(y + dy);
 
+    // Clamp boundaries to frame size
+    if (x_est < 0) x_start = 0;
+    if (y_est < 0) y_est = 0;
+    if (x_est >= PIGUN_RES_X) x_est = PIGUN_RES_X - 1;
+    if (y_est >= PIGUN_RES_Y) y_est = PIGUN_RES_Y - 1;
 
-/**
- * Performs a breadth-first search starting from the given starting index and
- * working on the given data array. Returns a list of indices found to belong
- * to the blob surrounding the starting point.
- * 
- * WARNING: if the blob is too big, it will be cutoff and its position will not be correct!
- * 
- * return 0 if the blob was too small
- * return 1 if the blob was ok
- */
-int blob_detect(uint32_t idx, unsigned char* data, const uint32_t blobID, const uint8_t threshold) {
-    
-    uint32_t blobSize = 0;
-    uint32_t x, y;
-    uint32_t sumVal = 0;
-    uint32_t sumX = 0, sumY = 0;
-    uint8_t maxI = 0;
+    return (pixel){(int)x_est, (int)y_est};
+}
 
-    // put the first px in the queue
-    uint32_t qSize = 1; // length of the queue of idx to check
-    pigun.detector.pxbuffer[0] = idx;
-    pigun.detector.checked[idx] = 1;
+// Function to perform connected component analysis and compute blob properties
+int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int height,
+                            int start_x, int start_y, uint32_t *sum_intensity,
+                            uint32_t *sum_x, uint32_t *sum_y) {
+    // Initialize stack for iterative flood-fill
+    pixel stack[MAX_PEAK_SIZE];
+    int peak_size = 0;
 
-#ifdef PIGUN_DEBUG
-    printf("PIGUN: detecting peak...");
-#endif
+    // Push the starting pixel onto the stack
+    int idx = start_y * width + start_x;
+    stack[peak_size++] = (pixel){start_x, start_y};
+    checked[idx] = 1;
 
-    // Do search until stack is emptied or maximum size is reached
-    while (qSize > 0 && blobSize < DETECTOR_MAXBLOBSIZE) {
-        
-        // check the last element on the list
-        qSize--;
-        uint32_t current = pigun.detector.pxbuffer[qSize];
-        
-        // do the blob position computation
-        
-        // Transform flattened index to 2D coordinate
-        x = current % PIGUN_RES_X;
-        y = current / PIGUN_RES_X;
-        sumVal += data[current];
-        sumX += (uint32_t)(data[current] * x);
-        sumY += (uint32_t)(data[current] * y);
-        if (data[current] > maxI) maxI = data[current];
-        
-        blobSize++;
+    while (peak_size > 0) {
+        // Pop a pixel from the stack
+        pixel p = stack[--peak_size];
+        int x = p.x;
+        int y = p.y;
+        int idx = y * width + x;
+        uint8_t intensity = frame[idx];
 
-        // check neighbours
-        uint32_t other;
-        
-        if(y > 0) { // UP
-            other = current - PIGUN_RES_X;
-            if (!pigun.detector.checked[other] && data[other] >= threshold) {
-                pigun.detector.pxbuffer[qSize] = other;
-                qSize++;
-                pigun.detector.checked[other] = 1;
+        // Accumulate sums
+        *sum_intensity += intensity;
+        *sum_x += x * intensity;
+        *sum_y += y * intensity;
+
+        // Check neighboring pixels (4-connectivity)
+        if (x > 0) {
+            int idx_left = idx - 1;
+            if (!checked[idx_left] && frame[idx_left] >= THRESHOLD) {
+                stack[peak_size++] = (pixel){x - 1, y};
+                checked[idx_left] = 1;
             }
         }
-        if(y < PIGUN_RES_Y-1) { // DOWN
-            other = current + PIGUN_RES_X;
-            if (!pigun.detector.checked[other] && data[other] >= threshold) {
-                pigun.detector.pxbuffer[qSize] = other;
-                qSize++;
-                pigun.detector.checked[other] = 1;
+        if (x < width - 1) {
+            int idx_right = idx + 1;
+            if (!checked[idx_right] && frame[idx_right] >= THRESHOLD) {
+                stack[peak_size++] = (pixel){x + 1, y};
+                checked[idx_right] = 1;
             }
         }
-        if(x > 0) { // LEFT
-            other = current - 1;
-            if (!pigun.detector.checked[other] && data[other] >= threshold) {
-                pigun.detector.pxbuffer[qSize] = other;
-                qSize++;
-                pigun.detector.checked[other] = 1;
+        if (y > 0) {
+            int idx_up = idx - width;
+            if (!checked[idx_up] && frame[idx_up] >= THRESHOLD) {
+                stack[peak_size++] = (pixel){x, y - 1};
+                checked[idx_up] = 1;
             }
         }
-        if(x < PIGUN_RES_X-1) { // RIGHT
-            other = current + 1;
-            if (!pigun.detector.checked[other] && data[other] >= threshold) {
-                pigun.detector.pxbuffer[qSize] = other;
-                qSize++;
-                pigun.detector.checked[other] = 1;
+        if (y < height - 1) {
+            int idx_down = idx + width;
+            if (!checked[idx_down] && frame[idx_down] >= THRESHOLD) {
+                stack[peak_size++] = (pixel){x, y + 1};
+                checked[idx_down] = 1;
             }
+        }
+
+        // Prevent stack overflow
+        if (peak_size >= MAX_PEAK_SIZE) {
+            return -1; // Indicate that the peak is too large
         }
     }
-    // loop ends when there are no more px to check, or the blob is as big as it can be
-    if (blobSize < DETECTOR_MINBLOBSIZE) return 0;
 
-    // code here => peak was good, save it
-    
-    //printf("peak found[%i]: %li %li -- %li -- %i --> ", blobID, sumX, sumY, sumVal, blobSize);
-    
-    pigun.detector.peaks[blobID].blobsize = blobSize;
-    pigun.detector.peaks[blobID].col = ((float)sumX) / sumVal;
-    pigun.detector.peaks[blobID].row = ((float)sumY) / sumVal;
-    pigun.detector.peaks[blobID].maxI = (float)maxI;
-    pigun.detector.peaks[blobID].total = (pigun.detector.peaks[blobID].row * PIGUN_RES_X + pigun.detector.peaks[blobID].col);
-    
-#ifdef PIGUN_DEBUG
-    printf("%f %f\n", pigun.detector.peaks[blobID].col, pigun.detector.peaks[blobID].row);
-#endif
-    return 1;
+    // Check that peak size is not too small
+    if (peak_size < MIN_PEAK_SIZE) {
+        return -1;
+    }
+
+    return 0; // Success
 }
 
-int peak_compare(const void* a, const void* b) {
-
-    pigun_peak_t* A = (pigun_peak_t*)a;
-    pigun_peak_t* B = (pigun_peak_t*)b;
-	
-    if (B->total > A->total) return -1;
-    else return 1;
-}
-int peak_compare_col(const void* a, const void* b) {
-    // return -1 if a is before b
-    pigun_peak_t* A = (pigun_peak_t*)a;
-    pigun_peak_t* B = (pigun_peak_t*)b;
-	
-    if (A->col < B->col) return -1;
-    else return 1;
-}
-int peak_compare_row(const void* a, const void* b) {
-    // return -1 if a is before b
-    pigun_peak_t* A = (pigun_peak_t*)a;
-    pigun_peak_t* B = (pigun_peak_t*)b;
-	
-    if (A->row < B->row) return -1;
-    else return 1;
-}
-
-
-
-/**
-    * Detects peaks in the camera output and reports them under the global
-    * "peaks"-variables.
-    */
-void pigun_detector_run(unsigned char* data) {
-
-#ifdef PIGUN_DEBUG
-    printf("detecting...\n");
-#endif
-
-    // These parameters have to be tuned to optimize the search
-    const uint8_t threshold = 130;          // The minimum threshold for pixel intensity in a blob
-
-    const uint32_t nx = floor((float)(PIGUN_RES_X) / (float)(DETECTOR_DX));
-    const uint32_t ny = floor((float)(PIGUN_RES_Y) / (float)(DETECTOR_DX));
+void pigun_detector_run(uint8_t *frame) {
+    // Array to store new peaks
+    pigun_peak_t new_peaks[MAX_PEAKS];
+    pigun_peak_t *old_peaks = pigun.detector.peaks;
+    int peak_count = 0;
 
     // Reset the boolean array for marking pixels as checked.
     memset(pigun.detector.checked, 0, PIGUN_RES_X * PIGUN_RES_Y * sizeof(uint8_t));
+    uint8_t* checked = pigun.detector.checked;
 
-    // reset the peaks
-    memset(pigun.detector.peaks, 0, sizeof(pigun_peak_t)*4);
+    // Constants for sampling
+    int max_delta = MAX_SEARCH_DISTANCE;
+    int stride = SPARSE_STEP; // N pixels
 
-    uint8_t blobID = 0;
+    // For each old peak, search for the new peak
+    for (int i = 0; i < MAX_PEAKS; i++) {
+        // Predict new position using previous velocity
+        pixel peak_estimate = get_peak_estimate(old_peaks[i].x, old_peaks[i].y, old_peaks[i].dx, old_peaks[i].dy);
+        int x0 = peak_estimate.x;
+        int y0 = peak_estimate.y;
 
-    // we should start the search at the centers of the old peaks from last frame
-    for(uint8_t i=0; i<4; i++){
-        pigun_peak_t *peak = &(pigun.detector.oldpeaks[i]);
-        
-        if(pigun.detector.oldpeaks[i].blobsize!=0){
-            uint32_t i = (uint32_t)floor(peak->col);
-            uint32_t j = (uint32_t)floor(peak->row);
-            uint32_t idx = j * PIGUN_RES_X + i;
-            uint8_t value = data[idx];
+        int peak_found = 0;
+        uint32_t sum_intensity = 0;
+        uint32_t sum_x = 0;
+        uint32_t sum_y = 0;
 
-            if(value >= threshold && !pigun.detector.checked[idx]){
-                value = blob_detect(idx, data, blobID, threshold);
-                if (value == 1) {
-                    blobID++;
-                    // stop trying if we found the ones we deserve
-                    if (blobID == DETECTOR_NBLOBS) break;
-                }
-            }
-        }
-    }
-    //printf("peaks found near previous ones: %i\n", blobID);
+        // Start sampling from delta = 0 (initial position), then expand outwards
+        for (int delta = 0; delta <= max_delta && !peak_found; delta += stride) {
+            for (int dx = -delta; dx <= delta && !peak_found; dx += stride) {
+                for (int dy = -delta; dy <= delta && !peak_found; dy += stride) {
+                    // Only consider positions at Manhattan distance 'delta'
+                    if (abs(dx) + abs(dy) != delta)
+                        continue;
 
-    // at this point we have used the old peaks to find the current ones
-    // the oldpeaks can be reset now
-    memset(pigun.detector.oldpeaks, 0, sizeof(pigun_peak_t)*4);
+                    int x = x0 + dx;
+                    int y = y0 + dy;
 
-    //blobID = 0; // DEBUG
-    // if we still did not find all the peaks, do a sweep
-    if(blobID != DETECTOR_NBLOBS) {
-        
-        // Here the order actually matters: we loop in this order to get better cache hit rate
-        for (uint32_t j = 0; j < ny; ++j) {
-            for (uint32_t i = 0; i < nx; ++i) {
+                    // Check if x and y are within bounds
+                    if (x >= 0 && x < PIGUN_RES_X && y >= 0 && y < PIGUN_RES_Y) {
+                        int idx = y * PIGUN_RES_X + x;
+                        if (!checked[idx] && frame[idx] >= THRESHOLD) {
+                            // Reset sums
+                            sum_intensity = 0;
+                            sum_x = 0;
+                            sum_y = 0;
 
-                // pixel index in the buffer
-                uint32_t idx = j * DETECTOR_DX * PIGUN_RES_X + i * DETECTOR_DX;
-                uint8_t value = data[idx];
+                            int result = compute_blob_properties(frame, checked, PIGUN_RES_X, PIGUN_RES_Y,
+                                                                 x, y,
+                                                                 &sum_intensity, &sum_x, &sum_y);
 
-                // check if px is bright enough and not seen by the bfs before
-                if (value >= threshold && !pigun.detector.checked[idx]) {
-                    
-                    // we found a bright pixel! search nearby
-                    value = blob_detect(idx, data, blobID, threshold);
-                    // peak was saved if good, move on to the next
-                    if (value == 1) {
-                        blobID++;
-                        // stop trying if we found the ones we deserve
-                        if (blobID == DETECTOR_NBLOBS) break;
+                            if (result == 0 && sum_intensity > 0) {
+                                float centroid_x = (float)sum_x / sum_intensity;
+                                float centroid_y = (float)sum_y / sum_intensity;
+
+                                // Update peak position and velocity
+                                float delta_x = centroid_x - old_peaks[i].x;
+                                float delta_y = centroid_y - old_peaks[i].y;
+
+                                new_peaks[peak_count].dx = delta_x;
+                                new_peaks[peak_count].dy = delta_y;
+                                new_peaks[peak_count].x = centroid_x;
+                                new_peaks[peak_count].y = centroid_y;
+                                ++peak_count;
+                                peak_found = 1;
+                                break; // Found the peak, proceed to next one
+                            }
+                        }
                     }
                 }
             }
-            if (blobID == DETECTOR_NBLOBS) break;
+        }
+        if (!peak_found) {
+            // Peak not found; handle accordingly or set error
+            // For now, we'll continue to the next peak
+            continue;
         }
     }
 
-    // save the peaks for faster search next round
-    if(blobID > 0)
-        memcpy(pigun.detector.oldpeaks, pigun.detector.peaks, sizeof(pigun_peak_t)*blobID);
-
-
-#ifdef PIGUN_DEBUG
-    //printf("detector done, nblobs=%i/%i\n", blobID, DETECTOR_NBLOBS);
-#endif
-
-    // at this point we should have all the blobs we wanted
-    // or maybe we are short
-    if (blobID != DETECTOR_NBLOBS) {
-        // if we are short or too many, tell the callback we got an error
+    // At this point we should have all the peak we wanted or maybe we are
+    // short. If we are short, tell the callback we got an error
+    if (peak_count != DETECTOR_NBLOBS) {
         pigun.detector.error = 1;
         return;
     }
 
-    /* INFO
+    /* Sort blobs based on location
+     INFO
         4 LED MODE:
 	
         Order peaks. The ordering is based on the distance of the peaks to the screen corners:
@@ -288,15 +242,14 @@ void pigun_detector_run(unsigned char* data) {
             if we were to use prediction to extrapolate positions of peaks that went out of
             camera view, the coordinates could be negative.
     */
-
     pigun_peak_t sortedpeaks[4];
 
     // sort by col (horizontal coordinate)
-    qsort(pigun.detector.peaks, 4, sizeof(pigun_peak_t), peak_compare_col);
+    qsort(pigun.detector.peaks, 4, sizeof(pigun_peak_t), peak_compare_x);
     // the first 2 peaks have to be 0 and 2 (unless u hold the gun like a gansta in which case u deserve to miss)
     // the one with smallest .row is 0
     // flip them if it is not so
-    if(pigun.detector.peaks[0].row > pigun.detector.peaks[1].row) {
+    if(pigun.detector.peaks[0].y > pigun.detector.peaks[1].y) {
         sortedpeaks[0] = pigun.detector.peaks[1];
         sortedpeaks[2] = pigun.detector.peaks[0];
 	} else {
@@ -304,7 +257,7 @@ void pigun_detector_run(unsigned char* data) {
         sortedpeaks[2] = pigun.detector.peaks[1];
     }
     // the same goes for peaks 2 and 3
-    if(pigun.detector.peaks[2].row > pigun.detector.peaks[3].row) {
+    if(pigun.detector.peaks[2].y > pigun.detector.peaks[3].y) {
         sortedpeaks[1] = pigun.detector.peaks[3];
         sortedpeaks[3] = pigun.detector.peaks[2];
     } else {
@@ -319,3 +272,7 @@ void pigun_detector_run(unsigned char* data) {
     return;
 }
 
+// Free up allocated memory
+void pigun_detector_free(){
+    free(pigun.detector.checked);
+}
