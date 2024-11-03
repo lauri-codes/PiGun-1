@@ -264,15 +264,27 @@ void pigun_detector_run(uint8_t *frame) {
 
         // Start sampling from delta = 0 (initial position), then expand outwards
         for (int delta = 0; delta <= max_delta && !peak_found; delta += stride) {
-            // Search is performed in four steps:
-            // 1) Top row
-            // 2) Bottom row
-            // 2) Left row
-            // 2) Right row
-            // The horizontal swipes are done first as memory is fastest to
-            // access this way.
+            // Top row
             int dy = -delta;
             for (int dx = -delta; dx <= delta && !peak_found; dx += stride) {
+                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
+                if (peak_found) break;
+            }
+            // Bottom row
+            int dy = delta;
+            for (int dx = -delta; dx <= delta && !peak_found; dx += stride) {
+                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
+                if (peak_found) break;
+            }
+            // Left column
+            int dx = -delta;
+            for (int dy = -delta+1; dy < delta && !peak_found; dy += stride) {
+                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
+                if (peak_found) break;
+            }
+            // Right column
+            int dx = delta;
+            for (int dy = -delta+1; dy < delta && !peak_found; dy += stride) {
                 peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
             }
