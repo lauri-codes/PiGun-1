@@ -124,8 +124,8 @@ void pigun_reset_peaks() {
 
 // Return an estimate for the peak location
 pixel get_peak_estimate(pigun_peak_t *old_peak) {
-    int x_est = (int)(old_peak.x + old_peak.dx);
-    int y_est = (int)(old_peak.y + old_peak.dy);
+    int x_est = (int)(old_peak->x + old_peak->dx);
+    int y_est = (int)(old_peak->y + old_peak->dy);
 
     // Clamp boundaries to frame size
     if (x_est < 0) x_est = 0;
@@ -226,13 +226,13 @@ int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked, 
                 float centroid_y = (float)sum_y / sum_intensity;
 
                 // Update peak position and velocity
-                float delta_x = centroid_x - old_peak.x;
-                float delta_y = centroid_y - old_peak.y;
+                float delta_x = centroid_x - old_peak->x;
+                float delta_y = centroid_y - old_peak->y;
 
-                peak.dx = delta_x;
-                peak.dy = delta_y;
-                peak.x = centroid_x;
-                peak.y = centroid_y;
+                new_peak->dx = delta_x;
+                new_peak->dy = delta_y;
+                new_peak->x = centroid_x;
+                new_peak->y = centroid_y;
                 return 1
             }
         }
