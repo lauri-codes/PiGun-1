@@ -53,7 +53,7 @@ pixel get_peak_estimate(int x, int y, float dx, float dy) {
     int y_est = (int)(y + dy);
 
     // Clamp boundaries to frame size
-    if (x_est < 0) x_start = 0;
+    if (x_est < 0) x_est = 0;
     if (y_est < 0) y_est = 0;
     if (x_est >= PIGUN_RES_X) x_est = PIGUN_RES_X - 1;
     if (y_est >= PIGUN_RES_Y) y_est = PIGUN_RES_Y - 1;
