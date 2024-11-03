@@ -248,7 +248,7 @@ int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked, 
 void pigun_detector_run(uint8_t *frame) {
     // Array to store new peaks
     pigun_peak_t new_peaks[MAX_PEAKS];
-    pigun_peak_t *old_peaks = pigun.detector.peaks;
+    pigun_peak_t old_peaks = pigun.detector.peaks;
     int peak_count = 0;
 
     // Reset the boolean array for marking pixels as checked.
@@ -262,7 +262,7 @@ void pigun_detector_run(uint8_t *frame) {
     // Search for a new peak from the vicinity of the old peak.
     for (int i = 0; i < MAX_PEAKS; i++) {
         // Predict new position using previous velocity
-        pixel peak_estimate = get_peak_estimate(old_peaks[i]);
+        pixel peak_estimate = get_peak_estimate(&old_peaks[i]);
         int x0 = peak_estimate.x;
         int y0 = peak_estimate.y;
         int peak_found = 0;
@@ -272,28 +272,28 @@ void pigun_detector_run(uint8_t *frame) {
             // Top row
             int dy = -delta;
             for (int dx = -delta; dx <= delta && !peak_found; dx += stride) {
-                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], old_peaks[i]);
+                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
             }
             if (peak_found) break;
             // Bottom row
             dy = delta;
             for (int dx = -delta; dx <= delta && !peak_found; dx += stride) {
-                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], old_peaks[i]);
+                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
             }
             if (peak_found) break;
             // Left column
             int dx = -delta;
             for (int dy = -delta+1; dy < delta && !peak_found; dy += stride) {
-                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], old_peaks[i]);
+                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
             }
             if (peak_found) break;
             // Right column
             dx = delta;
             for (int dy = -delta+1; dy < delta && !peak_found; dy += stride) {
-                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], old_peaks[i]);
+                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
             }
         }
