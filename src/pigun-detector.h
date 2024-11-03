@@ -5,10 +5,10 @@
 
 /// @brief Represents a peak in the image data
 typedef struct {
-    float x = 0;             // Current x position (centroid)
-    float y = 0;             // Current y position (centroid)
-    float dx = 0;            // Velocity in x
-    float dy = 0;            // Velocity in y
+    float x;             // Current x position (centroid)
+    float y;             // Current y position (centroid)
+    float dx;            // Velocity in x
+    float dy;            // Velocity in y
 } pigun_peak_t;
 
 /// @brief Detector operational parameters.
@@ -26,6 +26,7 @@ typedef struct {
 } pixel;
 
 void pigun_detector_init();
+void pigun_reset_peaks();
 void pigun_detector_run(unsigned char*);
 void pigun_detector_free();
 

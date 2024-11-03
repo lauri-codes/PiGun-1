@@ -21,6 +21,13 @@ void pigun_detector_init() {
 
     // Set initial peak locations. Note that the ordering needs to be set
     // correctly.
+    pigun_reset_peaks();
+}
+
+// For initializing detector state
+void pigun_reset_peaks() {
+    // Set default peak locations. Note that the ordering needs to be set
+    // correctly.
     pigun.detector.peaks[0].x = (int)(0.25 * PIGUN_RES_X);
     pigun.detector.peaks[0].y = (int)(0.25 * PIGUN_RES_Y);
     pigun.detector.peaks[1].x = (int)(0.75 * PIGUN_RES_X);
@@ -203,7 +210,8 @@ void pigun_detector_run(uint8_t *frame) {
     }
 
     // At this point we should have all the peak we wanted or maybe we are
-    // short. If we are short, tell the callback we got an error
+    // short. If we are short, tell the callback we got an error. The peaks are
+    // reset after errors in order for the search to not get stuck.
     if (peak_count != DETECTOR_NBLOBS) {
         pigun.detector.error = 1;
         return;
