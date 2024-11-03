@@ -19,7 +19,7 @@
 void pigun_detector_init() {
     pigun.detector.checked = calloc(PIGUN_RES_X * PIGUN_RES_Y, sizeof(uint8_t));
     pigun.detector.error = 0;
-    memset(pigun.detector.peaks, 0, sizeof(pigun_peak_t)*4);
+    memset(pigun.detector.peaks, 0, sizeof(pigun_peak_t)*MAX_PEAKS);
 
     // Set initial peak locations. Note that the ordering needs to be set
     // correctly.
@@ -75,10 +75,10 @@ int peak_compare_x(const void* a, const void* b) {
  * that went out of camera view, the coordinates could be negative.
  */
 void pigun_order_peaks() {
-    pigun_peak_t sortedpeaks[4];
+    pigun_peak_t sortedpeaks[MAX_PEAKS];
 
     // sort by col (horizontal coordinate)
-    qsort(pigun.detector.peaks, 4, sizeof(pigun_peak_t), peak_compare_x);
+    qsort(pigun.detector.peaks, MAX_PEAKS, sizeof(pigun_peak_t), peak_compare_x);
     // the first 2 peaks have to be 0 and 2 (unless u hold the gun like a gansta in which case u deserve to miss)
     // the one with smallest .row is 0
     // flip them if it is not so
@@ -97,7 +97,7 @@ void pigun_order_peaks() {
         sortedpeaks[1] = pigun.detector.peaks[2];
         sortedpeaks[3] = pigun.detector.peaks[3];
     }
-    memcpy(pigun.detector.peaks, sortedpeaks, sizeof(pigun_peak_t)*4);
+    memcpy(pigun.detector.peaks, sortedpeaks, sizeof(pigun_peak_t)*MAX_PEAKS);
 }
 
 /**
@@ -312,6 +312,9 @@ void pigun_detector_run(uint8_t *frame) {
         pigun.detector.error = 1;
         return;
     }
+    // Store new peaks as old peaks
+    memcpy(pigun.detector.peaks, new_peaks, sizeof(pigun_peak_t)*MAX_PEAKS);
+
     pigun_order_peaks();
     for (int i = 0; i < MAX_PEAKS; ++i) {
         printf("x: %i, y: %i\n", pigun.detector.peaks[i].x, pigun.detector.peaks[i].y);
