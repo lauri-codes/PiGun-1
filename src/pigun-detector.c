@@ -141,6 +141,10 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
 
 void pigun_detector_run(uint8_t *frame) {
     // Array to store new peaks
+    pigun_reset_peaks();
+    pigun.detector.error = 0;
+    return;
+
     pigun_peak_t new_peaks[MAX_PEAKS];
     pigun_peak_t *old_peaks = pigun.detector.peaks;
     int peak_count = 0;
