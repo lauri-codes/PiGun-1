@@ -24,10 +24,71 @@ void pigun_detector_init() {
     pigun_reset_peaks();
 }
 
-// For initializing detector state
+/**
+ * @brief Used to order peaks.
+ *
+ * INFO
+        4 LED MODE:
+	
+        Order peaks. The ordering is based on the distance of the peaks to the screen corners:
+            Peak closest to top-left corner = A
+            Peak closest to bottom-left corner = B
+            Peak closest to top-right corner = C
+            Peak closest to bottom-right corner = D
+
+        assuming we sort the peaks using the peak.total indexer (ascending), the camera sees:
+	
+        2---3      3---2
+        |   |  OR  |   |
+        0---1      1---0
+	
+        OR any similar pattern... in the end all we know is that:
+        a. the first 2 peaks are the bottom LED bar
+        b. the last 2 are the top LED bar
+        but after sorting the ordering of top and bottom spots depends on
+        camera rotation.
+        we have to manually adjust them so that we get:
+
+        0---1
+        |   |
+        2---3
+
+        the aimer will use these in the correct order to compute the inverse projection!
+
+        warning! sorting by .total is a hack that only works when the .row/.col are positive.
+            if we were to use prediction to extrapolate positions of peaks that went out of
+            camera view, the coordinates could be negative.
+ */
+void pigun_order_peaks() {
+    pigun_peak_t sortedpeaks[4];
+
+    // sort by col (horizontal coordinate)
+    qsort(pigun.detector.peaks, 4, sizeof(pigun_peak_t), peak_compare_x);
+    // the first 2 peaks have to be 0 and 2 (unless u hold the gun like a gansta in which case u deserve to miss)
+    // the one with smallest .row is 0
+    // flip them if it is not so
+    if(pigun.detector.peaks[0].y > pigun.detector.peaks[1].y) {
+        sortedpeaks[0] = pigun.detector.peaks[1];
+        sortedpeaks[2] = pigun.detector.peaks[0];
+	} else {
+        sortedpeaks[0] = pigun.detector.peaks[0];
+        sortedpeaks[2] = pigun.detector.peaks[1];
+    }
+    // the same goes for peaks 2 and 3
+    if(pigun.detector.peaks[2].y > pigun.detector.peaks[3].y) {
+        sortedpeaks[1] = pigun.detector.peaks[3];
+        sortedpeaks[3] = pigun.detector.peaks[2];
+    } else {
+        sortedpeaks[1] = pigun.detector.peaks[2];
+        sortedpeaks[3] = pigun.detector.peaks[3];
+    }
+    memcpy(pigun.detector.peaks, sortedpeaks, sizeof(pigun_peak_t)*4);
+}
+
+/**
+ * @brief Used to reset peaks to a default state.
+ */
 void pigun_reset_peaks() {
-    // Set default peak locations. Note that the ordering needs to be set
-    // correctly.
     pigun.detector.peaks[0].x = (int)(0.25 * PIGUN_RES_X);
     pigun.detector.peaks[0].y = (int)(0.25 * PIGUN_RES_Y);
     pigun.detector.peaks[0].dx = 0;
@@ -141,10 +202,6 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
 
 void pigun_detector_run(uint8_t *frame) {
     // Array to store new peaks
-    pigun_reset_peaks();
-    pigun.detector.error = 0;
-    return;
-
     pigun_peak_t new_peaks[MAX_PEAKS];
     pigun_peak_t *old_peaks = pigun.detector.peaks;
     int peak_count = 0;
@@ -225,68 +282,12 @@ void pigun_detector_run(uint8_t *frame) {
     // short. If we are short, tell the callback we got an error. The peaks are
     // reset after errors in order for the search to not get stuck.
     if (peak_count != MAX_PEAKS) {
+        printf("number of peaks found: [%i]\n", peak_count);
         pigun.detector.error = 1;
         pigun_reset_peaks();
         return;
     }
-
-    /* Sort blobs based on location
-     INFO
-        4 LED MODE:
-	
-        Order peaks. The ordering is based on the distance of the peaks to the screen corners:
-            Peak closest to top-left corner = A
-            Peak closest to bottom-left corner = B
-            Peak closest to top-right corner = C
-            Peak closest to bottom-right corner = D
-
-        assuming we sort the peaks using the peak.total indexer (ascending), the camera sees:
-	
-        2---3      3---2
-        |   |  OR  |   |
-        0---1      1---0
-	
-        OR any similar pattern... in the end all we know is that:
-        a. the first 2 peaks are the bottom LED bar
-        b. the last 2 are the top LED bar
-        but after sorting the ordering of top and bottom spots depends on
-        camera rotation.
-        we have to manually adjust them so that we get:
-
-        0---1
-        |   |
-        2---3
-
-        the aimer will use these in the correct order to compute the inverse projection!
-
-        WARNING! sorting by .total is a hack that only works when the .row/.col are positive.
-            if we were to use prediction to extrapolate positions of peaks that went out of
-            camera view, the coordinates could be negative.
-    */
-    pigun_peak_t sortedpeaks[4];
-
-    // sort by col (horizontal coordinate)
-    qsort(pigun.detector.peaks, 4, sizeof(pigun_peak_t), peak_compare_x);
-    // the first 2 peaks have to be 0 and 2 (unless u hold the gun like a gansta in which case u deserve to miss)
-    // the one with smallest .row is 0
-    // flip them if it is not so
-    if(pigun.detector.peaks[0].y > pigun.detector.peaks[1].y) {
-        sortedpeaks[0] = pigun.detector.peaks[1];
-        sortedpeaks[2] = pigun.detector.peaks[0];
-	} else {
-        sortedpeaks[0] = pigun.detector.peaks[0];
-        sortedpeaks[2] = pigun.detector.peaks[1];
-    }
-    // the same goes for peaks 2 and 3
-    if(pigun.detector.peaks[2].y > pigun.detector.peaks[3].y) {
-        sortedpeaks[1] = pigun.detector.peaks[3];
-        sortedpeaks[3] = pigun.detector.peaks[2];
-    } else {
-        sortedpeaks[1] = pigun.detector.peaks[2];
-        sortedpeaks[3] = pigun.detector.peaks[3];
-    }
-    memcpy(pigun.detector.peaks, sortedpeaks, sizeof(pigun_peak_t)*4);
-
+    pigun_order_peaks();
     //printf("detector done [%i]\n",blobID);
     pigun.detector.error = 0;
     return;
