@@ -220,7 +220,7 @@ int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked, 
             int result = compute_blob_properties(frame, checked, PIGUN_RES_X, PIGUN_RES_Y,
                                                  x, y,
                                                  &sum_intensity, &sum_x, &sum_y);
-
+            printf("intensity: [%i]\n", sum_intensity);
             if (result == 0 && sum_intensity > 0) {
                 float centroid_x = (float)sum_x / sum_intensity;
                 float centroid_y = (float)sum_y / sum_intensity;
@@ -270,18 +270,21 @@ void pigun_detector_run(uint8_t *frame) {
                 peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
             }
+            if (peak_found) break;
             // Bottom row
             int dy = delta;
             for (int dx = -delta; dx <= delta && !peak_found; dx += stride) {
                 peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
             }
+            if (peak_found) break;
             // Left column
             int dx = -delta;
             for (int dy = -delta+1; dy < delta && !peak_found; dy += stride) {
                 peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
             }
+            if (peak_found) break;
             // Right column
             int dx = delta;
             for (int dy = -delta+1; dy < delta && !peak_found; dy += stride) {
@@ -301,7 +304,7 @@ void pigun_detector_run(uint8_t *frame) {
     // short. If we are short, tell the callback we got an error. The old peak
     // positions are preserved so that something sensible can be reported.
     if (peak_count != MAX_PEAKS) {
-        printf("number of peaks found: [%i]\n", peak_count);
+        // printf("number of peaks found: [%i]\n", peak_count);
         pigun.detector.error = 1;
         return;
     }
