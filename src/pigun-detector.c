@@ -313,6 +313,9 @@ void pigun_detector_run(uint8_t *frame) {
         return;
     }
     pigun_order_peaks();
+    for (int i = 0; i < MAX_PEAKS; ++i) {
+        printf("x: %i, y: %i\n", pigun.detector.peaks[i].x, , pigun.detector.peaks[i].y);
+    }
     //printf("detector done [%i]\n",blobID);
     pigun.detector.error = 0;
     return;
