@@ -30,12 +30,20 @@ void pigun_reset_peaks() {
     // correctly.
     pigun.detector.peaks[0].x = (int)(0.25 * PIGUN_RES_X);
     pigun.detector.peaks[0].y = (int)(0.25 * PIGUN_RES_Y);
+    pigun.detector.peaks[0].dx = 0;
+    pigun.detector.peaks[0].dy = 0;
     pigun.detector.peaks[1].x = (int)(0.75 * PIGUN_RES_X);
     pigun.detector.peaks[1].y = (int)(0.25 * PIGUN_RES_Y);
+    pigun.detector.peaks[1].dx = 0;
+    pigun.detector.peaks[1].dy = 0;
     pigun.detector.peaks[2].x = (int)(0.25 * PIGUN_RES_X);
     pigun.detector.peaks[2].y = (int)(0.75 * PIGUN_RES_Y);
+    pigun.detector.peaks[2].dx = 0;
+    pigun.detector.peaks[2].dy = 0;
     pigun.detector.peaks[3].x = (int)(0.75 * PIGUN_RES_X);
     pigun.detector.peaks[3].y = (int)(0.75 * PIGUN_RES_Y);
+    pigun.detector.peaks[3].dx = 0;
+    pigun.detector.peaks[3].dy = 0;
 }
 
 int peak_compare_x(const void* a, const void* b) {
@@ -214,6 +222,7 @@ void pigun_detector_run(uint8_t *frame) {
     // reset after errors in order for the search to not get stuck.
     if (peak_count != MAX_PEAKS) {
         pigun.detector.error = 1;
+        pigun_reset_peaks();
         return;
     }
 
