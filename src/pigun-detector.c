@@ -214,9 +214,9 @@ int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked, 
     if (x >= 0 && x < PIGUN_RES_X && y >= 0 && y < PIGUN_RES_Y) {
         int idx = y * PIGUN_RES_X + x;
         if (!checked[idx] && frame[idx] >= THRESHOLD) {
-            int sum_intensity = 0;
-            int sum_x = 0;
-            int sum_y = 0;
+            uint32_t sum_intensity = 0;
+            uint32_t sum_x = 0;
+            uint32_t sum_y = 0;
             int result = compute_blob_properties(frame, checked, PIGUN_RES_X, PIGUN_RES_Y,
                                                  x, y,
                                                  &sum_intensity, &sum_x, &sum_y);
@@ -233,7 +233,7 @@ int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked, 
                 new_peak->dy = delta_y;
                 new_peak->x = centroid_x;
                 new_peak->y = centroid_y;
-                return 1
+                return 1;
             }
         }
     }
@@ -261,9 +261,6 @@ void pigun_detector_run(uint8_t *frame) {
         int x0 = peak_estimate.x;
         int y0 = peak_estimate.y;
         int peak_found = 0;
-        uint32_t sum_intensity = 0;
-        uint32_t sum_x = 0;
-        uint32_t sum_y = 0;
 
         // Start sampling from delta = 0 (initial position), then expand outwards
         for (int delta = 0; delta <= max_delta && !peak_found; delta += stride) {
