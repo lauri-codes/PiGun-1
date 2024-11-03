@@ -212,7 +212,7 @@ void pigun_detector_run(uint8_t *frame) {
     // At this point we should have all the peak we wanted or maybe we are
     // short. If we are short, tell the callback we got an error. The peaks are
     // reset after errors in order for the search to not get stuck.
-    if (peak_count != DETECTOR_NBLOBS) {
+    if (peak_count != MAX_PEAKS) {
         pigun.detector.error = 1;
         return;
     }
