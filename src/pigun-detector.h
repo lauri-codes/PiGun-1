@@ -27,6 +27,7 @@ typedef struct {
 
 void pigun_detector_init();
 void pigun_reset_peaks();
+void pigun_order_peaks();
 void pigun_detector_run(unsigned char*);
 void pigun_detector_free();
 

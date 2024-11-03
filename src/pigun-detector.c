@@ -13,7 +13,9 @@
 #define MIN_PEAK_SIZE   20      // Minimum number of pixels in a peak
 #define MAX_SEARCH_DISTANCE (int)(0.25 * PIGUN_RES_X) // Maximum search distance around old peaks in pixels
 
-// For initializing detector state
+/**
+ * @brief For initializing detector.
+ */
 void pigun_detector_init() {
     pigun.detector.checked = calloc(PIGUN_RES_X * PIGUN_RES_Y, sizeof(uint8_t));
     pigun.detector.error = 0;
@@ -22,6 +24,22 @@ void pigun_detector_init() {
     // Set initial peak locations. Note that the ordering needs to be set
     // correctly.
     pigun_reset_peaks();
+}
+
+/**
+ * @brief Used to compare peaks for sorting them.
+ * 
+ * @param a First peak
+ * @param b Second peak
+ * @return int
+ */
+int peak_compare_x(const void* a, const void* b) {
+    // return -1 if a is before b
+    pigun_peak_t* A = (pigun_peak_t*)a;
+    pigun_peak_t* B = (pigun_peak_t*)b;
+	
+    if (A->x < B->x) return -1;
+    else return 1;
 }
 
 /**
@@ -105,15 +123,6 @@ void pigun_reset_peaks() {
     pigun.detector.peaks[3].y = (int)(0.75 * PIGUN_RES_Y);
     pigun.detector.peaks[3].dx = 0;
     pigun.detector.peaks[3].dy = 0;
-}
-
-int peak_compare_x(const void* a, const void* b) {
-    // return -1 if a is before b
-    pigun_peak_t* A = (pigun_peak_t*)a;
-    pigun_peak_t* B = (pigun_peak_t*)b;
-	
-    if (A->x < B->x) return -1;
-    else return 1;
 }
 
 // Return an estimate for the peak location
