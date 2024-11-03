@@ -272,7 +272,7 @@ void pigun_detector_run(uint8_t *frame) {
             }
             if (peak_found) break;
             // Bottom row
-            int dy = delta;
+            dy = delta;
             for (int dx = -delta; dx <= delta && !peak_found; dx += stride) {
                 peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
@@ -286,7 +286,7 @@ void pigun_detector_run(uint8_t *frame) {
             }
             if (peak_found) break;
             // Right column
-            int dx = delta;
+            dx = delta;
             for (int dy = -delta+1; dy < delta && !peak_found; dy += stride) {
                 peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
