@@ -156,6 +156,7 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
         int y = p.y;
         int idx = y * width + x;
         uint8_t intensity = frame[idx];
+        printf("intensity: [%i]\n", intensity);
 
         // Accumulate sums
         *sum_intensity += intensity;
