@@ -123,9 +123,9 @@ void pigun_reset_peaks() {
 }
 
 // Return an estimate for the peak location
-pixel get_peak_estimate(int x, int y, float dx, float dy) {
-    int x_est = (int)(x + dx);
-    int y_est = (int)(y + dy);
+pixel get_peak_estimate(pigun_peak_t *old_peak) {
+    int x_est = (int)(old_peak.x + old_peak.dx);
+    int y_est = (int)(old_peak.y + old_peak.dy);
 
     // Clamp boundaries to frame size
     if (x_est < 0) x_est = 0;
@@ -206,7 +206,7 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
     return 0; // Success
 }
 
-int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked) {
+int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked, pigun_peak_t *new_peak, pigun_peak_t *old_peak) {
     int x = x0 + dx;
     int y = y0 + dy;
 
@@ -226,8 +226,8 @@ int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked) 
                 float centroid_y = (float)sum_y / sum_intensity;
 
                 // Update peak position and velocity
-                float delta_x = centroid_x - old_peaks[i].x;
-                float delta_y = centroid_y - old_peaks[i].y;
+                float delta_x = centroid_x - old_peak.x;
+                float delta_y = centroid_y - old_peak.y;
 
                 peak.dx = delta_x;
                 peak.dy = delta_y;
@@ -257,7 +257,7 @@ void pigun_detector_run(uint8_t *frame) {
     // Search for a new peak from the vicinity of the old peak.
     for (int i = 0; i < MAX_PEAKS; i++) {
         // Predict new position using previous velocity
-        pixel peak_estimate = get_peak_estimate(old_peaks[i].x, old_peaks[i].y, old_peaks[i].dx, old_peaks[i].dy);
+        pixel peak_estimate = get_peak_estimate(&old_peaks[i]);
         int x0 = peak_estimate.x;
         int y0 = peak_estimate.y;
         int peak_found = 0;
@@ -276,7 +276,7 @@ void pigun_detector_run(uint8_t *frame) {
             // access this way.
             int dy = -delta;
             for (int dx = -delta; dx <= delta && !peak_found; dx += stride) {
-                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[peak_count]);
+                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[i], &old_peaks[i]);
                 if (peak_found) break;
             }
         }
