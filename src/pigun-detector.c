@@ -194,12 +194,14 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
 
         // Prevent stack overflow
         if (peak_size >= MAX_PEAK_SIZE) {
+            printf("too large peak: [%i]\n", peak_size);
             return -1; // Indicate that the peak is too large
         }
     }
 
     // Check that peak size is not too small
     if (peak_size < MIN_PEAK_SIZE) {
+        printf("too small peak: [%i]\n", peak_size);
         return -1;
     }
 
@@ -220,7 +222,6 @@ int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked, 
             int result = compute_blob_properties(frame, checked, PIGUN_RES_X, PIGUN_RES_Y,
                                                  x, y,
                                                  &sum_intensity, &sum_x, &sum_y);
-            printf("intensity: [%i]\n", sum_intensity);
             if (result == 0 && sum_intensity > 0) {
                 float centroid_x = (float)sum_x / sum_intensity;
                 float centroid_y = (float)sum_y / sum_intensity;
