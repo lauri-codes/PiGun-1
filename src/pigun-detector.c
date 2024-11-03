@@ -11,7 +11,7 @@
 #define MAX_PEAKS       4       // Maximum number of peaks
 #define MAX_PEAK_SIZE   1000    // Maximum number of pixels in a peak
 #define MIN_PEAK_SIZE   20      // Minimum number of pixels in a peak
-#define MAX_SEARCH_DISTANCE 100 // Maximum search distance around old peaks in pixels
+#define MAX_SEARCH_DISTANCE (int)(0.25 * PIGUN_RES_X) // Maximum search distance around old peaks in pixels
 
 // For initializing detector state
 void pigun_detector_init() {
@@ -22,13 +22,13 @@ void pigun_detector_init() {
     // Set initial peak locations. Note that the ordering needs to be set
     // correctly.
     pigun.detector.peaks[0].x = (int)(0.25 * PIGUN_RES_X);
-    pigun.detector.peaks[0].y = (int)(0.25 * PIGUN_RES_Y)
+    pigun.detector.peaks[0].y = (int)(0.25 * PIGUN_RES_Y);
     pigun.detector.peaks[1].x = (int)(0.75 * PIGUN_RES_X);
-    pigun.detector.peaks[1].y = (int)(0.25 * PIGUN_RES_Y)
+    pigun.detector.peaks[1].y = (int)(0.25 * PIGUN_RES_Y);
     pigun.detector.peaks[2].x = (int)(0.25 * PIGUN_RES_X);
-    pigun.detector.peaks[2].y = (int)(0.75 * PIGUN_RES_Y)
+    pigun.detector.peaks[2].y = (int)(0.75 * PIGUN_RES_Y);
     pigun.detector.peaks[3].x = (int)(0.75 * PIGUN_RES_X);
-    pigun.detector.peaks[3].y = (int)(0.75 * PIGUN_RES_Y)
+    pigun.detector.peaks[3].y = (int)(0.75 * PIGUN_RES_Y);
 }
 
 int peak_compare_x(const void* a, const void* b) {
@@ -265,7 +265,6 @@ void pigun_detector_run(uint8_t *frame) {
         sortedpeaks[3] = pigun.detector.peaks[3];
     }
     memcpy(pigun.detector.peaks, sortedpeaks, sizeof(pigun_peak_t)*4);
-    
 
     //printf("detector done [%i]\n",blobID);
     pigun.detector.error = 0;
