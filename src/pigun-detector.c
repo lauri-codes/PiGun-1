@@ -202,11 +202,11 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
 
     // Check that peak size is not too small
     if (peak_size < MIN_PEAK_SIZE) {
-        printf("too small peak: [%i]\n", stack_index);
+        // printf("too small peak: [%i]\n", stack_index);
         return -1;
     // Check that peak size is not too big
     } else if (peak_size >= MAX_PEAK_SIZE) {
-        printf("too big peak: [%i]\n", stack_index);
+        // printf("too big peak: [%i]\n", stack_index);
         return -1;
     }
     return 0; // Success
@@ -316,9 +316,9 @@ void pigun_detector_run(uint8_t *frame) {
     memcpy(pigun.detector.peaks, new_peaks, sizeof(pigun_peak_t)*MAX_PEAKS);
 
     pigun_order_peaks();
-    for (int i = 0; i < MAX_PEAKS; ++i) {
-        printf("x: %i, y: %i\n", pigun.detector.peaks[i].x, pigun.detector.peaks[i].y);
-    }
+    // for (int i = 0; i < MAX_PEAKS; ++i) {
+    //     printf("x: %i, y: %i\n", pigun.detector.peaks[i].x, pigun.detector.peaks[i].y);
+    // }
     //printf("detector done [%i]\n",blobID);
     pigun.detector.error = 0;
     return;
