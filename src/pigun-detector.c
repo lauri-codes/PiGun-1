@@ -158,7 +158,6 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
         int idx = y * width + x;
         uint8_t intensity = frame[idx];
         ++peak_size;
-        printf("intensity: [%i]\n", intensity);
 
         // Accumulate sums
         *sum_intensity += intensity;
@@ -202,11 +201,11 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
     }
 
     // Check that peak size is not too small
-    if (stack_index < MIN_PEAK_SIZE) {
+    if (peak_size < MIN_PEAK_SIZE) {
         printf("too small peak: [%i]\n", stack_index);
         return -1;
     // Check that peak size is not too big
-    } else if (stack_index >= MAX_PEAK_SIZE) {
+    } else if (peak_size >= MAX_PEAK_SIZE) {
         printf("too big peak: [%i]\n", stack_index);
         return -1;
     }
