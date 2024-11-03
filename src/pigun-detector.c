@@ -142,20 +142,22 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
                             uint32_t *sum_x, uint32_t *sum_y) {
     // Initialize stack for iterative flood-fill
     pixel stack[MAX_PEAK_SIZE];
+    int stack_index = 0;
     int peak_size = 0;
 
     // Push the starting pixel onto the stack
     int idx = start_y * width + start_x;
-    stack[peak_size++] = (pixel){start_x, start_y};
+    stack[stack_index++] = (pixel){start_x, start_y};
     checked[idx] = 1;
 
-    while (peak_size > 0) {
+    while (stack_index > 0) {
         // Pop a pixel from the stack
-        pixel p = stack[--peak_size];
+        pixel p = stack[--stack_index];
         int x = p.x;
         int y = p.y;
         int idx = y * width + x;
         uint8_t intensity = frame[idx];
+        ++peak_size;
         printf("intensity: [%i]\n", intensity);
 
         // Accumulate sums
@@ -167,45 +169,47 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
         if (x > 0) {
             int idx_left = idx - 1;
             if (!checked[idx_left] && frame[idx_left] >= THRESHOLD) {
-                stack[peak_size++] = (pixel){x - 1, y};
+                stack[stack_index++] = (pixel){x - 1, y};
                 checked[idx_left] = 1;
             }
         }
         if (x < width - 1) {
             int idx_right = idx + 1;
             if (!checked[idx_right] && frame[idx_right] >= THRESHOLD) {
-                stack[peak_size++] = (pixel){x + 1, y};
+                stack[stack_index++] = (pixel){x + 1, y};
                 checked[idx_right] = 1;
             }
         }
         if (y > 0) {
             int idx_up = idx - width;
             if (!checked[idx_up] && frame[idx_up] >= THRESHOLD) {
-                stack[peak_size++] = (pixel){x, y - 1};
+                stack[stack_index++] = (pixel){x, y - 1};
                 checked[idx_up] = 1;
             }
         }
         if (y < height - 1) {
             int idx_down = idx + width;
             if (!checked[idx_down] && frame[idx_down] >= THRESHOLD) {
-                stack[peak_size++] = (pixel){x, y + 1};
+                stack[stack_index++] = (pixel){x, y + 1};
                 checked[idx_down] = 1;
             }
         }
 
         // Prevent stack overflow
-        if (peak_size >= MAX_PEAK_SIZE) {
-            printf("too large peak: [%i]\n", peak_size);
-            return -1; // Indicate that the peak is too large
+        if (stack_index >= MAX_PEAK_SIZE) {
+            break;
         }
     }
 
     // Check that peak size is not too small
-    if (peak_size < MIN_PEAK_SIZE) {
-        printf("too small peak: [%i]\n", peak_size);
+    if (stack_index < MIN_PEAK_SIZE) {
+        printf("too small peak: [%i]\n", stack_index);
+        return -1;
+    // Check that peak size is not too big
+    } else if (stack_index >= MAX_PEAK_SIZE) {
+        printf("too big peak: [%i]\n", stack_index);
         return -1;
     }
-
     return 0; // Success
 }
 
