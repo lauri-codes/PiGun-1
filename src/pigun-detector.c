@@ -45,37 +45,34 @@ int peak_compare_x(const void* a, const void* b) {
 /**
  * @brief Used to order peaks.
  *
- * INFO
-        4 LED MODE:
-	
-        Order peaks. The ordering is based on the distance of the peaks to the screen corners:
-            Peak closest to top-left corner = A
-            Peak closest to bottom-left corner = B
-            Peak closest to top-right corner = C
-            Peak closest to bottom-right corner = D
-
-        assuming we sort the peaks using the peak.total indexer (ascending), the camera sees:
-	
-        2---3      3---2
-        |   |  OR  |   |
-        0---1      1---0
-	
-        OR any similar pattern... in the end all we know is that:
-        a. the first 2 peaks are the bottom LED bar
-        b. the last 2 are the top LED bar
-        but after sorting the ordering of top and bottom spots depends on
-        camera rotation.
-        we have to manually adjust them so that we get:
-
-        0---1
-        |   |
-        2---3
-
-        the aimer will use these in the correct order to compute the inverse projection!
-
-        warning! sorting by .total is a hack that only works when the .row/.col are positive.
-            if we were to use prediction to extrapolate positions of peaks that went out of
-            camera view, the coordinates could be negative.
+ * The ordering is based on the distance of the peaks to the screen corners:
+ *  - Peak closest to top-left corner = A
+ *  - Peak closest to bottom-left corner = B
+ *  - Peak closest to top-right corner = C
+ *  - Peak closest to bottom-right corner = D
+ * 
+ * Assuming we sort the peaks using the peak.total indexer (ascending), the
+ * camera sees:
+ * 
+ *   2---3      3---2
+ *   |   |  OR  |   |
+ *   0---1      1---0
+ * 
+ * OR any similar pattern... in the end all we know is that: a. the first 2
+ * peaks are the bottom LED bar b. the last 2 are the top LED bar but after
+ * sorting the ordering of top and bottom spots depends on camera rotation. We
+ * have to manually adjust them so that we get:
+ * 
+ *   0---1
+ *   |   |
+ *   2---3
+ * 
+ * The aimer will use these in the correct order to compute the inverse
+ * projection!
+ * 
+ * Warning! sorting by .total is a hack that only works when the .row/.col are
+ * positive.  if we were to use prediction to extrapolate positions of peaks
+ * that went out of camera view, the coordinates could be negative.
  */
 void pigun_order_peaks() {
     pigun_peak_t sortedpeaks[4];
@@ -209,6 +206,40 @@ int compute_blob_properties(uint8_t *frame, uint8_t *checked, int width, int hei
     return 0; // Success
 }
 
+int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked) {
+    int x = x0 + dx;
+    int y = y0 + dy;
+
+    // Check if x and y are within bounds
+    if (x >= 0 && x < PIGUN_RES_X && y >= 0 && y < PIGUN_RES_Y) {
+        int idx = y * PIGUN_RES_X + x;
+        if (!checked[idx] && frame[idx] >= THRESHOLD) {
+            int sum_intensity = 0;
+            int sum_x = 0;
+            int sum_y = 0;
+            int result = compute_blob_properties(frame, checked, PIGUN_RES_X, PIGUN_RES_Y,
+                                                 x, y,
+                                                 &sum_intensity, &sum_x, &sum_y);
+
+            if (result == 0 && sum_intensity > 0) {
+                float centroid_x = (float)sum_x / sum_intensity;
+                float centroid_y = (float)sum_y / sum_intensity;
+
+                // Update peak position and velocity
+                float delta_x = centroid_x - old_peaks[i].x;
+                float delta_y = centroid_y - old_peaks[i].y;
+
+                peak.dx = delta_x;
+                peak.dy = delta_y;
+                peak.x = centroid_x;
+                peak.y = centroid_y;
+                return 1
+            }
+        }
+    }
+    return 0;
+}
+
 void pigun_detector_run(uint8_t *frame) {
     // Array to store new peaks
     pigun_peak_t new_peaks[MAX_PEAKS];
@@ -216,20 +247,19 @@ void pigun_detector_run(uint8_t *frame) {
     int peak_count = 0;
 
     // Reset the boolean array for marking pixels as checked.
-    memset(pigun.detector.checked, 0, PIGUN_RES_X * PIGUN_RES_Y * sizeof(uint8_t));
     uint8_t* checked = pigun.detector.checked;
+    memset(checked, 0, PIGUN_RES_X * PIGUN_RES_Y * sizeof(uint8_t));
 
     // Constants for sampling
     int max_delta = MAX_SEARCH_DISTANCE;
-    int stride = SPARSE_STEP; // N pixels
+    int stride = SPARSE_STEP;
 
-    // For each old peak, search for the new peak
+    // Search for a new peak from the vicinity of the old peak.
     for (int i = 0; i < MAX_PEAKS; i++) {
         // Predict new position using previous velocity
         pixel peak_estimate = get_peak_estimate(old_peaks[i].x, old_peaks[i].y, old_peaks[i].dx, old_peaks[i].dy);
         int x0 = peak_estimate.x;
         int y0 = peak_estimate.y;
-
         int peak_found = 0;
         uint32_t sum_intensity = 0;
         uint32_t sum_x = 0;
@@ -237,63 +267,33 @@ void pigun_detector_run(uint8_t *frame) {
 
         // Start sampling from delta = 0 (initial position), then expand outwards
         for (int delta = 0; delta <= max_delta && !peak_found; delta += stride) {
+            // Search is performed in four steps:
+            // 1) Top row
+            // 2) Bottom row
+            // 2) Left row
+            // 2) Right row
+            // The horizontal swipes are done first as memory is fastest to
+            // access this way.
+            int dy = -delta;
             for (int dx = -delta; dx <= delta && !peak_found; dx += stride) {
-                for (int dy = -delta; dy <= delta && !peak_found; dy += stride) {
-                    // Only consider positions at Manhattan distance 'delta'
-                    if (abs(dx) + abs(dy) != delta)
-                        continue;
-
-                    int x = x0 + dx;
-                    int y = y0 + dy;
-
-                    // Check if x and y are within bounds
-                    if (x >= 0 && x < PIGUN_RES_X && y >= 0 && y < PIGUN_RES_Y) {
-                        int idx = y * PIGUN_RES_X + x;
-                        if (!checked[idx] && frame[idx] >= THRESHOLD) {
-                            // Reset sums
-                            sum_intensity = 0;
-                            sum_x = 0;
-                            sum_y = 0;
-
-                            int result = compute_blob_properties(frame, checked, PIGUN_RES_X, PIGUN_RES_Y,
-                                                                 x, y,
-                                                                 &sum_intensity, &sum_x, &sum_y);
-
-                            if (result == 0 && sum_intensity > 0) {
-                                float centroid_x = (float)sum_x / sum_intensity;
-                                float centroid_y = (float)sum_y / sum_intensity;
-
-                                // Update peak position and velocity
-                                float delta_x = centroid_x - old_peaks[i].x;
-                                float delta_y = centroid_y - old_peaks[i].y;
-
-                                new_peaks[peak_count].dx = delta_x;
-                                new_peaks[peak_count].dy = delta_y;
-                                new_peaks[peak_count].x = centroid_x;
-                                new_peaks[peak_count].y = centroid_y;
-                                ++peak_count;
-                                peak_found = 1;
-                                break; // Found the peak, proceed to next one
-                            }
-                        }
-                    }
-                }
+                peak_found = find_peak(x0, y0, dx, dy, frame, checked, &new_peaks[peak_count]);
+                if (peak_found) break;
             }
         }
+        // If peak is not found, we break the search for now.
         if (!peak_found) {
-            // Peak not found; handle accordingly or set error
-            // For now, we'll continue to the next peak
-            continue;
+            break;
+        } else {
+            ++peak_count;
         }
     }
 
     // At this point we should have all the peak we wanted or maybe we are
-    // short. If we are short, tell the callback we got an error. The peaks are
-    // reset after errors in order for the search to not get stuck.
+    // short. If we are short, tell the callback we got an error. The old peak
+    // positions are preserved so that something sensible can be reported.
     if (peak_count != MAX_PEAKS) {
         printf("number of peaks found: [%i]\n", peak_count);
         pigun.detector.error = 1;
-        pigun_reset_peaks();
         return;
     }
     pigun_order_peaks();
