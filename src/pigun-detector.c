@@ -280,7 +280,6 @@ void pigun_detector_run(uint8_t *frame) {
 
     // Search for a new peak from the vicinity of the old peak.
     for (int i = 0; i < MAX_PEAKS; i++) {
-        continue;
         // Predict new position using previous velocity
         pixel peak_estimate = get_peak_estimate(&pigun.detector.peaks[i]);
         int x0 = peak_estimate.x;
@@ -329,7 +328,7 @@ void pigun_detector_run(uint8_t *frame) {
     // short. If we are short, tell the callback we got an error. The old peak
     // positions are preserved so that something sensible can be reported.
     if (peak_count != MAX_PEAKS) {
-        // printf("number of peaks found: [%i]\n", peak_count);
+        printf("number of peaks found: [%i]\n", peak_count);
         pigun.detector.error = 1;
         return;
     }
