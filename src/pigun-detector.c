@@ -262,7 +262,7 @@ void pigun_detector_run(uint8_t *frame) {
     for (int i = 0; i < MAX_PEAKS; i++) {
         new_peaks[i].dx = 0;
         new_peaks[i].dy = 0;
-        new_peaks[i].x = (new_peaks[i].x + 1) % PIGUN_RES_X;
+        new_peaks[i].x = (int)(new_peaks[i].x + 1) % PIGUN_RES_X;
         new_peaks[i].y = (int)(PIGUN_RES_Y / 2);
         continue;
         // Predict new position using previous velocity
