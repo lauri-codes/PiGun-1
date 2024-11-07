@@ -335,7 +335,6 @@ void pigun_detector_run(uint8_t *frame) {
     // longer lasting errors, the peak search is reset in order to unstuck the
     // search.
     if (peak_count != MAX_PEAKS) {
-        printf("number of peaks found: [%i]\n", peak_count);
         ++n_errors;
         if (n_errors >= ERROR_THRESHOLD) {
             pigun_reset_peaks();
