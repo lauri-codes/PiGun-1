@@ -7,6 +7,7 @@
 #include "pigun-mmal.h"
 #include "pigun.h"
 
+#define ERROR_THRESHOLD 5       // How many cycles of unfound peaks is considered an error
 #define THRESHOLD       130     // Intensity threshold for bright spots
 #define SPARSE_STEP     4       // Step size for sparse sampling (every nth pixel)
 #define MAX_PEAKS       4       // Maximum number of peaks
@@ -83,7 +84,7 @@ void pigun_order_peaks() {
     // the first 2 peaks have to be 0 and 2 (unless u hold the gun like a gansta in which case u deserve to miss)
     // the one with smallest .row is 0
     // flip them if it is not so
-    if(pigun.detector.peaks[0].y > pigun.detector.peaks[1].y) {
+    if (pigun.detector.peaks[0].y > pigun.detector.peaks[1].y) {
         sortedpeaks[0] = pigun.detector.peaks[1];
         sortedpeaks[2] = pigun.detector.peaks[0];
 	} else {
@@ -91,7 +92,7 @@ void pigun_order_peaks() {
         sortedpeaks[2] = pigun.detector.peaks[1];
     }
     // the same goes for peaks 2 and 3
-    if(pigun.detector.peaks[2].y > pigun.detector.peaks[3].y) {
+    if (pigun.detector.peaks[2].y > pigun.detector.peaks[3].y) {
         sortedpeaks[1] = pigun.detector.peaks[3];
         sortedpeaks[3] = pigun.detector.peaks[2];
     } else {
@@ -265,9 +266,11 @@ void printFPS() {
 }
 
 void pigun_detector_run(uint8_t *frame) {
-    static int errors = 0;
+    static int n_errors = ERROR_THRESHOLD;
 
-    printFPS();
+    // Uncomment to print out FPS every second.
+    // printFPS();
+
     // Array to store new peaks
     pigun_peak_t new_peaks[MAX_PEAKS];
     int peak_count = 0;
@@ -327,24 +330,25 @@ void pigun_detector_run(uint8_t *frame) {
     }
 
     // At this point we should have all the peak we wanted or maybe we are
-    // short. If we are short, tell the callback we got an error. The old peak
-    // positions are preserved so that something sensible can be reported.
+    // short. If we are short, tell the callback we got an error. For temporary
+    // failures, the old peak old peak positions are reported. When encountering
+    // longer lasting errors, the peak search is reset in order to unstuck the
+    // search.
     if (peak_count != MAX_PEAKS) {
         printf("number of peaks found: [%i]\n", peak_count);
-        // If peaks are not found for 10 cycles, we reset the peaks. This will
-        // allow recovering from very bad peaks.
-        ++errors;
-        if (errors > 10) {
+        ++n_errors;
+        if (n_errors >= ERROR_THRESHOLD) {
             pigun_reset_peaks();
+            pigun.detector.error = 1;
+            return;
         }
-        pigun.detector.error = 1;
-        return;
     }
     // Store new peaks as old peaks
     memcpy(pigun.detector.peaks, new_peaks, sizeof(pigun_peak_t)*MAX_PEAKS);
 
     pigun_order_peaks();
     pigun.detector.error = 0;
+    n_errors = 0;
     return;
 }
 
