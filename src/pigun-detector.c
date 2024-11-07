@@ -266,7 +266,7 @@ void printFPS() {
 }
 
 void pigun_detector_run(uint8_t *frame) {
-    static int n_errors = ERROR_THRESHOLD;
+    static int n_errors = 0;
 
     // Uncomment to print out FPS every second.
     // printFPS();
