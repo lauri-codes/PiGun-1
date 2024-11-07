@@ -266,7 +266,7 @@ void printFPS() {
 }
 
 void pigun_detector_run(uint8_t *frame) {
-    static int n_errors = 0;
+    static int n_errors = ERROR_THRESHOLD;
 
     // Uncomment to print out FPS every second.
     // printFPS();
@@ -339,8 +339,8 @@ void pigun_detector_run(uint8_t *frame) {
         if (n_errors >= ERROR_THRESHOLD) {
             pigun_reset_peaks();
             pigun.detector.error = 1;
-            return;
         }
+        return;
     }
     // Store new peaks as old peaks
     memcpy(pigun.detector.peaks, new_peaks, sizeof(pigun_peak_t)*MAX_PEAKS);
