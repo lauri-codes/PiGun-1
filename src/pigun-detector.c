@@ -280,6 +280,7 @@ void pigun_detector_run(uint8_t *frame) {
 
     // Search for a new peak from the vicinity of the old peak.
     for (int i = 0; i < MAX_PEAKS; i++) {
+        continue;
         // Predict new position using previous velocity
         pixel peak_estimate = get_peak_estimate(&pigun.detector.peaks[i]);
         int x0 = peak_estimate.x;
