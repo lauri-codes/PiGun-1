@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <chrono>
 #include <math.h>
 #include "pigun-detector.h"
 #include "pigun-mmal.h"
@@ -245,7 +246,19 @@ int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked, 
     return 0;
 }
 
+void printFPS() {
+    static std::chrono::time_point<std::chrono::steady_clock> oldTime = std::chrono::high_resolution_clock::now();
+    static int fps; fps++;
+
+    if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - oldTime) >= std::chrono::seconds{ 1 }) {
+        oldTime = std::chrono::high_resolution_clock::now();
+        std::cout << "FPS: " << fps <<  std::endl;
+        fps = 0;
+    }
+}
+
 void pigun_detector_run(uint8_t *frame) {
+    printFPS();
     // Array to store new peaks
     pigun_peak_t new_peaks[MAX_PEAKS];
     int peak_count = 0;
@@ -259,13 +272,9 @@ void pigun_detector_run(uint8_t *frame) {
     int stride = SPARSE_STEP;
 
     // Search for a new peak from the vicinity of the old peak.
-    for (int i = 0; i < MAX_PEAKS; i++) {
-        new_peaks[i].dx = 0;
-        new_peaks[i].dy = 0;
-        new_peaks[i].x = (int)(new_peaks[i].x + 1) % PIGUN_RES_X;
-        new_peaks[i].y = (int)(PIGUN_RES_Y / 2);
-        ++peak_count;
-        continue;
+    // for (int i = 0; i < MAX_PEAKS; i++) {
+    for (int i = 0; i < 2; ++i) {
+
         // Predict new position using previous velocity
         pixel peak_estimate = get_peak_estimate(&pigun.detector.peaks[i]);
         int x0 = peak_estimate.x;
