@@ -265,6 +265,8 @@ void printFPS() {
 }
 
 void pigun_detector_run(uint8_t *frame) {
+    static int errors = 0;
+
     printFPS();
     // Array to store new peaks
     pigun_peak_t new_peaks[MAX_PEAKS];
@@ -329,6 +331,12 @@ void pigun_detector_run(uint8_t *frame) {
     // positions are preserved so that something sensible can be reported.
     if (peak_count != MAX_PEAKS) {
         printf("number of peaks found: [%i]\n", peak_count);
+        // If peaks are not found for 10 cycles, we reset the peaks. This will
+        // allow recovering from very bad peaks.
+        ++errors;
+        if (errors > 10) {
+            pigun_reset_peaks();
+        }
         pigun.detector.error = 1;
         return;
     }
@@ -336,10 +344,6 @@ void pigun_detector_run(uint8_t *frame) {
     memcpy(pigun.detector.peaks, new_peaks, sizeof(pigun_peak_t)*MAX_PEAKS);
 
     pigun_order_peaks();
-    // for (int i = 0; i < MAX_PEAKS; ++i) {
-    //     printf("x: %i, y: %i\n", pigun.detector.peaks[i].x, pigun.detector.peaks[i].y);
-    // }
-    //printf("detector done [%i]\n",blobID);
     pigun.detector.error = 0;
     return;
 }
