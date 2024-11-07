@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <chrono>
+#include <time.h>
 #include <math.h>
 #include "pigun-detector.h"
 #include "pigun-mmal.h"
@@ -247,13 +247,20 @@ int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked, 
 }
 
 void printFPS() {
-    static std::chrono::time_point<std::chrono::steady_clock> oldTime = std::chrono::high_resolution_clock::now();
-    static int fps; fps++;
+    static int frames = 0;
+    static double lastTime = 0.0;
 
-    if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - oldTime) >= std::chrono::seconds{ 1 }) {
-        oldTime = std::chrono::high_resolution_clock::now();
-        std::cout << "FPS: " << fps <<  std::endl;
-        fps = 0;
+    // Get the current time
+    double currentTime = (double)clock() / CLOCKS_PER_SEC;
+    frames++;
+
+    // Calculate FPS every second
+    if (currentTime - lastTime >= 1.0) {
+        printf("FPS: %d\n", frames);
+        
+        // Reset the frame count and lastTime
+        frames = 0;
+        lastTime = currentTime;
     }
 }
 
