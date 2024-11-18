@@ -159,7 +159,7 @@ int pigun_mmal_init() {
 	format->es->video.frame_rate.den = 1;
 
 	camera_video_port->buffer_size = camera_video_port->buffer_size_recommended;
-	camera_video_port->buffer_num = 4;
+	camera_video_port->buffer_num = 6;
 
 	// apply the format
 	status = mmal_port_format_commit(camera_video_port);
