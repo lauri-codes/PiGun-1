@@ -11,7 +11,7 @@
 #define THRESHOLD       130     // Intensity threshold for bright spots
 #define SPARSE_STEP     4       // Step size for sparse sampling (every nth pixel)
 #define MAX_PEAKS       4       // Maximum number of peaks
-#define MAX_PEAK_SIZE   1000    // Maximum number of pixels in a peak
+#define MAX_PEAK_SIZE   900    // Maximum number of pixels in a peak
 #define MIN_PEAK_SIZE   20      // Minimum number of pixels in a peak
 #define MAX_SEARCH_DISTANCE (int)(0.25 * PIGUN_RES_X) // Maximum search distance around old peaks in pixels
 
@@ -269,7 +269,7 @@ void pigun_detector_run(uint8_t *frame) {
     static int n_errors = ERROR_THRESHOLD;
 
     // Uncomment to print out FPS every second.
-    // printFPS();
+    printFPS();
 
     // Array to store new peaks
     pigun_peak_t new_peaks[MAX_PEAKS];
