@@ -1,0 +1,18 @@
+# Use pkg-config to get compiler and linker flags for libcamera
+PKGCONFIG           = pkg-config
+LIBCAMERA_CFLAGS    = $(shell $(PKGCONFIG) --cflags libcamera)
+LIBCAMERA_LIBS      = $(shell $(PKGCONFIG) --libs libcamera)
+
+CXX      = g++
+CXXFLAGS = -Wall -Wextra -O3 -std=c++17
+TARGET   = main
+
+.PHONY: all clean
+
+all: $(TARGET)
+
+$(TARGET): libmain.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCAMERA_CFLAGS) libmain.cpp -o $(TARGET) $(LIBCAMERA_LIBS)
+
+clean:
+	rm -f $(TARGET)
