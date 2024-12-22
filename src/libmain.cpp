@@ -31,8 +31,19 @@ int main()
     // Configure camera
     std::unique_ptr<CameraConfiguration> config = camera->generateConfiguration( { StreamRole::Viewfinder } );
     StreamConfiguration &streamConfig = config->at(0);
-    std::cout << "Default viewfinder configuration is: " << streamConfig.toString() << std::endl;
+    streamConfig.size.width = 640; 
+    streamConfig.size.height = 480;
+    streamConfig.pixelFormat = formats::YUV420;
+    CameraConfiguration::Status status = config->validate();
+    if (status == CameraConfiguration::Status::Invalid) {
+        std::cerr << "Configuration invalid" << std::endl;
+        return -1;
+    }
 
-    // Code to follow
+    // Stop camera and release resources
+    camera->stop();
+    camera->release();
+    camera.reset();
+    cm->stop();
     return 0;
 }
