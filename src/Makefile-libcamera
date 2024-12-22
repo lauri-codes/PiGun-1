@@ -5,7 +5,7 @@ LIBCAMERA_LIBS      = $(shell $(PKGCONFIG) --libs libcamera)
 
 CXX      = g++
 CXXFLAGS = -Wall -Wextra -O3 -std=c++17
-TARGET   = main
+TARGET   = pigun
 
 .PHONY: all clean
 
