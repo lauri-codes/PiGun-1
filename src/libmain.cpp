@@ -74,10 +74,12 @@ int main()
     }
 
     // Set FPS
-    ControlList controls;
+    // ControlList controls;
+    // controls.set(controls::FrameDurationLimits, { frameDuration, frameDuration });
+    // camera->setControls(controls);
+    std::unique_ptr<libcamera::ControlList> camcontrols = std::unique_ptr<libcamera::ControlList>(new libcamera::ControlList());
     uint64_t frameDuration = 1000000ULL / 120; // 8333 µs
-    controls.set(controls::FrameDurationLimits, { frameDuration, frameDuration });
-    camera->setControls(controls);
+    camcontrols->set(controls::FrameDurationLimits, libcamera::Span<const std::uint64_t, 2>({frameDuration, frameDuration}));
 
     // Use a FrameBufferAllocator to allocate buffers (not fully shown)
     FrameBufferAllocator *allocator = new FrameBufferAllocator(camera);
@@ -113,7 +115,7 @@ int main()
     camera->requestCompleted.connect(requestComplete);
 
     // Start camera and queue requests
-    camera->start();
+    camera->start(camcontrols.get());
     for (std::unique_ptr<Request> &request : requests) {
         camera->queueRequest(request.get());
     }
