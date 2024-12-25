@@ -32,7 +32,7 @@ void printFPS() {
 
 static void requestComplete(Request *request)
 {
-    printFPS()
+    printFPS();
     request->reuse(Request::ReuseBuffers);
     camera->queueRequest(request);
 }
@@ -111,7 +111,7 @@ int main()
     }
 
     // Wait for 3 seconds
-    std::this_thread::sleep_for(3000ms);
+    std::this_thread::sleep_for(10000ms);
 
     // Stop camera and release resources
     camera->stop();
