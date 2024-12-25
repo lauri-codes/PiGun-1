@@ -59,7 +59,6 @@ int main()
     }
 
     // Frame capture
-    Stream *stream = streamConfig.stream();
     const std::vector<std::unique_ptr<FrameBuffer>> &buffers = allocator->buffers(stream);
     std::vector<std::unique_ptr<Request>> requests;
     for (unsigned int i = 0; i < buffers.size(); ++i) {
