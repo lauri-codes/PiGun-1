@@ -8,6 +8,7 @@
 #include <libcamera/framebuffer_allocator.h>
 
 using namespace libcamera;
+using namespace std::chrono_literals;
 
 static std::shared_ptr<Camera> camera;
 
