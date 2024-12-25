@@ -16,7 +16,7 @@ void printFPS() {
     static int frames = 0;
     static double lastTime = 0.0;
 
-    printf("Printing FPS\n");
+    std::cout << currentTime - lastTime << std::endl;
 
     // Get the current time
     double currentTime = (double)clock() / CLOCKS_PER_SEC;
