@@ -33,8 +33,8 @@ void printFPS() {
 static void requestComplete(Request *request)
 {
     printFPS();
-    request->reuse(Request::ReuseBuffers);
-    camera->queueRequest(request);
+    //request->reuse(Request::ReuseBuffers);
+    //camera->queueRequest(request);
 }
 
 int main()
