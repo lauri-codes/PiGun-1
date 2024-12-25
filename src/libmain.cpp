@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include <thread>
+#include <time.h>
 
 #include <libcamera/libcamera.h>
 #include <libcamera/framebuffer_allocator.h>
@@ -11,10 +12,29 @@ using namespace std::chrono_literals;
 
 static std::shared_ptr<Camera> camera;
 
+void printFPS() {
+    static int frames = 0;
+    static double lastTime = 0.0;
+
+    // Get the current time
+    double currentTime = (double)clock() / CLOCKS_PER_SEC;
+    frames++;
+
+    // Calculate FPS every second
+    if (currentTime - lastTime >= 1.0) {
+        printf("FPS: %d\n", frames);
+        
+        // Reset the frame count and lastTime
+        frames = 0;
+        lastTime = currentTime;
+    }
+}
+
 static void requestComplete(Request *request)
 {
-    // Code to follow
-    std::cerr << "Request complete!" << std::endl;
+    printFPS()
+    request->reuse(Request::ReuseBuffers);
+    camera->queueRequest(request);
 }
 
 int main()
