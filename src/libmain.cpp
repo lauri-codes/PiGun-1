@@ -2,31 +2,27 @@
 #include <iostream>
 #include <memory>
 #include <thread>
-#include <time.h>
+#include <chrono>
 
 #include <libcamera/libcamera.h>
 #include <libcamera/framebuffer_allocator.h>
 
 using namespace libcamera;
-using namespace std::chrono_literals;
 
 static std::shared_ptr<Camera> camera;
 
 void printFPS() {
+    using Clock = std::chrono::steady_clock;
+    static auto lastTime = Clock::now();
     static int frames = 0;
-    static double lastTime = 0.0;
 
-    // Get the current time
-    double currentTime = (double)clock() / CLOCKS_PER_SEC;
     frames++;
 
-    std::cout << currentTime - lastTime << std::endl;
+    auto currentTime = Clock::now();
+    auto elapsedTime = std::chrono::duration<double>(currentTime - lastTime).count();
 
-    // Calculate FPS every second
-    if (currentTime - lastTime >= 1.0) {
-        printf("FPS: %d\n", frames);
-        
-        // Reset the frame count and lastTime
+    if (elapsedTime >= 1.0) {
+        std::printf("FPS: %d\n", frames);
         frames = 0;
         lastTime = currentTime;
     }
