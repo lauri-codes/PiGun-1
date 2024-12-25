@@ -57,7 +57,7 @@ int main()
     camera = cm->get(cameraId);
     camera->acquire();
 
-    // Configure camera
+    // Configure camera resolution and format
     std::unique_ptr<CameraConfiguration> config = camera->generateConfiguration( { StreamRole::VideoRecording } );
     StreamConfiguration &streamConfig = config->at(0);
     streamConfig.size.width = 640; 
@@ -72,6 +72,12 @@ int main()
         std::cerr << "Failed to configure camera" << std::endl;
         return -1;
     }
+
+    // Set FPS
+    ControlList controls;
+    uint64_t frameDuration = 1000000ULL / 120; // 8333 µs
+    controls.set(controls::FrameDurationLimits, { frameDuration, frameDuration });
+    camera->setControls(controls);
 
     // Use a FrameBufferAllocator to allocate buffers (not fully shown)
     FrameBufferAllocator *allocator = new FrameBufferAllocator(camera);
