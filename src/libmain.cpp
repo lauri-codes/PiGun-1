@@ -32,9 +32,13 @@ void printFPS() {
 
 static void requestComplete(Request *request)
 {
-    printFPS();
-    //request->reuse(Request::ReuseBuffers);
-    //camera->queueRequest(request);
+    // If request was cancelled, ignore it as the data might be invalid
+    if (request->status() == Request::RequestCancelled) {
+        return;
+    }
+    // printFPS();
+    request->reuse(Request::ReuseBuffers);
+    camera->queueRequest(request);
 }
 
 int main()
@@ -51,7 +55,7 @@ int main()
         return EXIT_FAILURE;
     }
     std::string cameraId = cameras[0]->id();
-    auto camera = cm->get(cameraId);
+    camera = cm->get(cameraId);
     camera->acquire();
 
     // Configure camera
@@ -78,7 +82,7 @@ int main()
         return -1;
     }
 
-    // Frame capture
+    // Create a list of original requests to process
     const std::vector<std::unique_ptr<FrameBuffer>> &buffers = allocator->buffers(stream);
     std::vector<std::unique_ptr<Request>> requests;
     for (unsigned int i = 0; i < buffers.size(); ++i) {
@@ -93,8 +97,7 @@ int main()
         int ret = request->addBuffer(stream, buffer.get());
         if (ret < 0)
         {
-            std::cerr << "Can't set buffer for request"
-                << std::endl;
+            std::cerr << "Can't set buffer for request" << std::endl;
             return ret;
         }
 
