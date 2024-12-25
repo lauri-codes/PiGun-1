@@ -7,7 +7,10 @@
 #include <libcamera/libcamera.h>
 #include <libcamera/framebuffer_allocator.h>
 
-#include "pigun-mmal.h"
+#include "pigun.h"
+#include "pigun-detector.h"
+#include "pigun-gpio.h"
+#include "pigun-libcamera.h"
 
 using namespace libcamera;
 using namespace std::chrono_literals;
@@ -37,12 +40,52 @@ static void requestComplete(Request *request)
     if (request->status() == Request::RequestCancelled) {
         return;
     }
-    printFPS();
+
+    // If shutting down, stop frame requests
+	if (pigun.state == STATE_SHUTDOWN){
+		return;
+	}
+     
+    // Process completed buffers
+    for (auto [stream, buffer] : request->buffers()) {
+        // Print FPS
+        printFPS();
+
+        // Extract frame data from the request
+        MappedFrameBuffer mappedBuffer(buffer, MappedFrameBuffer::MapFlag::Read);
+        const std::vector<Span<uint8_t>> mem = mappedBuffer.planes();
+        pirung.framedata = (uint8_t *)(mem[0].data())
+        // pigun.framedata = buffer->data;
+
+        // Call the peak detector function. If there was a detector error, error LED
+        // goes on, otherwise off.
+        uint8_t ce = pigun.detector.error;
+        pigun_detector_run(pigun.framedata);
+        if (pigun.detector.error != ce) {
+            pigun_GPIO_output_set(PIN_OUT_ERR, pigun.detector.error);
+        }
+
+        // TODO: maybe add a mutex/semaphore so that the main bluetooth thread
+        // will wait until this is done with the x/y aim before reading the HID report
+
+        // compute aiming position from the detected peaks
+        pigun_calculate_aim();
+
+        // *********************************************************************
+        // check the buttons ***************************************************
+        pigun_buttons_process();
+
+        // TODO: maybe add a mutex/semaphore so that the main bluetooth thread
+        // will wait until this is done with the buttons before reading the HID report
+        // *********************************************************************
+    }
+
+    // Request new frame by reusing the buffer
     request->reuse(Request::ReuseBuffers);
     camera->queueRequest(request);
 }
 
-int main()
+int pigun_libcamera_init()
 {
     // Create and start the CameraManager
     std::unique_ptr<CameraManager> cm = std::make_unique<CameraManager>();

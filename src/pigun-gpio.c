@@ -9,7 +9,7 @@
 #include "pigun.h"
 #include "pigun-hid.h"
 #include "pigun-gpio.h"
-#include "pigun-mmal.h"
+#include "pigun-libcamera.h"
 
 
 

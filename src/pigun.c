@@ -10,9 +10,6 @@
   * video_buffer_callback copies the Y channel into another buffer
   * we use the Y channel to detect the IR LEDs
   *
-  * camera video output uses MMAL_ENCODING_I420
-  *
-  *
   * */
 
 #include <stdio.h>
@@ -26,7 +23,7 @@
 #include "pigun.h"
 #include "pigun-gpio.h"
 #include "pigun-hid.h"
-#include "pigun-mmal.h"
+#include "pigun-libcamera.h"
 #include "pigun-detector.h"
 
 
@@ -51,12 +48,6 @@ void pigun_calibration_save(){
 }
 
 
-static void preview_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer) { mmal_buffer_header_release(buffer); }
-
-
-
-
-//void * test_main(int argc, char** argv) {
 void* pigun_cycle(void* nullargs) {
 
 	pigun.state = STATE_IDLE;
@@ -83,18 +74,17 @@ void* pigun_cycle(void* nullargs) {
 	// because the bluetooth (HID) part also uses the LEDs to inform about connection status
 	
 	// Initialize the camera system
-	int error = pigun_mmal_init();
+	int error = pigun_libcamera_init();
 	if (error != 0) {
 		pigun_GPIO_output_set(PIN_OUT_ERR, 1);
 		return NULL;
 	}
-	printf("PIGUN: MMAL started correctly.\n");
+	printf("PIGUN: LIBCAMERA started correctly.\n");
 	
 	// repeat forever and ever!
 	// there could be a graceful shutdown?
 	int cameraON;
 	while (1) {
-		
 		cameraON = 1;
 		switch (pthread_mutex_trylock(&pigun_mutex)) {
 		case 0: /* if we got the lock, unlock and return 1 (true) */
@@ -111,7 +101,6 @@ void* pigun_cycle(void* nullargs) {
 	}
 	
 	pigun_detector_free();
-
 	pthread_exit((void*)0);
 }
 

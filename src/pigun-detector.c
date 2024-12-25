@@ -4,7 +4,7 @@
 #include <time.h>
 #include <math.h>
 #include "pigun-detector.h"
-#include "pigun-mmal.h"
+#include "pigun-libcamera.h"
 #include "pigun.h"
 
 #define ERROR_THRESHOLD 5       // How many cycles of unfound peaks is considered an error
