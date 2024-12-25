@@ -36,7 +36,7 @@ static void requestComplete(Request *request)
     if (request->status() == Request::RequestCancelled) {
         return;
     }
-    // printFPS();
+    printFPS();
     request->reuse(Request::ReuseBuffers);
     camera->queueRequest(request);
 }
