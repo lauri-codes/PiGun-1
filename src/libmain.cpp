@@ -16,6 +16,8 @@ void printFPS() {
     static int frames = 0;
     static double lastTime = 0.0;
 
+    printf("Printing FPS\n");
+
     // Get the current time
     double currentTime = (double)clock() / CLOCKS_PER_SEC;
     frames++;
