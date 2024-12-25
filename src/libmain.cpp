@@ -16,11 +16,11 @@ void printFPS() {
     static int frames = 0;
     static double lastTime = 0.0;
 
-    std::cout << currentTime - lastTime << std::endl;
-
     // Get the current time
     double currentTime = (double)clock() / CLOCKS_PER_SEC;
     frames++;
+
+    std::cout << currentTime - lastTime << std::endl;
 
     // Calculate FPS every second
     if (currentTime - lastTime >= 1.0) {
