@@ -51,7 +51,7 @@ int main()
     }
 
     // Use a FrameBufferAllocator to allocate buffers (not fully shown)
-    std::unique_ptr<FrameBufferAllocator> allocator = std::make_unique<FrameBufferAllocator>(camera);
+    FrameBufferAllocator *allocator = new FrameBufferAllocator(camera);
     Stream *stream = streamConfig.stream();
     if (allocator->allocate(stream) < 0) {
         std::cerr << "Failed to allocate buffers" << std::endl;
