@@ -7,6 +7,8 @@
 #include <libcamera/libcamera.h>
 #include <libcamera/framebuffer_allocator.h>
 
+#include "pigun-mmal.h"
+
 using namespace libcamera;
 using namespace std::chrono_literals;
 
@@ -60,9 +62,9 @@ int main()
     // Configure camera resolution and format
     std::unique_ptr<CameraConfiguration> config = camera->generateConfiguration( { StreamRole::VideoRecording } );
     StreamConfiguration &streamConfig = config->at(0);
-    streamConfig.size.width = 640; 
-    streamConfig.size.height = 480;
-    // streamConfig.pixelFormat = formats::YUV420;
+    streamConfig.size.width = PIGUN_RES_X; 
+    streamConfig.size.height = PIGUN_RES_Y;
+    streamConfig.pixelFormat = formats::YUV420;
     CameraConfiguration::Status status = config->validate();
     if (status == CameraConfiguration::Status::Invalid) {
         std::cerr << "Configuration invalid" << std::endl;
@@ -75,7 +77,7 @@ int main()
 
     // Set FPS
     std::unique_ptr<libcamera::ControlList> camcontrols = std::unique_ptr<libcamera::ControlList>(new libcamera::ControlList());
-    int64_t frameDuration = 1000000ULL / 120; // 8333 µs
+    int64_t frameDuration = 1000000ULL / PIGUN_FPS; // 8333 µs
     camcontrols->set(controls::FrameDurationLimits, libcamera::Span<const std::int64_t, 2>({frameDuration, frameDuration}));
 
     // Use a FrameBufferAllocator to allocate buffers (not fully shown)
