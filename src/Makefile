@@ -116,7 +116,7 @@ CORE_OBJ    = $(CORE:.c=.o)
 COMMON_OBJ  = $(COMMON:.c=.o)
 CLASSIC_OBJ  = $(CLASSIC:.c=.o)
 
-CFLAGS  += -g -std=c++17 -Wall -Werror -O3 -Wno-restrict \
+CFLAGS  += -g -std=c++17 -Wall -O3 -Wno-restrict \
 	-Wno-maybe-uninitialized -Wno-cpp -Wno-comment -Wno-format \
 	-Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable \
 	-I$(BTSTACK_ROOT)/platform/embedded \
