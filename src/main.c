@@ -61,7 +61,7 @@
 
 #include <pthread.h>
 //#include <bcm2835.h>
-#include <pigpio.h>
+#include <gpiod.hpp>i
 
 #include "pigun.h"
 #include "pigun-hid.h"

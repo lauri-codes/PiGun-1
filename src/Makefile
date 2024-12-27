@@ -224,7 +224,7 @@ bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient
 
 CXX        = g++
 CXXFLAGS   = -Wall -Wextra -O3 -std=c++17 -lstdc++
-GPIOFLAGS  = -lpigpio -lrt
+GPIOFLAGS  = -lgpiodcxx
 DEPS       = $(wildcard *.h)
 PIGUN_SRC := pigun-hid.c pigun-libcamera.c pigun-detector.c pigun-aimer.c pigun-gpio.c pigun.c main.c
 PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))

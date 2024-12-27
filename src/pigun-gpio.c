@@ -3,7 +3,7 @@
 */
 
 //#include <bcm2835.h>
-#include <pigpio.h>
+#include <gpiod.hpp>i
 
 #include <stdint.h>
 #include <stdio.h>
