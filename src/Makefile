@@ -132,10 +132,6 @@ VPATH += ${BTSTACK_ROOT}/platform/posix
 VPATH += ${BTSTACK_ROOT}/platform/embedded
 VPATH += ${BTSTACK_ROOT}/chipset/bcm
 
-# LIBCAMERA STUFF
-LIBCAMERA_CFLAGS  = $(shell $(PKGCONFIG) --cflags libcamera)
-LIBCAMERA_LIB  = $(shell $(PKGCONFIG) --libs libcamera)
-
 # THESE WILL BE REMOVED IN THIS VERSION
 # pigun flags
 
@@ -225,19 +221,18 @@ bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient
 CXX        = g++
 CXXFLAGS   = -Wall -Wextra -O3 -std=c++17 -lstdc++
 GPIOFLAGS  = -lgpiodcxx
+LIBCAMERA_CFLAGS  = $(shell $(PKGCONFIG) --cflags libcamera)
+LIBCAMERA_LIB  = $(shell $(PKGCONFIG) --libs libcamera)
+
 DEPS       = $(wildcard *.h)
 PIGUN_SRC := pigun-hid.c pigun-libcamera.c pigun-detector.c pigun-aimer.c pigun-gpio.c pigun.c main.c
 PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
 
 %.o: %.c $(DEPS)
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} -o $@ $<
+	${CXX} -c ${CXXFLAGS} ${PIGUNFLAGS} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
 	${CXX} ${CXXFLAGS} ${LIBCAMERA_LIB} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} ${GPIOFLAGS}
-
-
-
-
 
 clean:
 	rm -f *.o pigun.exe
