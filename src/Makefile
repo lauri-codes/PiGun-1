@@ -222,17 +222,18 @@ bluetooth-others:
 # this one compiles the all the BTStack only parts
 bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient bluetooth-others
 
-CXX      = g++
-CXXFLAGS = -Wall -Wextra -O3 -std=c++17
-DEPS = $(wildcard *.h)
-PIGUN_SRC := pigun-hid.c pigun-libcamera.c pigun-detector.c pigun-aimer.c pigun-gpio.c pigun-helpers.c pigun.c main.c
+CXX        = g++
+CXXFLAGS   = -Wall -Wextra -O3 -std=c++17 -lstdc++
+GPIOFLAGS  = -lpigpio -lrt
+DEPS       = $(wildcard *.h)
+PIGUN_SRC := pigun-hid.c pigun-libcamera.c pigun-detector.c pigun-aimer.c pigun-gpio.c pigun.c main.c
 PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
 
 %.o: %.c $(DEPS)
 	${CC} -c ${CFLAGS} ${PIGUNFLAGS} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
-	${CXX} ${CXXFLAGS} ${LIBCAMERA_LIB} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} -lbcm2835 -lstdc++
+	${CXX} ${CXXFLAGS} ${LIBCAMERA_LIB} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} ${GPIOFLAGS}
 
 
 

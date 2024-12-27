@@ -60,7 +60,8 @@
 #include <unistd.h>
 
 #include <pthread.h>
-#include <bcm2835.h>
+//#include <bcm2835.h>
+#include <pigpio.h>
 
 #include "pigun.h"
 #include "pigun-hid.h"
