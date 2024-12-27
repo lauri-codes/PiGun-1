@@ -73,7 +73,7 @@ int pigun_GPIO_init() {
 
 	// printf("PIGUN: GPIO system initialised.\n");
 	// pigun_GPIO_inited = 1;
-	// return 0;
+	return 0;
 }
 
 int pigun_GPIO_stop() {
@@ -91,7 +91,7 @@ int pigun_GPIO_stop() {
 	// bcm2835_close();
 	// pigun_GPIO_inited = 0;
 
-	// return 0;
+	return 0;
 }
 
 /// @brief Sets the state of an output pin.
