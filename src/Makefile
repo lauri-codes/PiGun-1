@@ -220,9 +220,12 @@ bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient
 
 CXX        = g++
 CXXFLAGS   = -Wall -Wextra -O3 -std=c++17 -lstdc++
+
+# Add bluetooth import directories
+CXXFLAGS += -I${BTSTACK_ROOT}/src
+
 GPIOFLAGS  = -lgpiodcxx
 LIBCAMERA_CFLAGS  = $(shell $(PKGCONFIG) --cflags libcamera)
-LIBCAMERA_LIB  = $(shell $(PKGCONFIG) --libs libcamera)
 
 DEPS       = $(wildcard *.h)
 PIGUN_SRC := pigun-hid.c pigun-libcamera.c pigun-detector.c pigun-aimer.c pigun-gpio.c pigun.c main.c
