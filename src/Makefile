@@ -218,7 +218,7 @@ bluetooth-others:
 bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient bluetooth-others
 
 DEPS = $(wildcard *.h)
-PIGUN_SRC := pigun-hid.c pigun-libcamera.c pigun-detector.c pigun-aimer.c pigun-gpio.c pigun.c main.c
+PIGUN_SRC := pigun-hid.c pigun-libcamera.cpp pigun-detector.c pigun-aimer.c pigun-gpio.c pigun.c main.c
 PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
 
 PKGCONFIG         = pkg-config
@@ -228,7 +228,7 @@ LIBCAMERA_LIBS      = $(shell $(PKGCONFIG) --libs libcamera)
 CXX = arm-linux-gnueabihf-g++
 
 %.o: %.c $(DEPS)
-	${CXX} ${LIBCAMERA_LIBS} -c -Wno-narrowing -Wno-literal-suffix ${CFLAGS} ${LIBCAMERA_CFLAGS} ${PIGUNFLAGS} -o $@ $<
+	${CXX} -c -Wno-narrowing -Wno-literal-suffix ${CFLAGS} ${LIBCAMERA_CFLAGS} ${PIGUNFLAGS} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
 	${CXX} -O3 ${LIBCAMERA_LIBS} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} -lstdc++
