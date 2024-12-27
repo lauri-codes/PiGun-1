@@ -226,11 +226,9 @@ LIBCAMERA_CFLAGS    = $(shell $(PKGCONFIG) --cflags libcamera)
 LIBCAMERA_LIBS      = $(shell $(PKGCONFIG) --libs libcamera)
 
 CXX = arm-linux-gnueabihf-g++
-# %.o: %.cpp
-#     $(CXX) -c $(CFLAGS) -o $@ $<
 
 %.o: %.c $(DEPS)
-	${CXX} -c -Wno-narrowing -Wno-literal-suffix ${CFLAGS} ${PIGUNFLAGS} -o $@ $<
+	${CXX} ${LIBCAMERA_LIBS} -c -Wno-narrowing -Wno-literal-suffix ${CFLAGS} ${LIBCAMERA_CFLAGS} ${PIGUNFLAGS} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
 	${CXX} -O3 ${LIBCAMERA_LIBS} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} -lstdc++
