@@ -19,7 +19,7 @@
  * @brief For initializing detector.
  */
 void pigun_detector_init() {
-    pigun.detector.checked = calloc(PIGUN_RES_X * PIGUN_RES_Y, sizeof(uint8_t));
+    pigun.detector.checked = static_cast<uint8_t*>(calloc(PIGUN_RES_X * PIGUN_RES_Y, sizeof(uint8_t)));
     pigun.detector.error = 0;
     memset(pigun.detector.peaks, 0, sizeof(pigun_peak_t)*MAX_PEAKS);
 
