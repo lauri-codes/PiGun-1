@@ -3,6 +3,7 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <sys/mman.h>
 
 #include <libcamera/libcamera.h>
 #include <libcamera/framebuffer_allocator.h>
@@ -51,11 +52,15 @@ static void requestComplete(Request *request)
         // Print FPS
         printFPS();
 
-        // Extract frame data from the request
-        MappedFrameBuffer mappedBuffer(buffer, MappedFrameBuffer::MapFlag::Read);
-        const std::vector<Span<uint8_t>> mem = mappedBuffer.planes();
-        pirung.framedata = (uint8_t *)(mem[0].data())
-        // pigun.framedata = buffer->data;
+        // Extract frame data from the request. We only retrieve the Y
+        // (luminance) plane
+        const auto &planes = buffer->planes();
+        const auto &yPlane = planes[0];
+        int     yFd      = yPlane.fd.get();
+        size_t  ySize    = yPlane.length;
+        size_t  yOffset  = yPlane.offset;
+        void   *yData    = mmap(nullptr, ySize, PROT_READ, MAP_SHARED, yFd, yOffset);
+        pigun.framedata = (uint8_t *)(yData);
 
         // Call the peak detector function. If there was a detector error, error LED
         // goes on, otherwise off.
