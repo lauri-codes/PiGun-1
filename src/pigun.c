@@ -22,7 +22,7 @@
 
 #include "pigun.h"
 #include "pigun-gpio.h"
-#include "pigun-hid.h"
+// #include "pigun-hid.h"
 #include "pigun-libcamera.h"
 #include "pigun-detector.h"
 

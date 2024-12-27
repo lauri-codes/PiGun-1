@@ -1,5 +1,4 @@
 # Makefile for Raspberry Pi
-PKGCONFIG           = pkg-config
 
 # use (cross)compiler for Raspi
 CC = arm-linux-gnueabihf-gcc
@@ -215,9 +214,10 @@ bluetooth-others:
 	${CC} -c ${CFLAGS} ${BTSTACK_ROOT}/src/btstack_hid_parser.c
 
 
-# this one compiles the all the BTStack only parts
+# this one compiles all the BTStack only parts
 bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient bluetooth-others
 
+# PKGCONFIG           = pkg-config
 # CXX        = gcc
 # CXXFLAGS   = -Wall -Wextra -O3 -std=c++17 -lstdc++
 
@@ -225,18 +225,18 @@ bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient
 # CXXFLAGS += -I.
 # CXXFLAGS += -I${BTSTACK_ROOT}/src
 
-GPIOFLAGS  = -lgpiodcxx
-LIBCAMERA_CFLAGS  = $(shell $(PKGCONFIG) --cflags libcamera)
+# GPIOFLAGS  = -lgpiodcxx
+# LIBCAMERA_CFLAGS  = $(shell $(PKGCONFIG) --cflags libcamera)
 
-DEPS       = $(wildcard *.h)
-PIGUN_SRC := pigun-hid.c pigun-libcamera.c pigun-detector.c pigun-aimer.c pigun-gpio.c pigun.c main.c
-PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
+# DEPS       = $(wildcard *.h)
+# PIGUN_SRC := pigun-hid.c pigun-libcamera.c pigun-detector.c pigun-aimer.c pigun-gpio.c pigun.c main.c
+# PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
 
-%.o: %.c $(DEPS)
-	${CC} -std=c++11 -c ${CFLAGS} ${PIGUNFLAGS} -o $@ $<
+# %.o: %.c $(DEPS)
+# 	${CC} -std=c++11 -c ${CFLAGS} ${PIGUNFLAGS} -o $@ $<
 
-pigun: $(PIGUN_OBJ)
-	${CC} -std=c++11 ${CFLAGS} ${LIBCAMERA_LIB} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} ${GPIOFLAGS}
+# pigun: $(PIGUN_OBJ)
+# 	${CC} -std=c++11 ${CFLAGS} ${LIBCAMERA_LIB} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} ${GPIOFLAGS}
 
 clean:
 	rm -f *.o pigun.exe
