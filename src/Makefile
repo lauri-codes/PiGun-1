@@ -231,7 +231,7 @@ CXX = arm-linux-gnueabihf-g++
 	${CXX} -c -Wno-narrowing -Wno-literal-suffix ${CFLAGS} ${LIBCAMERA_CFLAGS} ${PIGUNFLAGS} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
-	${CXX} -O3 ${LIBCAMERA_LIBS} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} -lstdc++
+	${CXX} -O3 ${LIBCAMERA_CFLAGS} ${LIBCAMERA_LIBS} *.o -o pigun.exe -lstdc++
 
 
 clean:
