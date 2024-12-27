@@ -222,7 +222,8 @@ PIGUN_SRC := pigun-hid.c pigun-libcamera.cpp pigun-detector.c pigun-aimer.c pigu
 PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
 
 PKGCONFIG         = pkg-config
-LIBCAMERA_CFLAGS    = $(shell $(PKGCONFIG) --cflags libcamera)
+# LIBCAMERA_CFLAGS    = $(shell $(PKGCONFIG) --cflags libcamera)
+LIBCAMERA_CFLAGS    = -I/usr/lib/aarch64-linux-gnu/
 LIBCAMERA_LIBS      = $(shell $(PKGCONFIG) --libs libcamera)
 
 CXX = arm-linux-gnueabihf-g++
