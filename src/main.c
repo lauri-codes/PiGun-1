@@ -218,7 +218,7 @@ static void sigint_handler(int param){
     printf("closing pigun thread...\n");
     int gunret;
     pthread_mutex_unlock(&pigun_mutex);         // This unlocks the pigun mutex
-    pthread_join(gunthread, (void*)&gunret);    // the pigun cycle exits when this mutex is made free
+    pthread_join(gunthread, &gunret);    // the pigun cycle exits when this mutex is made free
     // program halts there and waits for gunthread to end
     
     // close the gpio system
