@@ -218,12 +218,12 @@ bluetooth-others:
 # this one compiles the all the BTStack only parts
 bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient bluetooth-others
 
-CXX        = g++
-CXXFLAGS   = -Wall -Wextra -O3 -std=c++17 -lstdc++
+# CXX        = gcc
+# CXXFLAGS   = -Wall -Wextra -O3 -std=c++17 -lstdc++
 
 # Add bluetooth import directories
-CXXFLAGS += -I.
-CXXFLAGS += -I${BTSTACK_ROOT}/src
+# CXXFLAGS += -I.
+# CXXFLAGS += -I${BTSTACK_ROOT}/src
 
 GPIOFLAGS  = -lgpiodcxx
 LIBCAMERA_CFLAGS  = $(shell $(PKGCONFIG) --cflags libcamera)
@@ -233,10 +233,10 @@ PIGUN_SRC := pigun-hid.c pigun-libcamera.c pigun-detector.c pigun-aimer.c pigun-
 PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
 
 %.o: %.c $(DEPS)
-	${CXX} -c ${CXXFLAGS} ${PIGUNFLAGS} -o $@ $<
+	${CC} -c ${CFLAGS} ${PIGUNFLAGS} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
-	${CXX} ${CXXFLAGS} ${LIBCAMERA_LIB} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} ${GPIOFLAGS}
+	${CC} ${CFLAGS} ${LIBCAMERA_LIB} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} ${GPIOFLAGS}
 
 clean:
 	rm -f *.o pigun.exe
