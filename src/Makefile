@@ -2,8 +2,7 @@
 PKGCONFIG           = pkg-config
 
 # use (cross)compiler for Raspi
-# CC = arm-linux-gnueabihf-gcc
-CC = g++
+CC = arm-linux-gnueabihf-gcc
 
 # location of the btstack main folder
 BTSTACK_ROOT ?= ../btstack
@@ -219,8 +218,8 @@ bluetooth-others:
 # this one compiles the all the BTStack only parts
 bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient bluetooth-others
 
-# CXX        = g++
-# CXXFLAGS   = -Wall -Wextra -O3 -std=c++17 -lstdc++
+CXX        = g++
+CXXFLAGS   = -Wall -Wextra -O3 -std=c++17 -lstdc++
 
 # Add bluetooth import directories
 CXXFLAGS += -I.
