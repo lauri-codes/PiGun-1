@@ -285,7 +285,7 @@ void set_data(uint16_t hid_cid, hid_report_type_t report_type, uint16_t report_i
 	uint8_t par = report[0] & 0x0F;
 	if(cmd == 1){ // set recoil mode
 		if(par >= 0 && par <= RECOIL_OFF){
-			pigun.recoilMode = par;
+			pigun.recoilMode = static_cast<pigun_recoilmode_t>(par);
 			printf("PIGUN-HID: recoil mode is now %i\n", par);
 		}
 		else
