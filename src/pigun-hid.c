@@ -311,22 +311,22 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 	if (packet_type != HCI_EVENT_PACKET) return;
 
 	switch (hci_event_packet_get_type(packet)) {
-	case BTSTACK_EVENT_STATE:
+	case BTSTACK_EVENT_STATE: {
 		if (btstack_event_state_get_state(packet) != HCI_STATE_WORKING) return;
 		app_state = APP_NOT_CONNECTED;
 		break;
-
-	case HCI_EVENT_USER_CONFIRMATION_REQUEST:
+	}
+	case HCI_EVENT_USER_CONFIRMATION_REQUEST: {
 		// ssp: inform about user confirmation request
 		log_info("SSP User Confirmation Request with numeric value '%06"PRIu32"'\n", hci_event_user_confirmation_request_get_numeric_value(packet));
 		log_info("SSP User Confirmation Auto accept\n");
 		break;
-
+	}
 	// *** HID META EVENTS ***
-	case HCI_EVENT_HID_META:
+	case HCI_EVENT_HID_META: {
 		switch (hci_event_hid_meta_get_subevent_code(packet)) {
 
-		case HID_SUBEVENT_CONNECTION_OPENED:
+		case HID_SUBEVENT_CONNECTION_OPENED: {
 			status = hid_subevent_connection_opened_get_status(packet);
 			if (status != ERROR_CODE_SUCCESS) {
 				// outgoing connection failed
@@ -385,7 +385,8 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			printf("PIGUN-HID: connected to %s, pigunning now...\n", bd_addr_to_str(host_addr));
 			hid_device_request_can_send_now_event(hid_cid); // request a sendnow
 			break;
-		case HID_SUBEVENT_CONNECTION_CLOSED:
+		}
+		case HID_SUBEVENT_CONNECTION_CLOSED: {
 			printf("PIGUN-HID: disconnected\n");
 			app_state = APP_NOT_CONNECTED;
 			hid_cid = 0;
@@ -394,22 +395,24 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 			blinkID_greenLED = pigun_blinker_create(0, 800, &blinker_connectLED);
 
 			break;
-		case HID_SUBEVENT_CAN_SEND_NOW:
+		}
+		case HID_SUBEVENT_CAN_SEND_NOW: {
 			// when the stack raises can_send_now event, we send a report... because we can!
 			send_report(); // uses the global variable with gun data
 
 			// and then we request another can_send_now because we are greedy! need to send moooar!
 			hid_device_request_can_send_now_event(hid_cid);
 			break;
-
-		default:
+		}
+		default: {
 			break;
 		}
+		}
 		break;
-
-
-	default: //any other type of event
+	}
+	default: { //any other type of event
 		break;
+	}
 	}
 }
 
