@@ -116,7 +116,7 @@ CORE_OBJ    = $(CORE:.c=.o)
 COMMON_OBJ  = $(COMMON:.c=.o)
 CLASSIC_OBJ  = $(CLASSIC:.c=.o)
 
-CFLAGS  += -g -std=c++17 -Wall -O3 -Wno-restrict \
+CFLAGS  += -g -Wall -Werror -O3 -Wno-restrict \
 	-Wno-maybe-uninitialized -Wno-cpp -Wno-comment -Wno-format \
 	-Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable \
 	-I$(BTSTACK_ROOT)/platform/embedded \
@@ -223,8 +223,8 @@ bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient
 # CXXFLAGS   = -Wall -Wextra -O3 -std=c++17 -lstdc++
 
 # Add bluetooth import directories
-# CXXFLAGS += -I.
-# CXXFLAGS += -I${BTSTACK_ROOT}/src
+CXXFLAGS += -I.
+CXXFLAGS += -I${BTSTACK_ROOT}/src
 
 GPIOFLAGS  = -lgpiodcxx
 LIBCAMERA_CFLAGS  = $(shell $(PKGCONFIG) --cflags libcamera)
@@ -234,10 +234,10 @@ PIGUN_SRC := pigun-hid.c pigun-libcamera.c pigun-detector.c pigun-aimer.c pigun-
 PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
 
 %.o: %.c $(DEPS)
-	${CC} -c ${CFLAGS} ${PIGUNFLAGS} -o $@ $<
+	${CXX} -c ${CXXFLAGS} ${PIGUNFLAGS} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
-	${CC} ${CFLAGS} ${LIBCAMERA_LIB} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} ${GPIOFLAGS}
+	${CXX} ${CXXFLAGS} ${LIBCAMERA_LIB} *.o -o pigun.exe ${LIBCAMERA_CFLAGS} ${GPIOFLAGS}
 
 clean:
 	rm -f *.o pigun.exe
