@@ -17,8 +17,8 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-#include <bcm2835.h>
-
+//#include <bcm2835.h>
+#include <pigpio.h>
 
 #include "pigun.h"
 #include "pigun-gpio.h"
