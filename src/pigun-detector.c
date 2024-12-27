@@ -247,24 +247,6 @@ int find_peak(int x0, int y0, int dx, int dy, uint8_t *frame, uint8_t *checked, 
     return 0;
 }
 
-void printFPS() {
-    static int frames = 0;
-    static double lastTime = 0.0;
-
-    // Get the current time
-    double currentTime = (double)clock() / CLOCKS_PER_SEC;
-    frames++;
-
-    // Calculate FPS every second
-    if (currentTime - lastTime >= 1.0) {
-        printf("FPS: %d\n", frames);
-        
-        // Reset the frame count and lastTime
-        frames = 0;
-        lastTime = currentTime;
-    }
-}
-
 void pigun_detector_run(uint8_t *frame) {
     static int n_errors = ERROR_THRESHOLD;
 
