@@ -362,9 +362,19 @@ int main(int argc, char* argv[]) {
     raspi_get_bd_addr(addr);
 
     // On the RPi Zero 2.0, the BT_REG_EN pin is GPIO 42
-    transport_config.baudrate_main = 921600;
-    int bt_reg_en_pin = 42;
     bool power_cycle = true;
+    transport_config.flowcontrol = 1;
+    int bt_reg_en_pin = 42;
+    transport_config.baudrate_main = 921600;
+#ifdef ENABLE_CONTROLLER_WARM_BOOT
+    power_cycle = false;
+// #else
+    // // warn about power cycle on devices with shared reg_en pins
+    // if (model == MODEL_3APLUS || model == MODEL_3BPLUS){
+    //     printf("Wifi and Bluetooth share a single RESET line and BTstack needs to reset Bluetooth -> SSH over Wifi will fail\n");
+    //     printf("Please add ENABLE_CONTROLLER_WARM_BOOT to btstack_config.h to enable startup without RESET\n");
+    // }
+#endif
     // switch (raspi_get_bluetooth_uart_type()){
     //     case UART_INVALID:
     //         fprintf(stderr, "can't verify HW uart, %s\n", strerror( errno ) );
@@ -397,18 +407,17 @@ int main(int argc, char* argv[]) {
     //             bt_reg_en_pin = 129;
     //             transport_config.baudrate_main = 3000000;
     //         }
-
-#ifdef ENABLE_CONTROLLER_WARM_BOOT
-            power_cycle = false;
-#else
-            // warn about power cycle on devices with shared reg_en pins
-            if (model == MODEL_3APLUS || model == MODEL_3BPLUS){
-                printf("Wifi and Bluetooth share a single RESET line and BTstack needs to reset Bluetooth -> SSH over Wifi will fail\n");
-                printf("Please add ENABLE_CONTROLLER_WARM_BOOT to btstack_config.h to enable startup without RESET\n");
-            }
-#endif
-            break;
-    }
+// #ifdef ENABLE_CONTROLLER_WARM_BOOT
+//             power_cycle = false;
+// #else
+//             // warn about power cycle on devices with shared reg_en pins
+//             if (model == MODEL_3APLUS || model == MODEL_3BPLUS){
+//                 printf("Wifi and Bluetooth share a single RESET line and BTstack needs to reset Bluetooth -> SSH over Wifi will fail\n");
+//                 printf("Please add ENABLE_CONTROLLER_WARM_BOOT to btstack_config.h to enable startup without RESET\n");
+//             }
+// #endif
+//             break;
+//     }
     printf("%s, %u, BT_REG_EN at GPIO %u, %s\n", transport_config.flowcontrol ? "H4":"H5", transport_config.baudrate_main, bt_reg_en_pin, power_cycle ? "Reset Controller" : "Warm Boot");
 
     // get BCM chipset driver
