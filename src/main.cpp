@@ -339,7 +339,7 @@ static uart_type_t raspi_get_bluetooth_uart_type(void){
 }
 
 static void phase2(int status);
-int main(int argc, const char * argv[]){
+int main(int argc, char* argv[]) {
 
     /// GET STARTED with BTstack ///
     btstack_memory_init();
