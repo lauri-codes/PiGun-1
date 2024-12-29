@@ -222,7 +222,7 @@ bluetooth-others:
 bluetooth: bluetooth-core bluetooth-common bluetooth-classic bluetooth-sdpclient bluetooth-others
 
 DEPS = $(wildcard *.h)
-PIGUN_SRC := pigun-hid.cpp pigun-libcamera.cpp pigun-detector.cpp pigun-aimer.cpp pigun-gpio.cpp pigun.cpp main.cpp
+PIGUN_SRC := pigun-hid.cpp pigun-libcamera.cpp pigun-detector.cpp pigun-aimer.cpp pigun-gpio.cpp pigun.cpp main.c
 PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
 
 PKGCONFIG         = pkg-config
