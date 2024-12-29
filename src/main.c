@@ -501,7 +501,7 @@ int main(int argc, char* argv[]) {
     // at this point we can start the core of the pigun and camera stuff
     // setup the pigun
 
-    // run its acquisition loop in a se                          parate thread
+    // run its acquisition loop in a separate thread
     pthread_mutex_init(&pigun_mutex, NULL);
     pthread_mutex_lock(&pigun_mutex);
     pthread_create(&gunthread, NULL, pigun_cycle, NULL);

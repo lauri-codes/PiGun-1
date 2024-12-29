@@ -428,7 +428,6 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 int btstack_main(int argc, const char * argv[]);
 int btstack_main(int argc, const char * argv[]) {
 
-	printf("PIGUN-HID: MAIN");
 	(void)argc;
 	(void)argv;
 
