@@ -118,7 +118,7 @@ CLASSIC_OBJ  = $(CLASSIC:.c=.o)
 CFLAGS  += -g -Wall -Werror -O3 -Wno-restrict \
 	-Wno-maybe-uninitialized -Wno-cpp -Wno-comment -Wno-format \
 	-Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable \
-	-Wno-sign-compare -Wno-narrowing -Wno-literal-suffix -Wno-permissive\
+	-Wno-sign-compare -Wno-narrowing -Wno-literal-suffix -Wno-error=permissive\
  	-fpermissive \
 	-I$(BTSTACK_ROOT)/platform/embedded \
 	-I$(BTSTACK_ROOT)/platform/posix \
