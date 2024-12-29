@@ -51,7 +51,7 @@ int main()
     }
 
     // Use a FrameBufferAllocator to allocate buffers (not fully shown)
-    std::unique_ptr<FrameBufferAllocator> allocator = std::make_unique<FrameBufferAllocator>(camera);
+    FrameBufferAllocator *allocator = new FrameBufferAllocator(camera);
     Stream *stream = streamConfig.stream();
     if (allocator->allocate(stream) < 0) {
         std::cerr << "Failed to allocate buffers" << std::endl;
@@ -59,7 +59,6 @@ int main()
     }
 
     // Frame capture
-    Stream *stream = streamConfig.stream();
     const std::vector<std::unique_ptr<FrameBuffer>> &buffers = allocator->buffers(stream);
     std::vector<std::unique_ptr<Request>> requests;
     for (unsigned int i = 0; i < buffers.size(); ++i) {
