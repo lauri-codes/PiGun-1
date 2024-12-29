@@ -2,7 +2,7 @@
 
 # use (cross)compiler for Raspi
 # CC = arm-linux-gnueabihf-gcc
-CC = gcc
+CC = g++
 
 # location of the btstack main folder
 BTSTACK_ROOT ?= ../btstack
