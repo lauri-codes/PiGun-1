@@ -48,7 +48,7 @@ VPATH += ${BTSTACK_ROOT}/3rd-party/lwip/core/src/netif
 VPATH += ${BTSTACK_ROOT}/3rd-party/lwip/core/src/apps/http
 VPATH += ${BTSTACK_ROOT}/3rd-party/lwip/dhcp-server
 VPATH += ${BTSTACK_ROOT}/3rd-party/md5
-# VPATH += ${BTSTACK_ROOT}/3rd-party/micro-ecc
+VPATH += ${BTSTACK_ROOT}/3rd-party/micro-ecc
 VPATH += ${BTSTACK_ROOT}/3rd-party/yxml
 VPATH += ${BTSTACK_ROOT}/platform/lwip
 VPATH += ${BTSTACK_ROOT}/platform/lwip/port
@@ -64,7 +64,7 @@ CFLAGS += -I${BTSTACK_ROOT}/3rd-party/hxcmod-player
 CFLAGS += -I${BTSTACK_ROOT}/3rd-party/lwip/core/src/include/
 CFLAGS += -I${BTSTACK_ROOT}/3rd-party/lwip/dhcp-server
 CFLAGS += -I${BTSTACK_ROOT}/3rd-party/md5
-# CFLAGS += -I${BTSTACK_ROOT}/3rd-party/micro-ecc
+CFLAGS += -I${BTSTACK_ROOT}/3rd-party/micro-ecc
 CFLAGS += -I${BTSTACK_ROOT}/3rd-party/yxml
 CFLAGS += -I${BTSTACK_ROOT}/platform/lwip
 CFLAGS += -I${BTSTACK_ROOT}/platform/lwip/port
@@ -193,6 +193,7 @@ bluetooth-common:
 	${CC} -c ${CFLAGS} ${BTSTACK_ROOT}/src/btstack_audio.c
 	${CC} -c ${CFLAGS} ${BTSTACK_ROOT}/src/btstack_tlv.c
 	${CC} -c ${CFLAGS} ${BTSTACK_ROOT}/src/btstack_crypto.c
+	${CC} -c ${CFLAGS} ${BTSTACK_ROOT}/3rd-party/micro-ecc/uECC.c
 	${CC} -c ${CFLAGS} ${BTSTACK_ROOT}/src/ble/sm.c
 
 bluetooth-classic:
