@@ -474,7 +474,6 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-
     if (transport_config.flowcontrol){
 
         // re-use current terminal speed (if there was no power cycle)

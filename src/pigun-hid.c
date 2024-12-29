@@ -45,8 +45,8 @@
 #include "btstack.h"
 
 #include "pigun.h"
-#include "pigun-gpio.h" // this is mine!
-#include "pigun-hid.h" // this is mine!
+#include "pigun-gpio.h"
+#include "pigun-hid.h"
 
 /// @brief HID descriptor for joystick with extra output report (data)
 const uint8_t hid_descriptor_joystick_mode[] = {
@@ -128,8 +128,6 @@ void pigun_blinker_event(btstack_timer_source_t *ts) {
 	// code here => we have to schedule another blink
 	btstack_run_loop_set_timer(&(blk->timer), blk->timeout);
 	btstack_run_loop_add_timer(&(blk->timer));
-	
-
 }
 
 int pigun_blinker_create(uint8_t nblinks, uint16_t timeout, blinker_callback_t callback) {
@@ -429,6 +427,8 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 
 int btstack_main(int argc, const char * argv[]);
 int btstack_main(int argc, const char * argv[]) {
+
+	printf("PIGUN-HID: MAIN");
 	(void)argc;
 	(void)argv;
 
@@ -505,8 +505,9 @@ int btstack_main(int argc, const char * argv[]) {
 	blinkID_greenLED = pigun_blinker_create(0, 800, &blinker_connectLED);
 
 	// set one-shot timer for autoreconnect of there are servers in the list
-	if (pigun.nServers != 0)
+	if (pigun.nServers != 0) {
 		pigun_blinker_create(1, 5000, &blinker_autoconnect);
+	}
 
 	return 0;
 }
