@@ -389,7 +389,8 @@ int main(int argc, const char * argv[]){
             transport_config.flowcontrol = 1;
             int model = raspi_get_model();
             if (model == MODEL_ZERO_W){
-                bt_reg_en_pin =  45;
+                // On the RPi Zero 2.0, the BT_REG_EN pin is GPIO 42
+                bt_reg_en_pin = 42;
                 transport_config.baudrate_main =  921600;
             } else {
                 bt_reg_en_pin = 129;
