@@ -1,8 +1,8 @@
 # Makefile for Raspberry Pi
 
 # use (cross)compiler for Raspi
-# CC = arm-linux-gnueabihf-gcc
-CC = gcc
+# CC = arm-linux-gnueabihf-g++
+CC = g++
 
 # location of the btstack main folder
 BTSTACK_ROOT ?= ../btstack
@@ -228,14 +228,11 @@ PKGCONFIG         = pkg-config
 LIBCAMERA_CFLAGS    = $(shell $(PKGCONFIG) --cflags libcamera)
 LIBCAMERA_LIBS      = $(shell $(PKGCONFIG) --libs libcamera)
 
-# CXX = arm-linux-gnueabihf-g++
-CXX = g++
-
 %.o: %.c $(DEPS)
-	${CXX} -c -Wno-narrowing -Wno-literal-suffix ${CFLAGS} ${LIBCAMERA_CFLAGS} ${PIGUNFLAGS} -o $@ $<
+	${CC} -c -Wno-narrowing -Wno-literal-suffix ${CFLAGS} ${LIBCAMERA_CFLAGS} ${PIGUNFLAGS} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
-	${CXX} -O3 ${LIBCAMERA_CFLAGS} ${LIBCAMERA_LIBS} *.o -o pigun.exe -lstdc++
+	${CC} -O3 ${LIBCAMERA_CFLAGS} ${LIBCAMERA_LIBS} *.o -o pigun.exe -lstdc++
 
 
 clean:
