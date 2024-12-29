@@ -233,7 +233,7 @@ LIBCAMERA_LIBS      = $(shell $(PKGCONFIG) --libs libcamera)
 	${CC} -c -Wno-narrowing -Wno-literal-suffix ${CFLAGS} ${LIBCAMERA_CFLAGS} ${PIGUNFLAGS} -o $@ $<
 
 pigun: $(PIGUN_OBJ)
-	${CC} -O3 ${LIBCAMERA_CFLAGS} ${LIBCAMERA_LIBS} *.o -o pigun.exe -lstdc++
+	${CC} -lstdc++ -O3 ${LIBCAMERA_CFLAGS} *.o -o pigun.exe ${LIBCAMERA_LIBS}
 
 
 clean:
