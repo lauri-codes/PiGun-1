@@ -221,12 +221,11 @@ DEPS = $(wildcard *.h)
 PIGUN_SRC := pigun-hid.c pigun-libcamera.cpp pigun-detector.c pigun-aimer.c pigun-gpio.c pigun.c main.c
 PIGUN_OBJ := $(patsubst %.c,%.o,$(PIGUN_SRC))
 
-PKGCONFIG          = pkg-config
-LIBCAMERA_CFLAGS   = $(shell $(PKGCONFIG) --cflags libcamera)
-LIBCAMERA_LIBS     = $(shell $(PKGCONFIG) --libs libcamera)
+PKGCONFIG         = pkg-config
+LIBCAMERA_CFLAGS    = $(shell $(PKGCONFIG) --cflags libcamera)
+LIBCAMERA_LIBS      = $(shell $(PKGCONFIG) --libs libcamera)
 
-# CXX = arm-linux-gnueabihf-g++
-CXX = g++
+CXX = arm-linux-gnueabihf-g++
 
 %.o: %.c $(DEPS)
 	${CXX} -c -Wno-narrowing -Wno-literal-suffix ${CFLAGS} ${LIBCAMERA_CFLAGS} ${PIGUNFLAGS} -o $@ $<
