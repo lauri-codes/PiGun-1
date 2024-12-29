@@ -168,7 +168,7 @@ int pigun_libcamera_init()
     }
 
     // Wait for 30 seconds
-    std::this_thread::sleep_for(30000ms);
+    std::this_thread::sleep_for(1000ms);
 
     // Stop camera and release resources
     camera->stop();

@@ -361,41 +361,42 @@ int main(int argc, char* argv[]) {
     bd_addr_t addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
     raspi_get_bd_addr(addr);
 
-    // set UART config based on raspi Bluetooth UART type
-    int bt_reg_en_pin = -1;
+    // On the RPi Zero 2.0, the BT_REG_EN pin is GPIO 42
+    transport_config.baudrate_main = 921600;
+    int bt_reg_en_pin = 42;
     bool power_cycle = true;
-    switch (raspi_get_bluetooth_uart_type()){
-        case UART_INVALID:
-            fprintf(stderr, "can't verify HW uart, %s\n", strerror( errno ) );
-            return -1;
-        case UART_SOFTWARE_NO_FLOW:
-            // ??
-            bt_reg_en_pin = 128;
-            transport_config.baudrate_main = 460800;
-            transport_config.flowcontrol   = 0;
-            break;
-        case UART_HARDWARE_NO_FLOW:
-            // Raspberry Pi 3 A
-            // Raspberry Pi 3 B
-            // power up with H5 and without power cycle untested/unsupported
-            bt_reg_en_pin = 128;
-            transport_config.baudrate_main = 921600;
-            transport_config.flowcontrol   = 0;
-            break;
-        case UART_HARDWARE_FLOW:
-            // Raspberry Pi Zero W gpio 45, 3 mbps does not work (investigation pending)
-            // Raspberry Pi 3A+ vgpio 129 but WLAN + BL
-            // Raspberry Pi 3B+ vgpio 129 but WLAN + BL
-            transport_config.flowcontrol = 1;
-            int model = raspi_get_model();
-            if (model == MODEL_ZERO_W){
-                // On the RPi Zero 2.0, the BT_REG_EN pin is GPIO 42
-                bt_reg_en_pin = 42;
-                transport_config.baudrate_main =  921600;
-            } else {
-                bt_reg_en_pin = 129;
-                transport_config.baudrate_main = 3000000;
-            }
+    // switch (raspi_get_bluetooth_uart_type()){
+    //     case UART_INVALID:
+    //         fprintf(stderr, "can't verify HW uart, %s\n", strerror( errno ) );
+    //         return -1;
+    //     case UART_SOFTWARE_NO_FLOW:
+    //         // ??
+    //         bt_reg_en_pin = 128;
+    //         transport_config.baudrate_main = 460800;
+    //         transport_config.flowcontrol   = 0;
+    //         break;
+    //     case UART_HARDWARE_NO_FLOW:
+    //         // Raspberry Pi 3 A
+    //         // Raspberry Pi 3 B
+    //         // power up with H5 and without power cycle untested/unsupported
+    //         bt_reg_en_pin = 128;
+    //         transport_config.baudrate_main = 921600;
+    //         transport_config.flowcontrol   = 0;
+    //         break;
+    //     case UART_HARDWARE_FLOW:
+    //         // Raspberry Pi Zero W gpio 45, 3 mbps does not work (investigation pending)
+    //         // Raspberry Pi 3A+ vgpio 129 but WLAN + BL
+    //         // Raspberry Pi 3B+ vgpio 129 but WLAN + BL
+    //         transport_config.flowcontrol = 1;
+    //         int model = raspi_get_model();
+    //         if (model == MODEL_ZERO_W){
+    //             // On the RPi Zero 2.0, the BT_REG_EN pin is GPIO 42
+    //             bt_reg_en_pin = 42;
+    //             transport_config.baudrate_main =  921600;
+    //         } else {
+    //             bt_reg_en_pin = 129;
+    //             transport_config.baudrate_main = 3000000;
+    //         }
 
 #ifdef ENABLE_CONTROLLER_WARM_BOOT
             power_cycle = false;
