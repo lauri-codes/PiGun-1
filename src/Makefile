@@ -2,7 +2,7 @@
 
 # use (cross)compiler for Raspi
 # CC = arm-linux-gnueabihf-gcc
-CC = g++
+CC = gcc
 
 # location of the btstack main folder
 BTSTACK_ROOT ?= ../btstack
@@ -118,12 +118,13 @@ CLASSIC_OBJ  = $(CLASSIC:.c=.o)
 CFLAGS  += -g -Wall -Werror -O3 -Wno-restrict \
 	-Wno-maybe-uninitialized -Wno-cpp -Wno-comment -Wno-format \
 	-Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable \
-	-Wno-sign-compare -Wno-narrowing -Wno-literal-suffix \
 	-I$(BTSTACK_ROOT)/platform/embedded \
 	-I$(BTSTACK_ROOT)/platform/posix \
 	-I$(BTSTACK_ROOT)/chipset/bcm \
 	-I${BTSTACK_ROOT}/3rd-party/tinydir \
     -I${BTSTACK_ROOT}/3rd-party/rijndael
+
+#-Wno-sign-compare -Wno-narrowing -Wno-literal-suffix \
 
 # add 'real time' lib for clock_gettime
 LDFLAGS += -lrt -lpthread
