@@ -66,6 +66,10 @@ int send_hid_interrupt_message() {
         std::cout << "HID device is not open." << std::endl;
         return 1;
     }
+    int16_t x = 1234;       // any value within -32767..32767
+    int16_t y = -200;       // negative example
+    uint8_t buttons = 0x05; // suppose you pressed button1 and button3
+
     // Prepare the 6-byte input report
     // Byte 0:  Report ID = 3
     // Bytes 1-2: X axis (little-endian)
