@@ -66,19 +66,6 @@ int send_hid_interrupt_message() {
         std::cout << "HID device is not open." << std::endl;
         return 1;
     }
-    int16_t x = 1234;       // any value within -32767..32767
-    int16_t y = -200;       // negative example
-    uint8_t buttons = 0x05; // suppose you pressed button1 and button3
-
-    // Prepare the 6-byte input report
-    // Byte 0:  Report ID = 3
-    // Bytes 1-2: X axis (little-endian)
-    // Bytes 3-4: Y axis (little-endian)
-    // Byte 5:  8 bits of buttons
-    // uint8_t report[6];
-    
-    // 1) Report ID
-    // report[0] = PIGUN_REPORT_ID;  // PIGUN_REPORT_ID
 
     uint8_t hid_report[] = {
         PIGUN_REPORT_ID, // report ID
@@ -114,14 +101,14 @@ int send_hid_interrupt_message() {
     //     0                // placeholder for buttons
     // };
 
-    // // Fill with the actual data
-	// hid_report[1] = (pigun.report.x) & 0xff;
-	// hid_report[2] = (pigun.report.x >> 8) & 0xff;
-	// hid_report[3] = (pigun.report.y) & 0xff;
-	// hid_report[4] = (pigun.report.y >> 8) & 0xff;
-	// hid_report[5] = pigun.report.buttons;
+    // Fill with the actual data
+	hid_report[1] = (pigun.report.x) & 0xff;
+	hid_report[2] = (pigun.report.x >> 8) & 0xff;
+	hid_report[3] = (pigun.report.y) & 0xff;
+	hid_report[4] = (pigun.report.y >> 8) & 0xff;
+	hid_report[5] = pigun.report.buttons;
 
-    // // Write the report
+    // Write the report
     if (write(g_hid_fd, hid_report, sizeof(hid_report)) < 0) {
         std::cout << "Failed to write report to /dev/hidg0" << std::endl;
         return 1;
