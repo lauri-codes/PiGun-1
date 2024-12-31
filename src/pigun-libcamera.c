@@ -102,39 +102,41 @@ static void requestComplete(Request *request)
      
     // Process completed buffers
     for (auto [stream, buffer] : request->buffers()) {
+        std::cout << "PLANE" << std::endl;
+
         // Print FPS
         printFPS();
 
         // Extract frame data from the request. We only retrieve the Y
         // (luminance) plane
-        const auto &planes = buffer->planes();
-        const auto &yPlane = planes[0];
-        int     yFd      = yPlane.fd.get();
-        size_t  ySize    = yPlane.length;
-        size_t  yOffset  = yPlane.offset;
-        void   *yData    = mmap(nullptr, ySize, PROT_READ, MAP_SHARED, yFd, yOffset);
-        pigun.framedata = (uint8_t *)(yData);
+        // const auto &planes = buffer->planes();
+        // const auto &yPlane = planes[0];
+        // int     yFd      = yPlane.fd.get();
+        // size_t  ySize    = yPlane.length;
+        // size_t  yOffset  = yPlane.offset;
+        // void   *yData    = mmap(nullptr, ySize, PROT_READ, MAP_SHARED, yFd, yOffset);
+        // pigun.framedata = (uint8_t *)(yData);
 
-        // Call the peak detector function. If there was a detector error, error LED
-        // goes on, otherwise off.
-        uint8_t ce = pigun.detector.error;
-        pigun_detector_run(pigun.framedata);
-        if (pigun.detector.error != ce) {
-            pigun_GPIO_output_set(PIN_OUT_ERR, pigun.detector.error);
-        }
+        // // Call the peak detector function. If there was a detector error, error LED
+        // // goes on, otherwise off.
+        // uint8_t ce = pigun.detector.error;
+        // pigun_detector_run(pigun.framedata);
+        // if (pigun.detector.error != ce) {
+        //     pigun_GPIO_output_set(PIN_OUT_ERR, pigun.detector.error);
+        // }
 
-        // TODO: maybe add a mutex/semaphore so that the main bluetooth thread
-        // will wait until this is done with the x/y aim before reading the HID report
+        // // TODO: maybe add a mutex/semaphore so that the main bluetooth thread
+        // // will wait until this is done with the x/y aim before reading the HID report
 
-        // compute aiming position from the detected peaks
-        pigun_calculate_aim();
+        // // compute aiming position from the detected peaks
+        // pigun_calculate_aim();
 
-        // *********************************************************************
-        // check the buttons ***************************************************
-        pigun_buttons_process();
+        // // *********************************************************************
+        // // check the buttons ***************************************************
+        // pigun_buttons_process();
 
-        // Send HID report
-        send_hid_interrupt_message();
+        // // Send HID report
+        // send_hid_interrupt_message();
     }
 
     // Request new frame by reusing the buffer
@@ -225,7 +227,7 @@ int pigun_libcamera_init()
     }
 
     // Sleep for 5 minutes
-    std::this_thread::sleep_for(300000ms);
+    std::this_thread::sleep_for(30000ms);
 
     // Stop camera and release resources
     camera->stop();
