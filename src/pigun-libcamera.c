@@ -69,18 +69,17 @@ int send_hid_interrupt_message() {
 
     // Report data structure
     uint8_t hid_report[] = {
-        0xa1,            // a1 = device-to-host
         PIGUN_REPORT_ID, // report ID
         0, 0, 0, 0,      // placeholders for X, Y
         0                // placeholder for buttons
     };
 
     // Fill with the actual data
-	hid_report[2] = (pigun.report.x) & 0xff;
-	hid_report[3] = (pigun.report.x >> 8) & 0xff;
-	hid_report[4] = (pigun.report.y) & 0xff;
-	hid_report[5] = (pigun.report.y >> 8) & 0xff;
-	hid_report[6] = pigun.report.buttons;
+	hid_report[1] = (pigun.report.x) & 0xff;
+	hid_report[2] = (pigun.report.x >> 8) & 0xff;
+	hid_report[3] = (pigun.report.y) & 0xff;
+	hid_report[4] = (pigun.report.y >> 8) & 0xff;
+	hid_report[5] = pigun.report.buttons;
 
     // Write the report
     if (write(g_hid_fd, hid_report, sizeof(hid_report)) < 0) {
