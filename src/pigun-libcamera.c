@@ -261,8 +261,8 @@ int pigun_libcamera_init()
         camera->queueRequest(request.get());
     }
 
-    // Sleep for 5 minutes
-    std::this_thread::sleep_for(30000ms);
+    // Sleep
+    std::this_thread::sleep_for(3000000ms);
 
     // Stop camera and release resources
     camera->stop();
