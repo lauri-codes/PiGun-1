@@ -47,6 +47,8 @@
 //
 // *****************************************************************************
 
+#include <chrono>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -97,6 +99,8 @@
 
 
 #include "raspi_get_model.h"
+
+using namespace std::chrono_literals;
 
 int btstack_main(int argc, const char * argv[]);
 pthread_t gunthread;
@@ -509,6 +513,8 @@ int main(int argc, char* argv[]) {
     // go
     printf("pigun main loop starting...\n");
     // btstack_run_loop_execute();
+
+    std::this_thread::sleep_for(30000ms);
 
     return 0;
 }
