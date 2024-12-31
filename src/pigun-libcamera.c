@@ -98,7 +98,7 @@ int send_hid_interrupt_message() {
     // report[5] = buttons;
 
     // Write it out
-    ssize_t written = write(g_hid_fd, hid_report, sizeof(report));
+    ssize_t written = write(g_hid_fd, hid_report, sizeof(hid_report));
     if (written < 0) {
         std::cout << "Failed to write report\n";
         return 1;
