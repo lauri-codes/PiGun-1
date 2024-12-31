@@ -66,27 +66,57 @@ int send_hid_interrupt_message() {
         std::cout << "HID device is not open." << std::endl;
         return 1;
     }
+    // Prepare the 6-byte input report
+    // Byte 0:  Report ID = 3
+    // Bytes 1-2: X axis (little-endian)
+    // Bytes 3-4: Y axis (little-endian)
+    // Byte 5:  8 bits of buttons
+    uint8_t report[6];
+    
+    // 1) Report ID
+    report[0] = 3;  // PIGUN_REPORT_ID
 
-    // Report data structure
-    uint8_t hid_report[] = {
-        PIGUN_REPORT_ID, // report ID
-        0, 0, 0, 0,      // placeholders for X, Y
-        0                // placeholder for buttons
-    };
+    // 2) X axis (little-endian)
+    report[1] = static_cast<uint8_t>(x & 0xFF);       // low byte
+    report[2] = static_cast<uint8_t>((x >> 8) & 0xFF); // high byte
 
-    // Fill with the actual data
-	hid_report[1] = (pigun.report.x) & 0xff;
-	hid_report[2] = (pigun.report.x >> 8) & 0xff;
-	hid_report[3] = (pigun.report.y) & 0xff;
-	hid_report[4] = (pigun.report.y >> 8) & 0xff;
-	hid_report[5] = pigun.report.buttons;
+    // 3) Y axis (little-endian)
+    report[3] = static_cast<uint8_t>(y & 0xFF);
+    report[4] = static_cast<uint8_t>((y >> 8) & 0xFF);
 
-    // Write the report
-    if (write(g_hid_fd, hid_report, sizeof(hid_report)) < 0) {
-        std::cout << "Failed to write report to /dev/hidg0" << std::endl;
+    // 4) Buttons bitmask
+    report[5] = buttons;
+
+    // Write it out
+    ssize_t written = write(g_hid_fd, report, sizeof(report));
+    if (written < 0) {
+        std::cout << "Failed to write report\n";
         return 1;
     }
-    return 0;
+
+    std::cout << "Wrote " << written << " bytes to HID device.\n";
+
+
+    // Report data structure
+    // uint8_t hid_report[] = {
+    //     PIGUN_REPORT_ID, // report ID
+    //     0, 0, 0, 0,      // placeholders for X, Y
+    //     0                // placeholder for buttons
+    // };
+
+    // // Fill with the actual data
+	// hid_report[1] = (pigun.report.x) & 0xff;
+	// hid_report[2] = (pigun.report.x >> 8) & 0xff;
+	// hid_report[3] = (pigun.report.y) & 0xff;
+	// hid_report[4] = (pigun.report.y >> 8) & 0xff;
+	// hid_report[5] = pigun.report.buttons;
+
+    // // Write the report
+    // if (write(g_hid_fd, hid_report, sizeof(hid_report)) < 0) {
+    //     std::cout << "Failed to write report to /dev/hidg0" << std::endl;
+    //     return 1;
+    // }
+    // return 0;
 }
 
 static void requestComplete(Request *request)
