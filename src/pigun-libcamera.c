@@ -62,10 +62,15 @@ void printFPS() {
 }
 
 int send_hid_interrupt_message() {
+    if (g_hid_fd < 0) {
+        std::cout << "HID device is not open." << std::endl;
+        return 1;
+    }
+
     // Report data structure
     uint8_t hid_report[] = {
-        0xa1,            // a1 = device-to-host (from your original code)
-        PIGUN_REPORT_ID, // or your joystick report ID
+        0xa1,            // a1 = device-to-host
+        PIGUN_REPORT_ID, // report ID
         0, 0, 0, 0,      // placeholders for X, Y
         0                // placeholder for buttons
     };
@@ -79,7 +84,7 @@ int send_hid_interrupt_message() {
 
     // Write the report
     if (write(g_hid_fd, hid_report, sizeof(hid_report)) < 0) {
-        std::cerr << "Failed to write report to /dev/hidg0" << std::endl;
+        std::cout << "Failed to write report to /dev/hidg0" << std::endl;
         return 1;
     }
     return 0;
@@ -126,8 +131,8 @@ static void requestComplete(Request *request)
         // Process button presses
         pigun_buttons_process();
 
-        // // Send HID report
-        // send_hid_interrupt_message();
+        // Send HID report
+        send_hid_interrupt_message();
     }
 
     // Request new frame by reusing the buffer
