@@ -123,9 +123,8 @@ static void requestComplete(Request *request)
         // Compute aiming position from the detected peaks
         pigun_calculate_aim();
 
-        // // *********************************************************************
-        // // check the buttons ***************************************************
-        // pigun_buttons_process();
+        // Process button presses
+        pigun_buttons_process();
 
         // // Send HID report
         // send_hid_interrupt_message();
