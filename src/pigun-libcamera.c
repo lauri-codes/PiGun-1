@@ -90,11 +90,13 @@ static void requestComplete(Request *request)
     std::cout << "PROCESS FRAME" << std::endl;
     // If request was cancelled, ignore it as the data might be invalid
     if (request->status() == Request::RequestCancelled) {
+        std::cout << "CANCELLED" << std::endl;
         return;
     }
 
     // If shutting down, stop frame requests
 	if (pigun.state == STATE_SHUTDOWN){
+        std::cout << "SHUTDOWN" << std::endl;
 		return;
 	}
      
