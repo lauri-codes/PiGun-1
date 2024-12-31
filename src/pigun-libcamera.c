@@ -112,19 +112,16 @@ static void requestComplete(Request *request)
         void   *yData    = mmap(nullptr, ySize, PROT_READ, MAP_SHARED, yFd, yOffset);
         pigun.framedata = (uint8_t *)(yData);
 
-        // // Call the peak detector function. If there was a detector error, error LED
-        // // goes on, otherwise off.
+        // Call the peak detector function. If there was a detector error, error
+        // LED goes on, otherwise off.
         uint8_t ce = pigun.detector.error;
         pigun_detector_run(pigun.framedata);
-        // if (pigun.detector.error != ce) {
-        //     pigun_GPIO_output_set(PIN_OUT_ERR, pigun.detector.error);
-        // }
+        if (pigun.detector.error != ce) {
+            pigun_GPIO_output_set(PIN_OUT_ERR, pigun.detector.error);
+        }
 
-        // TODO: maybe add a mutex/semaphore so that the main bluetooth thread
-        // will wait until this is done with the x/y aim before reading the HID report
-
-        // // compute aiming position from the detected peaks
-        // pigun_calculate_aim();
+        // Compute aiming position from the detected peaks
+        pigun_calculate_aim();
 
         // // *********************************************************************
         // // check the buttons ***************************************************
