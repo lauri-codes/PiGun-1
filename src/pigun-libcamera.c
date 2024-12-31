@@ -75,21 +75,27 @@ int send_hid_interrupt_message() {
     // Bytes 1-2: X axis (little-endian)
     // Bytes 3-4: Y axis (little-endian)
     // Byte 5:  8 bits of buttons
-    uint8_t report[6];
+    // uint8_t report[6];
     
     // 1) Report ID
-    report[0] = 3;  // PIGUN_REPORT_ID
+    // report[0] = PIGUN_REPORT_ID;  // PIGUN_REPORT_ID
 
-    // 2) X axis (little-endian)
-    report[1] = static_cast<uint8_t>(x & 0xFF);       // low byte
-    report[2] = static_cast<uint8_t>((x >> 8) & 0xFF); // high byte
+    uint8_t hid_report[] = {
+        PIGUN_REPORT_ID, // report ID
+        0, 0, 0, 0,      // placeholders for X, Y
+        0                // placeholder for buttons
+    };
 
-    // 3) Y axis (little-endian)
-    report[3] = static_cast<uint8_t>(y & 0xFF);
-    report[4] = static_cast<uint8_t>((y >> 8) & 0xFF);
+    // // 2) X axis (little-endian)
+    // report[1] = static_cast<uint8_t>(x & 0xFF);       // low byte
+    // report[2] = static_cast<uint8_t>((x >> 8) & 0xFF); // high byte
 
-    // 4) Buttons bitmask
-    report[5] = buttons;
+    // // 3) Y axis (little-endian)
+    // report[3] = static_cast<uint8_t>(y & 0xFF);
+    // report[4] = static_cast<uint8_t>((y >> 8) & 0xFF);
+
+    // // 4) Buttons bitmask
+    // report[5] = buttons;
 
     // Write it out
     ssize_t written = write(g_hid_fd, report, sizeof(report));
