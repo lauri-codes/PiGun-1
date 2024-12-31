@@ -98,13 +98,13 @@ int send_hid_interrupt_message() {
     // report[5] = buttons;
 
     // Write it out
-    ssize_t written = write(g_hid_fd, hid_report, sizeof(hid_report));
-    if (written < 0) {
-        std::cout << "Failed to write report\n";
-        return 1;
-    }
+    // ssize_t written = write(g_hid_fd, hid_report, sizeof(hid_report));
+    // if (written < 0) {
+    //     std::cout << "Failed to write report\n";
+    //     return 1;
+    // }
 
-    std::cout << "Wrote " << written << " bytes to HID device.\n";
+    // std::cout << "Wrote " << written << " bytes to HID device.\n";
 
 
     // Report data structure
@@ -126,7 +126,7 @@ int send_hid_interrupt_message() {
     //     std::cout << "Failed to write report to /dev/hidg0" << std::endl;
     //     return 1;
     // }
-    // return 0;
+    return 0;
 }
 
 static void requestComplete(Request *request)
