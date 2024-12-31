@@ -512,9 +512,9 @@ int main(int argc, char* argv[]) {
 
     // go
     printf("pigun main loop starting...\n");
-    // btstack_run_loop_execute();
 
-    std::this_thread::sleep_for(30000ms);
+    while (true) {
+    }
 
     return 0;
 }
