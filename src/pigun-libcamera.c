@@ -87,46 +87,41 @@ int send_hid_interrupt_message() {
 
 static void requestComplete(Request *request)
 {
-    std::cout << "PROCESS FRAME" << std::endl;
     // If request was cancelled, ignore it as the data might be invalid
     if (request->status() == Request::RequestCancelled) {
-        std::cout << "CANCELLED" << std::endl;
         return;
     }
 
     // If shutting down, stop frame requests
 	if (pigun.state == STATE_SHUTDOWN){
-        std::cout << "SHUTDOWN" << std::endl;
 		return;
 	}
      
     // Process completed buffers
     for (auto [stream, buffer] : request->buffers()) {
-        std::cout << "PLANE" << std::endl;
-
         // Print FPS
         printFPS();
 
         // Extract frame data from the request. We only retrieve the Y
         // (luminance) plane
-        // const auto &planes = buffer->planes();
-        // const auto &yPlane = planes[0];
-        // int     yFd      = yPlane.fd.get();
-        // size_t  ySize    = yPlane.length;
-        // size_t  yOffset  = yPlane.offset;
-        // void   *yData    = mmap(nullptr, ySize, PROT_READ, MAP_SHARED, yFd, yOffset);
-        // pigun.framedata = (uint8_t *)(yData);
+        const auto &planes = buffer->planes();
+        const auto &yPlane = planes[0];
+        int     yFd      = yPlane.fd.get();
+        size_t  ySize    = yPlane.length;
+        size_t  yOffset  = yPlane.offset;
+        void   *yData    = mmap(nullptr, ySize, PROT_READ, MAP_SHARED, yFd, yOffset);
+        pigun.framedata = (uint8_t *)(yData);
 
         // // Call the peak detector function. If there was a detector error, error LED
         // // goes on, otherwise off.
-        // uint8_t ce = pigun.detector.error;
-        // pigun_detector_run(pigun.framedata);
+        uint8_t ce = pigun.detector.error;
+        pigun_detector_run(pigun.framedata);
         // if (pigun.detector.error != ce) {
         //     pigun_GPIO_output_set(PIN_OUT_ERR, pigun.detector.error);
         // }
 
-        // // TODO: maybe add a mutex/semaphore so that the main bluetooth thread
-        // // will wait until this is done with the x/y aim before reading the HID report
+        // TODO: maybe add a mutex/semaphore so that the main bluetooth thread
+        // will wait until this is done with the x/y aim before reading the HID report
 
         // // compute aiming position from the detected peaks
         // pigun_calculate_aim();
