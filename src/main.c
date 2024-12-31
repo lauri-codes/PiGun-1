@@ -342,116 +342,116 @@ static void phase2(int status);
 int main(int argc, char* argv[]) {
 
     /// GET STARTED with BTstack ///
-    btstack_memory_init();
+//     btstack_memory_init();
 
-    // log into file using HCI_DUMP_PACKETLOGGER format
-    const char * pklg_path = "/tmp/hci_dump.pklg";
-    hci_dump_posix_fs_open(pklg_path, HCI_DUMP_PACKETLOGGER);
-    const hci_dump_t * hci_dump_impl = hci_dump_posix_fs_get_instance();
-    //hci_dump_init(hci_dump_impl);
-    //printf("Packet Log: %s\n", pklg_path);
+//     // log into file using HCI_DUMP_PACKETLOGGER format
+//     const char * pklg_path = "/tmp/hci_dump.pklg";
+//     hci_dump_posix_fs_open(pklg_path, HCI_DUMP_PACKETLOGGER);
+//     const hci_dump_t * hci_dump_impl = hci_dump_posix_fs_get_instance();
+//     //hci_dump_init(hci_dump_impl);
+//     //printf("Packet Log: %s\n", pklg_path);
 
-    // setup run loop
-    btstack_run_loop_init(btstack_run_loop_posix_get_instance());
+//     // setup run loop
+//     btstack_run_loop_init(btstack_run_loop_posix_get_instance());
 
-    // pick serial port and configure uart block driver
-    transport_config.device_name = "/dev/serial1";
+//     // pick serial port and configure uart block driver
+//     transport_config.device_name = "/dev/serial1";
 
-    // derive bd_addr from serial number
-    bd_addr_t addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-    raspi_get_bd_addr(addr);
+//     // derive bd_addr from serial number
+//     bd_addr_t addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+//     raspi_get_bd_addr(addr);
 
-    // On the RPi Zero 2.0, the BT_REG_EN pin is GPIO 42
-    bool power_cycle = true;
-    transport_config.flowcontrol = 1;
-    int bt_reg_en_pin = 42;
-    transport_config.baudrate_main = 921600;
-#ifdef ENABLE_CONTROLLER_WARM_BOOT
-    power_cycle = false;
-// #else
-    // // warn about power cycle on devices with shared reg_en pins
-    // if (model == MODEL_3APLUS || model == MODEL_3BPLUS){
-    //     printf("Wifi and Bluetooth share a single RESET line and BTstack needs to reset Bluetooth -> SSH over Wifi will fail\n");
-    //     printf("Please add ENABLE_CONTROLLER_WARM_BOOT to btstack_config.h to enable startup without RESET\n");
-    // }
-#endif
-    // switch (raspi_get_bluetooth_uart_type()){
-    //     case UART_INVALID:
-    //         fprintf(stderr, "can't verify HW uart, %s\n", strerror( errno ) );
-    //         return -1;
-    //     case UART_SOFTWARE_NO_FLOW:
-    //         // ??
-    //         bt_reg_en_pin = 128;
-    //         transport_config.baudrate_main = 460800;
-    //         transport_config.flowcontrol   = 0;
-    //         break;
-    //     case UART_HARDWARE_NO_FLOW:
-    //         // Raspberry Pi 3 A
-    //         // Raspberry Pi 3 B
-    //         // power up with H5 and without power cycle untested/unsupported
-    //         bt_reg_en_pin = 128;
-    //         transport_config.baudrate_main = 921600;
-    //         transport_config.flowcontrol   = 0;
-    //         break;
-    //     case UART_HARDWARE_FLOW:
-    //         // Raspberry Pi Zero W gpio 45, 3 mbps does not work (investigation pending)
-    //         // Raspberry Pi 3A+ vgpio 129 but WLAN + BL
-    //         // Raspberry Pi 3B+ vgpio 129 but WLAN + BL
-    //         transport_config.flowcontrol = 1;
-    //         int model = raspi_get_model();
-    //         if (model == MODEL_ZERO_W){
-    //             // On the RPi Zero 2.0, the BT_REG_EN pin is GPIO 42
-    //             bt_reg_en_pin = 42;
-    //             transport_config.baudrate_main =  921600;
-    //         } else {
-    //             bt_reg_en_pin = 129;
-    //             transport_config.baudrate_main = 3000000;
-    //         }
+//     // On the RPi Zero 2.0, the BT_REG_EN pin is GPIO 42
+//     bool power_cycle = true;
+//     transport_config.flowcontrol = 1;
+//     int bt_reg_en_pin = 42;
+//     transport_config.baudrate_main = 921600;
 // #ifdef ENABLE_CONTROLLER_WARM_BOOT
-//             power_cycle = false;
-// #else
-//             // warn about power cycle on devices with shared reg_en pins
-//             if (model == MODEL_3APLUS || model == MODEL_3BPLUS){
-//                 printf("Wifi and Bluetooth share a single RESET line and BTstack needs to reset Bluetooth -> SSH over Wifi will fail\n");
-//                 printf("Please add ENABLE_CONTROLLER_WARM_BOOT to btstack_config.h to enable startup without RESET\n");
-//             }
+//     power_cycle = false;
+// // #else
+//     // // warn about power cycle on devices with shared reg_en pins
+//     // if (model == MODEL_3APLUS || model == MODEL_3BPLUS){
+//     //     printf("Wifi and Bluetooth share a single RESET line and BTstack needs to reset Bluetooth -> SSH over Wifi will fail\n");
+//     //     printf("Please add ENABLE_CONTROLLER_WARM_BOOT to btstack_config.h to enable startup without RESET\n");
+//     // }
 // #endif
-//             break;
+//     // switch (raspi_get_bluetooth_uart_type()){
+//     //     case UART_INVALID:
+//     //         fprintf(stderr, "can't verify HW uart, %s\n", strerror( errno ) );
+//     //         return -1;
+//     //     case UART_SOFTWARE_NO_FLOW:
+//     //         // ??
+//     //         bt_reg_en_pin = 128;
+//     //         transport_config.baudrate_main = 460800;
+//     //         transport_config.flowcontrol   = 0;
+//     //         break;
+//     //     case UART_HARDWARE_NO_FLOW:
+//     //         // Raspberry Pi 3 A
+//     //         // Raspberry Pi 3 B
+//     //         // power up with H5 and without power cycle untested/unsupported
+//     //         bt_reg_en_pin = 128;
+//     //         transport_config.baudrate_main = 921600;
+//     //         transport_config.flowcontrol   = 0;
+//     //         break;
+//     //     case UART_HARDWARE_FLOW:
+//     //         // Raspberry Pi Zero W gpio 45, 3 mbps does not work (investigation pending)
+//     //         // Raspberry Pi 3A+ vgpio 129 but WLAN + BL
+//     //         // Raspberry Pi 3B+ vgpio 129 but WLAN + BL
+//     //         transport_config.flowcontrol = 1;
+//     //         int model = raspi_get_model();
+//     //         if (model == MODEL_ZERO_W){
+//     //             // On the RPi Zero 2.0, the BT_REG_EN pin is GPIO 42
+//     //             bt_reg_en_pin = 42;
+//     //             transport_config.baudrate_main =  921600;
+//     //         } else {
+//     //             bt_reg_en_pin = 129;
+//     //             transport_config.baudrate_main = 3000000;
+//     //         }
+// // #ifdef ENABLE_CONTROLLER_WARM_BOOT
+// //             power_cycle = false;
+// // #else
+// //             // warn about power cycle on devices with shared reg_en pins
+// //             if (model == MODEL_3APLUS || model == MODEL_3BPLUS){
+// //                 printf("Wifi and Bluetooth share a single RESET line and BTstack needs to reset Bluetooth -> SSH over Wifi will fail\n");
+// //                 printf("Please add ENABLE_CONTROLLER_WARM_BOOT to btstack_config.h to enable startup without RESET\n");
+// //             }
+// // #endif
+// //             break;
+// //     }
+//     printf("%s, %u, BT_REG_EN at GPIO %u, %s\n", transport_config.flowcontrol ? "H4":"H5", transport_config.baudrate_main, bt_reg_en_pin, power_cycle ? "Reset Controller" : "Warm Boot");
+
+//     // get BCM chipset driver
+//     const btstack_chipset_t * chipset = btstack_chipset_bcm_instance();
+//     chipset->init(&transport_config);
+
+//     // set path to firmware files
+//     btstack_chipset_bcm_set_hcd_folder_path("/lib/firmware/brcm");
+
+//     // setup UART driver
+//     const btstack_uart_t * uart_driver = btstack_uart_posix_instance();
+
+//     // extract UART config from transport config
+//     uart_config.baudrate    = transport_config.baudrate_init;
+//     uart_config.flowcontrol = transport_config.flowcontrol;
+//     uart_config.device_name = transport_config.device_name;
+//     uart_driver->init(&uart_config);
+
+//     // HW with FlowControl -> we can use regular h4 mode
+//     const hci_transport_t * transport;
+//     if (transport_config.flowcontrol){
+//         transport = hci_transport_h4_instance(uart_driver);
+//     } else {
+//         transport = hci_transport_h5_instance(uart_driver);
 //     }
-    printf("%s, %u, BT_REG_EN at GPIO %u, %s\n", transport_config.flowcontrol ? "H4":"H5", transport_config.baudrate_main, bt_reg_en_pin, power_cycle ? "Reset Controller" : "Warm Boot");
 
-    // get BCM chipset driver
-    const btstack_chipset_t * chipset = btstack_chipset_bcm_instance();
-    chipset->init(&transport_config);
+//     // setup HCI (to be able to use bcm chipset driver)
+//     hci_init(transport, (void*) &transport_config);
+//     hci_set_bd_addr( addr );
+//     hci_set_chipset(btstack_chipset_bcm_instance());
 
-    // set path to firmware files
-    btstack_chipset_bcm_set_hcd_folder_path("/lib/firmware/brcm");
-
-    // setup UART driver
-    const btstack_uart_t * uart_driver = btstack_uart_posix_instance();
-
-    // extract UART config from transport config
-    uart_config.baudrate    = transport_config.baudrate_init;
-    uart_config.flowcontrol = transport_config.flowcontrol;
-    uart_config.device_name = transport_config.device_name;
-    uart_driver->init(&uart_config);
-
-    // HW with FlowControl -> we can use regular h4 mode
-    const hci_transport_t * transport;
-    if (transport_config.flowcontrol){
-        transport = hci_transport_h4_instance(uart_driver);
-    } else {
-        transport = hci_transport_h5_instance(uart_driver);
-    }
-
-    // setup HCI (to be able to use bcm chipset driver)
-    hci_init(transport, (void*) &transport_config);
-    hci_set_bd_addr( addr );
-    hci_set_chipset(btstack_chipset_bcm_instance());
-
-    // inform about BTstack state
-    hci_event_callback_registration.callback = &packet_handler;
-    hci_add_event_handler(&hci_event_callback_registration);
+//     // inform about BTstack state
+//     hci_event_callback_registration.callback = &packet_handler;
+//     hci_add_event_handler(&hci_event_callback_registration);
 
     // handle CTRL-c
     signal(SIGINT, sigint_handler);
@@ -459,43 +459,43 @@ int main(int argc, char* argv[]) {
     main_argc = argc;
     main_argv = argv;
 
-    // power cycle Bluetooth controller on older models without flowcontrol
-    if (power_cycle){
-        btstack_control_raspi_set_bt_reg_en_pin(bt_reg_en_pin);
-        btstack_control_t *control = btstack_control_raspi_get_instance();
-        control->init(NULL);
-        control->off();
-        usleep( 100000 );
-        control->on();
-    }
+//     // power cycle Bluetooth controller on older models without flowcontrol
+//     if (power_cycle){
+//         btstack_control_raspi_set_bt_reg_en_pin(bt_reg_en_pin);
+//         btstack_control_t *control = btstack_control_raspi_get_instance();
+//         control->init(NULL);
+//         control->off();
+//         usleep( 100000 );
+//         control->on();
+//     }
 
     // SETUP THE GPIO SYSTEM
     if (pigun_GPIO_init() != 0) { // stop everything if error
         return 0;
     }
 
-    if (transport_config.flowcontrol){
+//     if (transport_config.flowcontrol){
 
-        // re-use current terminal speed (if there was no power cycle)
-        if (!power_cycle){
-            raspi_get_terminal_params( &transport_config );
-        }
+//         // re-use current terminal speed (if there was no power cycle)
+//         if (!power_cycle){
+//             raspi_get_terminal_params( &transport_config );
+//         }
 
-        // with flowcontrol, we use h4 and are done
-        btstack_main(main_argc, main_argv);
+//         // with flowcontrol, we use h4 and are done
+//         btstack_main(main_argc, main_argv);
 
-    }
-    else {
+//     }
+//     else {
 
-        // assume BCM4343W used in Pi 3 A/B. Pi 3 A/B+ have a newer controller but support H4 with Flowcontrol
-        btstack_chipset_bcm_set_device_name("BCM43430A1");
+//         // assume BCM4343W used in Pi 3 A/B. Pi 3 A/B+ have a newer controller but support H4 with Flowcontrol
+//         btstack_chipset_bcm_set_device_name("BCM43430A1");
 
-        // phase #1 download firmware
-        printf("Phase 1: Download firmware\n");
+//         // phase #1 download firmware
+//         printf("Phase 1: Download firmware\n");
 
-        // phase #2 start main app
-        btstack_chipset_bcm_download_firmware(uart_driver, transport_config.baudrate_main, &phase2);
-    }
+//         // phase #2 start main app
+//         btstack_chipset_bcm_download_firmware(uart_driver, transport_config.baudrate_main, &phase2);
+//     }
 
 
     // at this point we can start the core of the pigun and camera stuff
@@ -508,7 +508,7 @@ int main(int argc, char* argv[]) {
 
     // go
     printf("pigun main loop starting...\n");
-    btstack_run_loop_execute();
+    // btstack_run_loop_execute();
 
     return 0;
 }
