@@ -62,14 +62,6 @@ void printFPS() {
 }
 
 int send_hid_interrupt_message() {
-
-    // Open the HID gadget device in write-only mode
-    int fd = open("/dev/hidg0", O_WRONLY);
-    if (fd < 0) {
-        std::cerr << "Failed to open /dev/hidg0" << std::endl;
-        return 1;
-    }
-
     // Report data structure
     uint8_t hid_report[] = {
         0xa1,            // a1 = device-to-host (from your original code)
@@ -86,18 +78,16 @@ int send_hid_interrupt_message() {
 	hid_report[6] = pigun.report.buttons;
 
     // Write the report
-    if (write(fd, hid_report, sizeof(hid_report)) < 0) {
+    if (write(g_hid_fd, hid_report, sizeof(hid_report)) < 0) {
         std::cerr << "Failed to write report to /dev/hidg0" << std::endl;
-        close(fd);
         return 1;
     }
-
-    close(fd);
     return 0;
 }
 
 static void requestComplete(Request *request)
 {
+    std::cout << "PROCESS FRAME" << std::endl;
     // If request was cancelled, ignore it as the data might be invalid
     if (request->status() == Request::RequestCancelled) {
         return;
