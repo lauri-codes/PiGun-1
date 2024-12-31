@@ -86,7 +86,7 @@ int send_hid_interrupt_message() {
 	hid_report[6] = pigun.report.buttons;
 
     // Write the report
-    if (write(fd, report, sizeof(report)) < 0) {
+    if (write(fd, hid_report, sizeof(hid_report)) < 0) {
         std::cerr << "Failed to write report to /dev/hidg0" << std::endl;
         close(fd);
         return 1;
