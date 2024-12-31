@@ -3,6 +3,9 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <fcntl.h>
+#include <unistd.h>
+#include <cstdint>
 #include <sys/mman.h>
 
 #include <libcamera/libcamera.h>
@@ -17,6 +20,29 @@ using namespace libcamera;
 using namespace std::chrono_literals;
 
 static std::shared_ptr<Camera> camera;
+
+// Global file descriptor
+static int g_hid_fd = -1;
+
+// Suppose pigun is a global struct holding the data you want to send
+// struct { ... } pigun;
+
+bool init_hid() {
+    g_hid_fd = open("/dev/hidg0", O_WRONLY);
+    if (g_hid_fd < 0) {
+        std::cerr << "Failed to open /dev/hidg0" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+void close_hid() {
+    if (g_hid_fd >= 0) {
+        close(g_hid_fd);
+        g_hid_fd = -1;
+    }
+}
+
 
 void printFPS() {
     using Clock = std::chrono::steady_clock;
@@ -33,6 +59,41 @@ void printFPS() {
         frames = 0;
         lastTime = currentTime;
     }
+}
+
+int send_hid_interrupt_message() {
+
+    // Open the HID gadget device in write-only mode
+    int fd = open("/dev/hidg0", O_WRONLY);
+    if (fd < 0) {
+        std::cerr << "Failed to open /dev/hidg0" << std::endl;
+        return 1;
+    }
+
+    // Report data structure
+    uint8_t hid_report[] = {
+        0xa1,            // a1 = device-to-host (from your original code)
+        PIGUN_REPORT_ID, // or your joystick report ID
+        0, 0, 0, 0,      // placeholders for X, Y
+        0                // placeholder for buttons
+    };
+
+    // Fill with the actual data
+	hid_report[2] = (pigun.report.x) & 0xff;
+	hid_report[3] = (pigun.report.x >> 8) & 0xff;
+	hid_report[4] = (pigun.report.y) & 0xff;
+	hid_report[5] = (pigun.report.y >> 8) & 0xff;
+	hid_report[6] = pigun.report.buttons;
+
+    // Write the report
+    if (write(fd, report, sizeof(report)) < 0) {
+        std::cerr << "Failed to write report to /dev/hidg0" << std::endl;
+        close(fd);
+        return 1;
+    }
+
+    close(fd);
+    return 0;
 }
 
 static void requestComplete(Request *request)
@@ -80,9 +141,8 @@ static void requestComplete(Request *request)
         // check the buttons ***************************************************
         pigun_buttons_process();
 
-        // TODO: maybe add a mutex/semaphore so that the main bluetooth thread
-        // will wait until this is done with the buttons before reading the HID report
-        // *********************************************************************
+        // Send HID report
+        send_hid_interrupt_message();
     }
 
     // Request new frame by reusing the buffer
@@ -92,6 +152,11 @@ static void requestComplete(Request *request)
 
 int pigun_libcamera_init()
 {
+    // Initialize the HID device once
+    if (!init_hid()) {
+        return 1;
+    }
+
     // Create and start the CameraManager
     std::unique_ptr<CameraManager> cm = std::make_unique<CameraManager>();
     cm->start();
@@ -167,8 +232,8 @@ int pigun_libcamera_init()
         camera->queueRequest(request.get());
     }
 
-    // Wait for 30 seconds
-    std::this_thread::sleep_for(1000ms);
+    // Sleep for 5 minutes
+    std::this_thread::sleep_for(300000ms);
 
     // Stop camera and release resources
     camera->stop();
@@ -177,5 +242,6 @@ int pigun_libcamera_init()
     camera->release();
     camera.reset();
     cm->stop();
+    close_hid();
     return 0;
 }
